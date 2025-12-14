@@ -62,7 +62,23 @@ class _UploadBottomSheetState extends State<UploadBottomSheet> {
           ),
         );
       }
-    } catch (e) {
+    } on FormatException catch(e) {
+      setState(() {
+        _isAnalyzing = false;
+        _statusMessage = "Select an option";
+      });
+      if(mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+    catch (e) {
       setState(() {
         _isAnalyzing = false;
         _statusMessage = "Error: ${e.toString()}";

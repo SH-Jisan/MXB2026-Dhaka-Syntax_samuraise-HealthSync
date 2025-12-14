@@ -52,20 +52,42 @@ class AiUploadService {
       print("✅ 4. AI Analysis Complete!");
       final aiData = response.data; // সরাসরি JSON অবজেক্ট
 
+      print("checking for duplicates...");
+      final String newTitle = aiData['title'] ?? 'Unknown Report';
+      final String newDate = aiData['event_date'] ?? DateTime.now().toIso8601String();
+
+      // ডাটাবেস চেক করা: একই পেসেন্ট, একই টাইটেল এবং একই তারিখের ডাটা আছে কি না?
+      final List<dynamic> existingRecords = await _supabase
+          .from('medical_events')
+          .select()
+          .eq('patient_id', patientId)
+          .eq('title', newTitle)
+          .eq('event_date', newDate); // তারিখ ধরে চেক করা সবচেয়ে সেইফ
+
+      if (existingRecords.isNotEmpty) {
+        print("⚠️ Duplicate found! Skipping insert.");
+        // আমরা এখানে একটি বিশেষ Exception ছুঁড়ে দিচ্ছি যা UI ধরতে পারবে
+        throw const FormatException("Duplicate Record: This report already exists.");
+      }
+
       // E. ডাটাবেসে সেভ করা
       print("💾 5. Saving to Database...");
       await _supabase.from('medical_events').insert({
         'patient_id': patientId,
-        'title': aiData['title'] ?? 'Unknown Report',
+        'title': newTitle,
         'event_type': aiData['event_type'] ?? 'REPORT',
-        'event_date': aiData['event_date'] ?? DateTime.now().toIso8601String(),
+        'event_date': newDate,
         'severity': aiData['severity'] ?? 'LOW',
         'summary': aiData['summary'] ?? 'Analyzed by Edge Function',
         'attachment_urls': [publicUrl],
+        'extracted_text': aiData['extracted_text'],
         'details': aiData,
       });
-
-    } catch (e) {
+    }
+    on FormatException catch(e){
+      rethrow;
+    }
+    catch (e) {
       print("💥 CRITICAL ERROR: $e");
       throw Exception("Process Failed: $e");
     }

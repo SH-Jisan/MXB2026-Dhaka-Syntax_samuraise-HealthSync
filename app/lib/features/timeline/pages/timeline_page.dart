@@ -14,14 +14,16 @@ class TimelinePage extends StatefulWidget {
 
 class _TimelinePageState extends State<TimelinePage> {
   // ডাটা লোড করার স্ট্রিম
+  // primaryKey: ['id'] থাকা জরুরি, নাহলে আপডেট ট্র্যাক করতে পারবে না
   final _eventsStream = Supabase.instance.client
       .from('medical_events')
       .stream(primaryKey: ['id'])
-      .order('event_date', ascending: false); // নতুন ঘটনা আগে দেখাবে
+      .order('event_date', ascending: false);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background, // ব্যাকগ্রাউন্ড কালার ঠিক রাখা
       appBar: AppBar(
         title: const Text("Medical History"),
         backgroundColor: Colors.white,
@@ -30,18 +32,34 @@ class _TimelinePageState extends State<TimelinePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: AppColors.error),
-            onPressed: () => Supabase.instance.client.auth.signOut(),
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+            },
           ),
         ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _eventsStream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          // 1. যদি কোনো এরর হয় (খুবই গুরুত্বপূর্ণ ডিবাগিং এর জন্য)
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Error loading data: ${snapshot.error}",
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
+
+          // 2. লোডিং অবস্থা
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          final data = snapshot.data!;
+
+          // 3. যদি ডাটা খালি থাকে
+          if (data.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -49,13 +67,15 @@ class _TimelinePageState extends State<TimelinePage> {
                   Icon(Icons.history, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 16),
                   const Text("No medical history found!"),
+                  const SizedBox(height: 8),
                   const Text("Upload your first report to start.", style: TextStyle(color: Colors.grey)),
                 ],
               ),
             );
           }
 
-          final events = snapshot.data!.map((json) => MedicalEvent.fromJson(json)).toList();
+          // 4. ডাটা মডেলে কনভার্ট করা
+          final events = data.map((json) => MedicalEvent.fromJson(json)).toList();
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -70,7 +90,6 @@ class _TimelinePageState extends State<TimelinePage> {
           );
         },
       ),
-      // নতুন ইভেন্ট অ্যাড করার জন্য বাটন (পরে কাজ করব)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
