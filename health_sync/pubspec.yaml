@@ -24,7 +24,7 @@ dependencies:
     # Features
   image_picker: ^1.1.2
   file_picker: ^8.1.4
-  speech_to_text: ^7.0.0  # (For AI Doctor Voice Input)
+  speech_to_text: ^7.3.0  # (For AI Doctor Voice Input)
   url_launcher: ^6.3.1    # (For calling/emailing)
   timeline_tile: ^2.0.0
   crypto: ^3.0.7

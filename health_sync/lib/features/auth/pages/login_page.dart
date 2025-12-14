@@ -27,50 +27,86 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.health_and_safety, size: 80, color: AppColors.primary),
-              const SizedBox(height: 16),
-              const Text(
-                "HealthSync",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primary),
+              // Logo & Title
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primary.withOpacity(0.1),
+                ),
+                child: const Icon(Icons.health_and_safety, size: 64, color: AppColors.primary),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+              const Text(
+                "Welcome Back!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28, 
+                  fontWeight: FontWeight.bold, 
+                  color: AppColors.textPrimary
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Sign in to continue to HealthSync",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 40),
 
+              // Inputs
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: "Email Address",
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Password",
-                  prefixIcon: const Icon(Icons.lock),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.lock_outline),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              ElevatedButton(
-                onPressed: isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+              
+              // Forgot Password (Placeholder)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {},
+                  child: const Text("Forgot Password?"),
                 ),
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("LOGIN"),
               ),
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => context.go('/signup'),
-                child: const Text("Don't have an account? Sign Up"),
+
+              // Action Button
+              ElevatedButton(
+                onPressed: isLoading ? null : _handleLogin,
+                child: isLoading
+                    ? const SizedBox(
+                        height: 20, 
+                        width: 20, 
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                      )
+                    : const Text("LOGIN"),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Sign Up Link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Don't have an account?", style: TextStyle(color: AppColors.textSecondary)),
+                  TextButton(
+                    onPressed: () => context.go('/signup'),
+                    child: const Text("Sign Up", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
               ),
             ],
           ),
@@ -85,10 +121,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // রাউটার অটোমেটিক রিডাইরেক্ট করবে, তাই এখানে ম্যানুয়ালি পেজ চেঞ্জ করার দরকার নেই
+      // Router will handle redirect
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login Failed: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Login Failed: ${e.toString().split('\n').first}"), // Simpler error
+            backgroundColor: AppColors.error,
+          )
+        );
       }
     }
   }
