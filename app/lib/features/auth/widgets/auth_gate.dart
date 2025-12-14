@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../pages/login_page.dart';
 // আমরা পরে Home Page বানাব, আপাতত একটা Placeholder দিচ্ছি
 import 'package:flutter/widgets.dart';
+import '../../timeline/pages/timeline_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -27,9 +28,7 @@ class AuthGate extends StatelessWidget {
         if (session != null) {
           // ইউজার লগইন আছে! -> Home Page এ পাঠাও
           // (আপাতত একটা টেক্সট দেখাচ্ছি, পরের স্টেপে এখানে Home Page বসাব)
-          return const Scaffold(
-            body: Center(child: Text("Logged In! Welcome to Dashboard")),
-          );
+          return const TimelinePage();
         } else {
           // ইউজার লগইন নেই -> Login Page এ পাঠাও
           return const LoginPage();
