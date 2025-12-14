@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-
+import '../../upload/widgets/upload_buttom_sheet.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../timeline/providers/timeline_provider.dart';
 import '../../../shared/models/medical_event_model.dart';
@@ -30,9 +30,11 @@ class CitizenHomePage extends ConsumerWidget {
       // 🔥 আপলোড বাটন (পরের ধাপে কাজ করবে)
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: Open Upload BottomSheet
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Upload Feature Coming Next!")),
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true, // ফুল স্ক্রিন বা বড় করার জন্য
+            backgroundColor: Colors.transparent,
+            builder: (context) => const UploadBottomSheet(),
           );
         },
         label: const Text("Add Report"),

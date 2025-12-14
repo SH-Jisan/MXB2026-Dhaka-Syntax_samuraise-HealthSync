@@ -12,19 +12,38 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    const { imageBase64, mimeType, patient_id, uploader_id, file_url } = await req.json()
+    const { imageBase64, mimeType, patient_id, uploader_id, file_url, file_hash, file_path } = await req.json()
 
-    // 1. Environment Variables Check
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
     if (!apiKey || !supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing environment variables!')
+          throw new Error('Missing environment variables!')
     }
 
     // 2. Initialize Clients
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    // 🛑 1. DUPLICATE CHECK (Based on Hash) - AI এর আগে চেক করছি খরচ বাঁচাতে
+        if (file_hash) {
+          const { data: duplicates } = await supabase
+            .from('medical_events')
+            .select('id')
+            .eq('patient_id', patient_id)
+            .eq('file_hash', file_hash) // টাইটেল না, হ্যাশ দিয়ে চেক
+
+          if (duplicates && duplicates.length > 0) {
+            // 🗑️ ডুপ্লিকেট হলে স্টোরেজ থেকে ফাইলটি ডিলিট করে দেওয়া (Clean up)
+            if (file_path) {
+               await supabase.storage.from('reports').remove([file_path])
+            }
+
+            return new Response(JSON.stringify({ error: "Duplicate File" }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 409, // Conflict status code
+            })
+          }
+        }
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 
@@ -63,20 +82,6 @@ serve(async (req) => {
     const newTitle = aiData['title'] ?? 'Medical Document'
     const newDate = aiData['event_date'] ?? new Date().toISOString().split('T')[0]
 
-    const { data: duplicates } = await supabase
-      .from('medical_events')
-      .select('id')
-      .eq('patient_id', patient_id)
-      .eq('title', newTitle)
-      .eq('event_date', newDate)
-
-    if (duplicates && duplicates.length > 0) {
-      return new Response(JSON.stringify({ error: "Duplicate: This record already exists." }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 409,
-      })
-    }
-
     // 6. Secure Database Insert
     // আমরা uploader_id আলাদা সেভ করছি যাতে বোঝা যায় কে আপলোড করেছে (Hospital/Self)
     const { error: insertError } = await supabase
@@ -92,13 +97,11 @@ serve(async (req) => {
         extracted_text: aiData['extracted_text'],
         key_findings: aiData['key_findings'],
         attachment_urls: [file_url],
+        file_hash: file_hash,
         ai_details: aiData // Full JSON for future use
       })
 
     if (insertError) throw insertError
-
-    // 7. Update Profile Summary (Rolling Update Feature) - Optional for now
-    // এটা পরে আমরা আলাদা ট্রিগার দিয়েও করতে পারি।
 
     return new Response(JSON.stringify({ success: true, data: aiData }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

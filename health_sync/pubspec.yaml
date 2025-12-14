@@ -27,6 +27,7 @@ dependencies:
   speech_to_text: ^7.0.0  # (For AI Doctor Voice Input)
   url_launcher: ^6.3.1    # (For calling/emailing)
   timeline_tile: ^2.0.0
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
