@@ -1,79 +1,150 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart'; // Google Maps এর জন্য
 import '../../../core/constants/app_colors.dart';
 import '../providers/doctor_provider.dart';
 
-class DoctorListPage extends ConsumerWidget {
+class DoctorListPage extends ConsumerStatefulWidget {
   final String specialty;
+  final List<dynamic> internetDoctors; // 🔥 ইন্টারনেট রেজাল্ট রিসিভ করবে
 
-  const DoctorListPage({super.key, required this.specialty});
+  const DoctorListPage({
+    super.key,
+    required this.specialty,
+    this.internetDoctors = const [],
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // প্রোভাইডার কল করছি
-    final doctorsAsync = ref.watch(doctorsBySpecialtyProvider(specialty));
+  ConsumerState<DoctorListPage> createState() => _DoctorListPageState();
+}
+
+class _DoctorListPageState extends ConsumerState<DoctorListPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // লোকাল ডাক্তার খোঁজার প্রোভাইডার
+    final appDoctorsAsync = ref.watch(doctorsBySpecialtyProvider(widget.specialty));
 
     return Scaffold(
-      appBar: AppBar(title: Text("$specialty Doctors")),
-      body: doctorsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text("Error: $err")),
-        data: (doctors) {
-          if (doctors.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.person_search, size: 60, color: Colors.grey.shade300),
-                  const SizedBox(height: 10),
-                  Text("No $specialty found nearby."),
-                ],
-              ),
-            );
-          }
+      appBar: AppBar(
+        title: Text("${widget.specialty}s"),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: AppColors.primary,
+          tabs: const [
+            Tab(text: "App Doctors"),
+            Tab(text: "From Google"),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // 🏠 TAB 1: Local App Doctors
+          appDoctorsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Center(child: Text("Error: $err")),
+            data: (doctors) {
+              if (doctors.isEmpty) {
+                return _buildEmptyState("No registered doctors found in our app.");
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: doctors.length,
+                itemBuilder: (context, index) {
+                  final doc = doctors[index];
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.teal.shade100,
+                        child: const Icon(Icons.person, color: Colors.teal),
+                      ),
+                      title: Text(doc['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(doc['specialty'] ?? widget.specialty),
+                      trailing: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                        child: const Text("Book"),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
 
-          return ListView.builder(
+          // 🌐 TAB 2: Internet Search Results
+          widget.internetDoctors.isEmpty
+              ? _buildEmptyState("No results found on Google.")
+              : ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: doctors.length,
+            itemCount: widget.internetDoctors.length,
             itemBuilder: (context, index) {
-              final doc = doctors[index];
+              final doc = widget.internetDoctors[index];
               return Card(
-                elevation: 2,
+                elevation: 3,
                 margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
-                    child: Text(doc['full_name'][0].toUpperCase()),
+                  contentPadding: const EdgeInsets.all(12),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.public, color: Colors.blue),
                   ),
-                  title: Text(doc['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(doc['title'] ?? 'Unknown Doctor', style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(doc['specialty'] ?? 'Specialist'),
-                      if (doc['district'] != null)
-                        Row(
-                          children: [
-                            const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                            const SizedBox(width: 4),
-                            Text(doc['district'], style: const TextStyle(fontSize: 12)),
-                          ],
-                        ),
+                      const SizedBox(height: 4),
+                      Text(doc['address'] ?? 'No address available', style: const TextStyle(fontSize: 12)),
+                      if (doc['rating'] != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.star, size: 14, color: Colors.amber),
+                              Text(" ${doc['rating']} (${doc['userRatingsTotal'] ?? 0})",
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                            ],
+                          ),
+                        )
                     ],
                   ),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Appointment Booking Coming Soon!")),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-                    child: const Text("Book"),
-                  ),
+                  trailing: const Icon(Icons.map, color: Colors.green),
+                  onTap: () async {
+                    // Google Maps এ ওপেন হবে
+                    final query = Uri.encodeComponent(doc['title'] + " " + (doc['address'] ?? ""));
+                    final url = Uri.parse("https://www.google.com/maps/search/?api=1&query=$query");
+                    if (await canLaunchUrl(url)) launchUrl(url);
+                  },
                 ),
               );
             },
-          );
-        },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 50, color: Colors.grey.shade300),
+          const SizedBox(height: 10),
+          Text(message, style: const TextStyle(color: Colors.grey)),
+        ],
       ),
     );
   }

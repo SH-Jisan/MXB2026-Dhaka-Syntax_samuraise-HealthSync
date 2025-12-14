@@ -63,7 +63,10 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
     try {
       final response = await Supabase.instance.client.functions.invoke(
         'triage-symptoms',
-        body: {'symptoms': _textController.text},
+        body: {
+          'symptoms': _textController.text,
+          'location': 'Dhaka',
+        },
       );
 
       if (response.status == 200) {
@@ -84,7 +87,8 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("AI Health Assistant")),
-      body: Padding(
+      // 🔥 ফিক্স: SingleChildScrollView যোগ করা হয়েছে overflow এড়াতে
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -137,6 +141,9 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
     final urgency = data['urgency'] ?? 'LOW';
     final condition = data['condition'] ?? 'Unknown';
 
+    // 🔥 নতুন: কারণগুলো লিস্ট আকারে নেওয়া
+    final causes = List<String>.from(data['potential_causes'] ?? []);
+
     Color color = urgency == 'HIGH' ? Colors.red.shade100 : Colors.green.shade100;
     Color textColor = urgency == 'HIGH' ? Colors.red : Colors.green;
 
@@ -148,11 +155,12 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header
             Row(
               children: [
                 Icon(Icons.medical_services, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text("AI Diagnosis", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text("AI Diagnosis", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -162,37 +170,110 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
               ],
             ),
             const Divider(),
+
+            // 1. Condition
             const SizedBox(height: 8),
-            Text("Possible Condition:", style: TextStyle(color: Colors.grey)),
-            Text(condition, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text("Possible Condition:", style: TextStyle(color: Colors.grey)),
+            Text(condition, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
 
-            const SizedBox(height: 12),
-            Text("Recommended Specialist:", style: TextStyle(color: Colors.grey)),
-            Text(specialty, style: TextStyle(fontSize: 20, color: AppColors.primary, fontWeight: FontWeight.bold)),
+            // 🔥 2. Potential Causes (NEW SECTION)
+            if (causes.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const Text("Potential Causes (Why?):", style: TextStyle(color: Colors.grey)),
+              const SizedBox(height: 4),
+              // লিস্ট আইটেমগুলো লুপ করে দেখানো
+              ...causes.map((cause) => Padding(
+                padding: const EdgeInsets.only(left: 8.0, bottom: 2.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("• ", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
+                    Expanded(child: Text(cause, style: const TextStyle(fontSize: 14))),
+                  ],
+                ),
+              )),
+            ],
 
+            // 3. Specialist
             const SizedBox(height: 12),
-            Text("Immediate Advice:", style: TextStyle(color: Colors.grey)),
-            Text(data['advice'] ?? '', style: TextStyle(fontStyle: FontStyle.italic)),
+            const Text("Recommended Specialist:", style: TextStyle(color: Colors.grey)),
+            Text(specialty, style: const TextStyle(fontSize: 20, color: AppColors.primary, fontWeight: FontWeight.bold)),
+
+            // 4. Advice
+            const SizedBox(height: 12),
+            const Text("Immediate Advice:", style: TextStyle(color: Colors.grey)),
+            Text(data['advice'] ?? '', style: const TextStyle(fontStyle: FontStyle.italic)),
 
             const SizedBox(height: 20),
+
+            // 5. Button
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () {
+                  final internetDocs = data['internet_doctors'] ?? [];
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => DoctorListPage(specialty: specialty),
+                      builder: (_) => DoctorListPage(
+                        specialty: specialty,
+                        internetDoctors: internetDocs,
+                      ),
                     ),
                   );
                 },
-                icon: Icon(Icons.search),
+                icon: const Icon(Icons.search),
                 label: Text("FIND $specialty NOW"),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: AppColors.primary),
+                ),
               ),
             )
           ],
         ),
       ),
+    );
+  }
+  Widget _buildInternetDoctorsList(List<dynamic> doctors) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        const Text("Recommended by Google Search:",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
+
+        ...doctors.take(3).map((doc) { // সেরা ৩টি দেখাবে
+          return Card(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: ListTile(
+              leading: const Icon(Icons.public, color: Colors.blue),
+              title: Text(doc['title'] ?? 'Doctor Name',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(doc['address'] ?? 'Address not available'),
+                  if (doc['rating'] != null)
+                    Row(
+                      children: [
+                        const Icon(Icons.star, size: 14, color: Colors.amber),
+                        Text(" ${doc['rating']} (${doc['ratingCount']})"),
+                      ],
+                    )
+                ],
+              ),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: () async {
+                // Google Maps এ ওপেন করার জন্য (url_launcher লাগবে)
+                // final url = Uri.parse("https://www.google.com/maps/search/?api=1&query=${doc['title']}");
+                // if (await canLaunchUrl(url)) launchUrl(url);
+              },
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 }
