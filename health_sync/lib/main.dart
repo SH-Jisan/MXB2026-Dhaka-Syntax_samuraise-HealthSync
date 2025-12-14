@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/constants/app_colors.dart';
-// router ফাইলটি আমরা পরের ধাপে বানাব, তাই আপাতত কমেন্ট বা ডামি
-// import 'core/router/app_router.dart';
+ import 'core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +22,7 @@ class HealthSyncApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'HealthSync',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -32,8 +31,7 @@ class HealthSyncApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      // হোম পেজ আমরা পরে রাউটার দিয়ে সেট করব
-      home: const Scaffold(body: Center(child: Text("HealthSync Setup Complete!"))),
+      routerConfig: appRouter,
     );
   }
 }
