@@ -3,6 +3,7 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/models/medical_event.dart';
+import '../pages/event_details_page.dart';
 
 class TimelineCard extends StatelessWidget {
   final MedicalEvent event;
@@ -18,7 +19,16 @@ class TimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TimelineTile(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailsPage(event: event),
+          ),
+        );
+      },
+      child:TimelineTile(
       isFirst: isFirst,
       isLast: isLast,
       beforeLineStyle: const LineStyle(color: Color(0xFFE2E8F0), thickness: 2),
@@ -69,6 +79,7 @@ class TimelineCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 
