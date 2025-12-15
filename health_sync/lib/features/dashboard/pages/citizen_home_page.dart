@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-
+import '../../../shared/widgets/side_drawer.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../timeline/providers/timeline_provider.dart';
 import '../../../shared/models/medical_event_model.dart';
@@ -21,6 +21,7 @@ class CitizenHomePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      drawer: const SideDrawer(),
       appBar: AppBar(
         title: const Text("My Medical History"),
         centerTitle: false,

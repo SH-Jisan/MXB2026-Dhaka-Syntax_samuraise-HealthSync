@@ -19,7 +19,7 @@ serve(async (req) => {
     if (!apiKey || !serperKey) throw new Error('Missing API keys!')
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" })
 
     // 🔥 UPDATE: Prompt এ 'potential_causes' চাওয়া হয়েছে
     const prompt = `
