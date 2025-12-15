@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/app_colors.dart';
 // Blood & About পেজ আমরা পরে বানাবো, তাই আপাতত ইম্পোর্ট বাদে রাখছি
-// import '../../features/blood/pages/blood_home_page.dart';
+import '../../features/blood/pages/blood_request_page.dart';
 import '../../features/about/about_app_page.dart';
+import '../../features/blood/pages/blood_home_page.dart';
 
 class SideDrawer extends ConsumerWidget {
   const SideDrawer({super.key});
@@ -52,8 +53,10 @@ class SideDrawer extends ConsumerWidget {
             subtitle: const Text("Find donors & Request blood"),
             onTap: () {
               Navigator.pop(context);
-              // TODO: Navigate to Blood Page
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Blood Section Coming Next!")));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BloodHomePage())
+              );
             },
           ),
 
