@@ -28,6 +28,8 @@ dependencies:
   url_launcher: ^6.3.2    # (For calling/emailing)
   timeline_tile: ^2.0.0
   crypto: ^3.0.7
+  firebase_core: ^4.3.0
+  firebase_messaging: ^16.1.0
 
 dev_dependencies:
   flutter_test:

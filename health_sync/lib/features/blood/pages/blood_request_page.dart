@@ -15,7 +15,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
   // Controllers
   final _aiInputController = TextEditingController();
   final _locationController = TextEditingController();
-  final _noteController = TextEditingController(); // Patient details/Note
+  final _noteController = TextEditingController();
 
   // Dropdown Values
   String? _selectedBloodGroup;
@@ -24,7 +24,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
   bool _isAnalyzing = false;
   bool _isSubmitting = false;
 
-  // 🧠 AI Analysis Function
+  // 🧠 AI Analysis Function (Same as before)
   Future<void> _analyzeWithAI() async {
     if (_aiInputController.text.isEmpty) return;
 
@@ -39,19 +39,15 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
         final data = response.data;
 
         setState(() {
-          // 1. Auto-fill fields
           if (data['blood_group'] != null) {
-            // ডাটাবেসের সাথে ফরম্যাট মিলানোর জন্য চেক
             const validGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
             if (validGroups.contains(data['blood_group'])) {
               _selectedBloodGroup = data['blood_group'];
             }
           }
-
           _locationController.text = data['location'] ?? '';
           _noteController.text = data['patient_note'] ?? _aiInputController.text;
 
-          // Urgency mapping
           if (data['urgency'] == 'CRITICAL') {
             _urgency = 'CRITICAL';
           } else {
@@ -70,7 +66,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
     }
   }
 
-  // 💾 Submit to Database
+  // 💾 Submit to Database & Trigger Notification
   Future<void> _submitRequest() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedBloodGroup == null) {
@@ -82,32 +78,51 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
     try {
       final user = Supabase.instance.client.auth.currentUser;
 
-      // 1. ডাটাবেসে সেভ
-      final response = await Supabase.instance.client.from('blood_requests').insert({
+      // ১. ডাটাবেসে রিকোয়েস্ট সেভ করা
+      // আমরা রেসপন্সটি ভেরিয়েবলে রাখছি না কারণ আমাদের শুধু ইনসার্ট কনফার্মেশন দরকার
+      await Supabase.instance.client.from('blood_requests').insert({
         'requester_id': user!.id,
         'blood_group': _selectedBloodGroup,
-        'hospital_name': _locationController.text, // লোকেশন হিসেবে ব্যবহার করছি
-        'urgency': _urgency, // Critical / Normal
+        'hospital_name': _locationController.text,
+        'urgency': _urgency,
         'reason': _noteController.text,
         'status': 'OPEN',
         'accepted_count': 0,
         'created_at': DateTime.now().toIso8601String(),
-      }).select().single();
+      });
 
-      // 2. TODO: Trigger Notification (Next Step) 🔔
-      // আমরা পরের ধাপে এখানে FCM ট্রিগার করব
+      // 🔥 ২. নোটিফিকেশন ট্রিগার (Fire & Forget)
+      // আমরা এখানে 'await' ব্যবহার করছি না, যাতে ইউজারকে অপেক্ষা করতে না হয়।
+      // নোটিফিকেশন ব্যাকগ্রাউন্ডে চলে যাবে।
+      Supabase.instance.client.functions.invoke('notify-donors', body: {
+        'blood_group': _selectedBloodGroup,
+        'hospital': _locationController.text,
+        'urgency': _urgency,
+      }).then((response) {
+        debugPrint("🔔 Notification Response: ${response.data}");
+      }).catchError((error) {
+        debugPrint("❌ Notification Failed: $error");
+      });
 
+      // ৩. সাকসেস মেসেজ এবং পেজ বন্ধ করা
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Request Posted Successfully! Notification sent to donors."), backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text("Request Posted! Notifying nearby donors... 📲"),
+              backgroundColor: Colors.green
+          ),
         );
-        Navigator.pop(context); // পেজ বন্ধ
+        Navigator.pop(context);
       }
 
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error posting request: $e")));
+      }
     } finally {
-      setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
