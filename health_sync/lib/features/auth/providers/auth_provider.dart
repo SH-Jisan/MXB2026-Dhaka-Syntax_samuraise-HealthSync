@@ -9,18 +9,16 @@ final authStateProvider = StateNotifierProvider<AuthController, bool>((ref) {
 class AuthController extends StateNotifier<bool> {
   AuthController() : super(false); // false = not loading
 
-  // 2. Sign Up Function (Role সহ)
+  // 2. Sign Up Function
   Future<void> signUp({
     required String email,
     required String password,
     required String fullName,
     required String phone,
-    required String role, // 'PATIENT', 'DOCTOR', 'HOSPITAL', 'DIAGNOSTIC'
+    required String role, // 'CITIZEN', 'DOCTOR', 'HOSPITAL', 'DIAGNOSTIC'
   }) async {
     state = true; // Loading start
     try {
-      // মেটাডাটা হিসেবে রোল এবং অন্যান্য তথ্য পাঠাচ্ছি
-      // এটি ডাটাবেসের 'handle_new_user' ট্রিগার দিয়ে প্রোফাইল টেবিলে সেভ হবে
       await Supabase.instance.client.auth.signUp(
         email: email,
         password: password,
@@ -31,7 +29,7 @@ class AuthController extends StateNotifier<bool> {
         },
       );
     } catch (e) {
-      rethrow; // UI তে এরর দেখানোর জন্য পাঠালাম
+      rethrow;
     } finally {
       state = false; // Loading stop
     }
@@ -52,8 +50,16 @@ class AuthController extends StateNotifier<bool> {
     }
   }
 
-  // 4. Logout
-  Future<void> signOut() async {
-    await Supabase.instance.client.auth.signOut();
+  // 🔥 4. Logout Function (Updated)
+  // নাম 'signOut' থেকে বদলে 'logout' করা হয়েছে যাতে ProfilePage এর সাথে মিলে যায়
+  Future<void> logout() async {
+    state = true; // লোডিং শুরু
+    try {
+      await Supabase.instance.client.auth.signOut();
+    } catch (e) {
+      rethrow;
+    } finally {
+      state = false; // লোডিং শেষ
+    }
   }
 }

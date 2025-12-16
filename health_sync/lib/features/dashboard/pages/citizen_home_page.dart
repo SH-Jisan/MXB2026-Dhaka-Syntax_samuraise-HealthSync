@@ -1,31 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:timeline_tile/timeline_tile.dart';
-import '../../../shared/widgets/side_drawer.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../timeline/providers/timeline_provider.dart';
-import '../../../shared/models/medical_event_model.dart';
-import '../../upload/widgets/upload_buttom_sheet.dart';
+import '../../../shared/widgets/side_drawer.dart';
 import 'ai_doctor_page.dart';
-import 'medical_event_details_page.dart';
 
-class CitizenHomePage extends ConsumerWidget {
+// পেজ ইম্পোর্ট
+import '../../timeline/pages/medical_timeline_view.dart';
+import '../../profile/pages/profile_page.dart';
+import '../../health_plan/pages/health_plan_page.dart'; // 🔥 নতুন পেজ ইম্পোর্ট
+
+class CitizenHomePage extends StatefulWidget {
   const CitizenHomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final timelineAsync = ref.watch(timelineProvider);
+  State<CitizenHomePage> createState() => _CitizenHomePageState();
+}
 
+class _CitizenHomePageState extends State<CitizenHomePage> {
+  int _selectedIndex = 0;
+
+  // 🔥 পেজের লিস্টে HealthPlanPage যোগ করা হলো
+  final List<Widget> _pages = [
+    const MedicalTimelineView(), // Tab 0
+    const HealthPlanPage(),      // Tab 1: AI Health Plan (NEW)
+    const ProfilePage(),         // Tab 2
+  ];
+
+  final List<String> _titles = [
+    "My Medical History",
+    "Health Plan",
+    "My Profile",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       drawer: const SideDrawer(),
+
       appBar: AppBar(
-        title: const Text("My Medical History"),
+        title: Text(_titles[_selectedIndex]),
         centerTitle: false,
         actions: [
+          // শুধু টাইমলাইনেই AI Doctor বাটন রাখা যেতে পারে, অথবা সবখানে
           IconButton(
             icon: const Icon(Icons.support_agent, color: AppColors.primary),
             onPressed: () {
@@ -35,280 +52,39 @@ class CitizenHomePage extends ConsumerWidget {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: AppColors.error),
-            onPressed: () =>
-                Supabase.instance.client.auth.signOut(),
-          ),
         ],
       ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => const UploadBottomSheet(),
-          );
-        },
-        label: const Text("Add Report"),
-        icon: const Icon(Icons.add_a_photo),
-        elevation: 4,
-      ),
+      body: _pages[_selectedIndex],
 
-      body: timelineAsync.when(
-        loading: () =>
-        const Center(child: CircularProgressIndicator()),
-        error: (err, stack) =>
-            Center(child: Text("Error: $err")),
-        data: (events) {
-          if (events.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
-            ),
-            itemCount: events.length,
-            itemBuilder: (context, index) {
-              final event = events[index];
-              return _buildTimelineTile(
-                context,
-                event,
-                isLast: index == events.length - 1,
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  // ---------------- EMPTY STATE ----------------
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.history_edu,
-              size: 64,
-              color: AppColors.primary.withOpacity(0.5),
-            ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        backgroundColor: Colors.white,
+        indicatorColor: AppColors.primary.withOpacity(0.2),
+        elevation: 3,
+        destinations: const [
+          // 1. Timeline
+          NavigationDestination(
+            icon: Icon(Icons.history_edu_outlined),
+            selectedIcon: Icon(Icons.history_edu, color: AppColors.primary),
+            label: 'Timeline',
           ),
-          const SizedBox(height: 24),
-          Text(
-            "No medical history yet!",
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+
+          // 2. Health Plan (NEW)
+          NavigationDestination(
+            icon: Icon(Icons.spa_outlined), // Spa বা Leaf আইকন হেলথের জন্য ভালো
+            selectedIcon: Icon(Icons.spa, color: AppColors.primary),
+            label: 'Health Plan',
           ),
-          const SizedBox(height: 8),
-          Text(
-            "Upload your first report to start tracking.",
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+
+          // 3. Profile
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person, color: AppColors.primary),
+            label: 'Profile',
           ),
         ],
-      ),
-    );
-  }
-
-  // ---------------- TIMELINE TILE ----------------
-
-  Widget _buildTimelineTile(
-      BuildContext context,
-      MedicalEvent event, {
-        required bool isLast,
-      }) {
-    final isPrescription =
-        event.eventType == 'PRESCRIPTION';
-
-    return TimelineTile(
-      isFirst: false,
-      isLast: isLast,
-      beforeLineStyle: LineStyle(
-        color: AppColors.primary.withOpacity(0.3),
-        thickness: 2,
-      ),
-      indicatorStyle: IndicatorStyle(
-        width: 36,
-        height: 36,
-        indicator: Container(
-          decoration: BoxDecoration(
-            color: isPrescription
-                ? Colors.purple.shade50
-                : Colors.teal.shade50,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color:
-              isPrescription ? Colors.purple : Colors.teal,
-              width: 2,
-            ),
-          ),
-          child: Icon(
-            isPrescription
-                ? Icons.medication_outlined
-                : Icons.assignment_outlined,
-            color:
-            isPrescription ? Colors.purple : Colors.teal,
-            size: 18,
-          ),
-        ),
-      ),
-
-      endChild: Container(
-        margin: const EdgeInsets.only(bottom: 24, left: 16),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      MedicalEventDetailsPage(event: event),
-                ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Date + Severity
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat('dd MMM yyyy')
-                            .format(event.eventDate),
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color:
-                          AppColors.textSecondary,
-                        ),
-                      ),
-                      _buildSeverityBadge(event.severity),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Title
-                  Text(
-                    event.title,
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-
-                  // Summary
-                  if (event.summary != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      event.summary!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        "View Details →",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ---------------- SEVERITY BADGE ----------------
-
-  Widget _buildSeverityBadge(String severity) {
-    Color color;
-    Color bg;
-
-    switch (severity) {
-      case 'HIGH':
-        color = Colors.red.shade700;
-        bg = Colors.red.shade50;
-        break;
-      case 'MEDIUM':
-        color = Colors.orange.shade800;
-        bg = Colors.orange.shade50;
-        break;
-      default:
-        color = Colors.green.shade700;
-        bg = Colors.green.shade50;
-    }
-
-    return Container(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        severity,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }
