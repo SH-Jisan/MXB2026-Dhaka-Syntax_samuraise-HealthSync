@@ -28,8 +28,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authStateProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: const Text("Create Account")),
       body: Center(
         child: SingleChildScrollView(
@@ -39,20 +42,23 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
+                Text(
                   "Get Started",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 28, 
                     fontWeight: FontWeight.bold, 
-                    color: AppColors.textPrimary
+                    color: theme.textTheme.displayMedium?.color ?? (isDark ? Colors.white : AppColors.textPrimary)
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   "Create a new account to access HealthSync",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 16, 
+                    color: theme.textTheme.bodyMedium?.color ?? (isDark ? Colors.grey.shade400 : AppColors.textSecondary)
+                  ),
                 ),
                 const SizedBox(height: 32),
 
@@ -60,6 +66,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 DropdownButtonFormField<String>(
                   value: _selectedRole,
                   decoration: _inputDecoration("Account Type", Icons.category_outlined),
+                  dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
                   items: _roles.map((role) {
                     return DropdownMenuItem(
                       value: role,
@@ -105,11 +112,18 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 // 3. Signup Button
                 ElevatedButton(
                   onPressed: isLoading ? null : _handleSignup,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
+                  ),
                   child: isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                          child: CircularProgressIndicator(
+                            color: isDark ? Colors.black : Colors.white, 
+                            strokeWidth: 2
+                          )
                         )
                       : const Text("CREATE ACCOUNT"),
                 ),
@@ -119,10 +133,19 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Already have an account?", style: TextStyle(color: AppColors.textSecondary)),
+                    Text(
+                      "Already have an account?", 
+                      style: TextStyle(color: theme.textTheme.bodyMedium?.color)
+                    ),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text("Log In", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(
+                        "Log In", 
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.darkPrimary : AppColors.primary
+                        )
+                      ),
                     ),
                   ],
                 ),

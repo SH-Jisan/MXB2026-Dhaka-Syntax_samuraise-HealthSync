@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/blood_feed_provider.dart';
+import 'blood_request_page.dart';
 
 class BloodRequestsFeedPage extends ConsumerStatefulWidget {
   const BloodRequestsFeedPage({super.key});
@@ -15,19 +17,16 @@ class BloodRequestsFeedPage extends ConsumerStatefulWidget {
 
 class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
 
-  // ✅ রক্ত দেওয়ার লজিক (আপডেট করা হয়েছে)
   Future<void> _acceptRequest(String requestId, String requesterPhone) async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
 
     try {
-      // ১. এক্সেপ্ট টেবিল এ এন্ট্রি
       await Supabase.instance.client.from('request_acceptors').insert({
         'request_id': requestId,
         'donor_id': user.id,
       });
 
-      // ২. সাকসেস ডায়ালগ
       if (mounted) {
         showDialog(
           context: context,
@@ -51,15 +50,14 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
             ),
             actions: [
               TextButton(onPressed: () {
-                Navigator.pop(ctx); // ডায়ালগ বন্ধ
-                ref.refresh(bloodFeedProvider); // ফিড রিফ্রেশ
+                Navigator.pop(ctx); 
+                ref.refresh(bloodFeedProvider); 
               }, child: const Text("CLOSE"))
             ],
           ),
         );
       }
     } on PostgrestException catch (e) {
-      // 🔥 ERROR FIX: ডুপ্লিকেট এক্সেপ্ট হ্যান্ডেল করা
       if (e.code == '23505') {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +68,6 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
           );
         }
       } else {
-        // অন্য কোনো এরর হলে
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
         }
@@ -85,126 +82,276 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
   @override
   Widget build(BuildContext context) {
     final feedAsync = ref.watch(bloodFeedProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor, // 🔥 থিম থেকে ব্যাকগ্রাউন্ড
       appBar: AppBar(title: const Text("Live Blood Requests")),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const BloodRequestPage()));
+        },
+        label: const Text("Post Request"),
+        icon: const Icon(Icons.add_circle_outline),
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
+      ),
       body: feedAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text("Error: $err")),
         data: (requests) {
           if (requests.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_outline, size: 80, color: Colors.green),
-                  SizedBox(height: 10),
-                  Text("No pending requests right now!", style: TextStyle(fontSize: 16)),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      shape: BoxShape.circle
+                    ),
+                    child: Icon(Icons.check_circle_outline, size: 60, color: Colors.green.shade400),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "No pending requests right now!", 
+                    style: GoogleFonts.poppins(fontSize: 18, color: isDark ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.bold)
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "You are all caught up.",
+                    style: GoogleFonts.poppins(color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                  ),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 80),
             itemCount: requests.length,
             itemBuilder: (context, index) {
               final req = requests[index];
               final requester = req['profiles'] ?? {};
               final isCritical = req['urgency'] == 'CRITICAL';
               final acceptedCount = req['accepted_count'] ?? 0;
+              final neededCount = 3;
+              final progress = (acceptedCount / neededCount).clamp(0.0, 1.0);
 
-              return Card(
-                elevation: 4,
+              return Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: isCritical ? const BorderSide(color: Colors.red, width: 2) : BorderSide.none,
+                decoration: BoxDecoration(
+                  // 🔥 কার্ড কালার থিম অনুযায়ী সেট করা
+                  color: isCritical 
+                      ? (isDark ? Colors.red.shade900.withOpacity(0.2) : Colors.red.shade50.withOpacity(0.5))
+                      : (isDark ? theme.cardTheme.color : Colors.white),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.08), blurRadius: 10, offset: const Offset(0, 4))
+                  ],
+                  border: isCritical 
+                      ? Border.all(color: Colors.red.withOpacity(isDark ? 0.5 : 0.3), width: 1.5) 
+                      : (isDark ? Border.all(color: Colors.grey.shade800) : null),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header
+                      // Header: Blood Group & Urgency
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                colors: isCritical 
+                                  ? [Colors.red.shade600, Colors.red.shade800]
+                                  : [Colors.red.shade400, Colors.red.shade600],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 3))
+                              ]
                             ),
                             child: Text(
                               req['blood_group'],
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                           ),
-                          if (isCritical)
-                            const Row(
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.warning, color: Colors.red, size: 18),
-                                SizedBox(width: 4),
-                                Text("CRITICAL", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                if (isCritical)
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.warning_amber_rounded, color: Colors.red.shade800, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text("CRITICAL URGENCY", style: TextStyle(color: Colors.red.shade800, fontWeight: FontWeight.w800, fontSize: 11)),
+                                      ],
+                                    ),
+                                  ),
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time, size: 14, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      DateFormat('dd MMM, hh:mm a').format(DateTime.parse(req['created_at'])),
+                                      style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-                          Text(
-                            DateFormat('dd MMM, hh:mm a').format(DateTime.parse(req['created_at'])),
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          )
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+
+                      // Hospital Name
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.local_hospital_outlined, size: 20, color: isDark ? Colors.grey.shade400 : Colors.grey.shade700),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              req['hospital_name'], 
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 16, 
+                                color: isDark ? Colors.white : AppColors.textPrimary
+                              )
+                            ),
                           ),
                         ],
                       ),
+                      
+                      if (req['reason'] != null && req['reason'].isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            // নোট সেকশনের ব্যাকগ্রাউন্ড ডার্ক মোডে মানানসই করা হলো
+                            color: isCritical 
+                                ? (isDark ? Colors.black26 : Colors.white) 
+                                : (isDark ? Colors.black26 : Colors.grey.shade50),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.notes, size: 16, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "${req['reason']}", 
+                                  style: TextStyle(
+                                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade800, 
+                                    fontSize: 13, 
+                                    height: 1.4
+                                  )
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
-
-                      // Details
-                      Text("Patient at: ${req['hospital_name']}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      const SizedBox(height: 4),
-                      Text("Reason: ${req['reason']}", style: TextStyle(color: Colors.grey.shade700)),
-                      const SizedBox(height: 8),
 
                       // Requester Info
                       Row(
                         children: [
-                          const Icon(Icons.person, size: 14, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text("Requested by: ${requester['full_name'] ?? 'Unknown'}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          CircleAvatar(
+                            radius: 10,
+                            backgroundColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                            child: const Icon(Icons.person, size: 14, color: Colors.white),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Requested by ${requester['full_name'] ?? 'Unknown'}", 
+                            style: GoogleFonts.poppins(
+                              fontSize: 12, 
+                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, 
+                              fontStyle: FontStyle.italic
+                            )
+                          ),
                         ],
                       ),
 
-                      const Divider(height: 24),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(height: 1),
+                      ),
 
-                      // Actions - 🔥 OVERFLOW FIX: Row এর বদলে Wrap ব্যবহার করা হয়েছে
-                      Wrap(
-                        alignment: WrapAlignment.spaceBetween,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 10, // পাশাপাশি গ্যাপ
-                        runSpacing: 10, // নিচে নামলে গ্যাপ
+                      // Actions & Progress
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Progress Status
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.teal.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.teal.shade100),
-                            ),
-                            child: Text(
-                              "$acceptedCount / 3 Donors Found",
-                              style: TextStyle(color: Colors.teal.shade700, fontWeight: FontWeight.bold),
+                          // Progress Bar
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Donors Found ($acceptedCount/$neededCount)",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12, 
+                                  fontWeight: FontWeight.w600, 
+                                  color: isDark ? AppColors.darkPrimary : Colors.teal.shade700
+                                ),
+                              ),
+                              Text(
+                                "${(progress * 100).toInt()}%",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12, 
+                                  fontWeight: FontWeight.bold, 
+                                  color: isDark ? AppColors.darkPrimary : Colors.teal.shade700
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: isDark ? Colors.teal.shade900 : Colors.teal.shade50,
+                              color: isDark ? AppColors.darkPrimary : Colors.teal,
+                              minHeight: 6,
                             ),
                           ),
+                          const SizedBox(height: 16),
 
                           // Donate Button
                           ElevatedButton.icon(
                             onPressed: () => _acceptRequest(req['id'], requester['phone'] ?? ''),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isCritical ? Colors.red : AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              backgroundColor: isCritical ? Colors.red.shade600 : (isDark ? AppColors.darkPrimary : AppColors.primary),
+                              foregroundColor: isDark && !isCritical ? Colors.black : Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 4,
+                              shadowColor: (isCritical ? Colors.red : AppColors.primary).withOpacity(0.4),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            icon: const Icon(Icons.volunteer_activism),
-                            label: const Text("I CAN DONATE"),
+                            icon: const Icon(Icons.volunteer_activism_outlined, size: 20),
+                            label: Text(
+                              "I CAN DONATE", 
+                              style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 15)
+                            ),
                           ),
                         ],
                       )

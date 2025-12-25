@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/constants/app_colors.dart';
 
 class BloodRequestPage extends StatefulWidget {
   const BloodRequestPage({super.key});
@@ -23,7 +25,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
   bool _isAnalyzing = false;
   bool _isSubmitting = false;
 
-  // 🧠 AI Analysis Function (Same as before)
+  // 🧠 AI Analysis Function
   Future<void> _analyzeWithAI() async {
     if (_aiInputController.text.isEmpty) return;
 
@@ -78,7 +80,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
       final user = Supabase.instance.client.auth.currentUser;
 
       // ১. ডাটাবেসে রিকোয়েস্ট সেভ করা
-      // আমরা রেসপন্সটি ভেরিয়েবলে রাখছি না কারণ আমাদের শুধু ইনসার্ট কনফার্মেশন দরকার
       await Supabase.instance.client.from('blood_requests').insert({
         'requester_id': user!.id,
         'blood_group': _selectedBloodGroup,
@@ -91,8 +92,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
       });
 
       // 🔥 ২. নোটিফিকেশন ট্রিগার (Fire & Forget)
-      // আমরা এখানে 'await' ব্যবহার করছি না, যাতে ইউজারকে অপেক্ষা করতে না হয়।
-      // নোটিফিকেশন ব্যাকগ্রাউন্ডে চলে যাবে।
       Supabase.instance.client.functions.invoke('notify-donors', body: {
         'blood_group': _selectedBloodGroup,
         'hospital': _locationController.text,
@@ -127,101 +126,202 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: const Text("Request Blood")),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✨ AI SECTION
+              // ✨ AI SECTION (Enhanced Look)
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.purple.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.purple.shade100),
+                  gradient: LinearGradient(
+                    colors: isDark 
+                        ? [Colors.deepPurple.shade900.withOpacity(0.5), AppColors.darkSurface]
+                        : [Colors.deepPurple.shade50, Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? Colors.deepPurple.shade800 : Colors.deepPurple.shade100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark ? Colors.black.withOpacity(0.3) : Colors.deepPurple.withOpacity(0.08), 
+                      blurRadius: 12, 
+                      offset: const Offset(0, 4)
+                    )
+                  ]
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: const [
-                        Icon(Icons.auto_awesome, color: Colors.purple),
-                        SizedBox(width: 8),
-                        Text("AI Assistant (Voice/Text)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple)),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: [Colors.deepPurple.shade300, Colors.purple]),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(color: Colors.purple.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 2))
+                            ]
+                          ),
+                          child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Quick AI Fill", 
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold, 
+                                color: isDark ? Colors.deepPurple.shade100 : Colors.deepPurple.shade800, 
+                                fontSize: 16
+                              )
+                            ),
+                            Text(
+                              "Type or speak your need naturally", 
+                              style: GoogleFonts.poppins(
+                                fontSize: 12, 
+                                color: isDark ? Colors.deepPurple.shade200 : Colors.deepPurple.shade400
+                              )
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _aiInputController,
-                      maxLines: 2,
-                      decoration: const InputDecoration(
-                        hintText: "e.g., Need B+ blood at Dhaka Medical for accident...",
-                        border: InputBorder.none,
+                      maxLines: 3,
+                      style: GoogleFonts.poppins(fontSize: 14, color: isDark ? Colors.white : Colors.black),
+                      decoration: InputDecoration(
+                        hintText: "Example: \"Urgent A+ blood needed at Dhaka Medical College for a road accident patient...\"",
+                        hintStyle: TextStyle(
+                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade500, 
+                          fontSize: 13, 
+                          fontStyle: FontStyle.italic
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+                        contentPadding: const EdgeInsets.all(16),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: _isAnalyzing ? null : _analyzeWithAI,
                         icon: _isAnalyzing
                             ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Icon(Icons.bolt),
-                        label: Text(_isAnalyzing ? "Analyzing..." : "Auto-Fill Form"),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
+                            : const Icon(Icons.bolt_rounded, size: 20),
+                        label: Text(
+                          _isAnalyzing ? "Processing..." : "Auto-Fill Form with AI",
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w600)
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple, 
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                        ),
                       ),
                     )
                   ],
                 ),
               ),
 
-              const SizedBox(height: 24),
-              const Text("Review Details", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
+              
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 8),
+                child: Text(
+                  "Manual Entry", 
+                  style: GoogleFonts.poppins(
+                    fontSize: 14, 
+                    fontWeight: FontWeight.w600, 
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, 
+                    letterSpacing: 1
+                  )
+                ),
+              ),
 
               // 🩸 Blood Group Dropdown
+              _buildInputLabel("Blood Group", isDark),
               DropdownButtonFormField<String>(
                 value: _selectedBloodGroup,
-                decoration: const InputDecoration(labelText: "Blood Group", border: OutlineInputBorder()),
+                decoration: _inputDecoration(hint: "Select Group", icon: Icons.bloodtype, color: Colors.red, isDark: isDark),
+                dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
                 items: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
-                    .map((group) => DropdownMenuItem(value: group, child: Text(group)))
+                    .map((group) => DropdownMenuItem(value: group, child: Text(group, style: GoogleFonts.poppins(fontWeight: FontWeight.w500))))
                     .toList(),
                 onChanged: (val) => setState(() => _selectedBloodGroup = val),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // 🏥 Location
+              _buildInputLabel("Hospital / Location", isDark),
               TextFormField(
                 controller: _locationController,
-                decoration: const InputDecoration(labelText: "Hospital / Location", border: OutlineInputBorder(), prefixIcon: Icon(Icons.location_on)),
+                style: GoogleFonts.poppins(color: isDark ? Colors.white : Colors.black),
+                decoration: _inputDecoration(hint: "Enter hospital name & area", icon: Icons.location_on_outlined, isDark: isDark),
                 validator: (val) => val!.isEmpty ? "Required" : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // 🚨 Urgency
+              _buildInputLabel("Urgency Level", isDark),
               DropdownButtonFormField<String>(
                 value: _urgency,
-                decoration: const InputDecoration(labelText: "Urgency Level", border: OutlineInputBorder()),
+                decoration: _inputDecoration(hint: "Select Urgency", icon: Icons.warning_amber_rounded, color: _urgency == 'CRITICAL' ? Colors.red : Colors.orange, isDark: isDark),
+                dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
                 items: ['NORMAL', 'CRITICAL']
-                    .map((u) => DropdownMenuItem(value: u, child: Text(u, style: TextStyle(color: u == 'CRITICAL' ? Colors.red : Colors.black))))
-                    .toList(),
+                    .map((u) => DropdownMenuItem(
+                      value: u, 
+                      child: Row(
+                        children: [
+                          Text(u, style: GoogleFonts.poppins(
+                            color: u == 'CRITICAL' ? Colors.red : (isDark ? Colors.white : Colors.black), 
+                            fontWeight: u == 'CRITICAL' ? FontWeight.bold : FontWeight.normal
+                          )),
+                          if(u == 'CRITICAL') ...[
+                            const SizedBox(width: 8),
+                            const Icon(Icons.priority_high, size: 16, color: Colors.red)
+                          ]
+                        ],
+                      )
+                    )).toList(),
                 onChanged: (val) => setState(() => _urgency = val!),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // 📝 Reason / Note
+              _buildInputLabel("Patient Condition / Note", isDark),
               TextFormField(
                 controller: _noteController,
-                maxLines: 3,
-                decoration: const InputDecoration(labelText: "Patient Condition / Note", border: OutlineInputBorder()),
+                maxLines: 4,
+                style: GoogleFonts.poppins(color: isDark ? Colors.white : Colors.black),
+                decoration: _inputDecoration(hint: "Describe the situation...", icon: Icons.note_alt_outlined, isDark: isDark).copyWith(
+                  alignLabelWithHint: true,
+                ),
                 validator: (val) => val!.isEmpty ? "Required" : null,
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
 
               // ✅ Submit Button
               SizedBox(
@@ -229,18 +329,66 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitRequest,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.red.shade600,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    elevation: 6,
+                    shadowColor: Colors.red.withOpacity(0.4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   child: _isSubmitting
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("POST BLOOD REQUEST", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : Text(
+                          "POST BLOOD REQUEST", 
+                          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)
+                        ),
                 ),
               ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInputLabel(String label, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 14, 
+          fontWeight: FontWeight.w500, 
+          color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({required String hint, required IconData icon, Color? color, required bool isDark}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: GoogleFonts.poppins(color: isDark ? Colors.grey.shade500 : Colors.grey.shade400, fontSize: 13),
+      prefixIcon: Icon(icon, color: color ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade600), size: 22),
+      filled: true,
+      fillColor: isDark ? AppColors.darkSurface : Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: isDark ? AppColors.darkPrimary.withOpacity(0.5) : AppColors.primary.withOpacity(0.5), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.red.shade200, width: 1),
       ),
     );
   }

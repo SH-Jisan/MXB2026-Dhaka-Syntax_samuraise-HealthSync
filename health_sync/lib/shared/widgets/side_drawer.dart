@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/app_colors.dart';
-// Blood & About পেজ আমরা পরে বানাবো, তাই আপাতত ইম্পোর্ট বাদে রাখছি
-import '../../features/blood/pages/blood_request_page.dart';
-import '../../features/about/about_app_page.dart';
 import '../../features/blood/pages/blood_home_page.dart';
+import '../../features/about/about_app_page.dart';
+import '../providers/theme_provider.dart'; // Import Theme Provider
 
 class SideDrawer extends ConsumerWidget {
   const SideDrawer({super.key});
@@ -16,76 +15,210 @@ class SideDrawer extends ConsumerWidget {
     final user = Supabase.instance.client.auth.currentUser;
     final email = user?.email ?? "Guest";
     final name = user?.userMetadata?['full_name'] ?? "User";
+    final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : "U";
+
+    // Watch Theme State
+    final themeMode = ref.watch(themeProvider);
+    final isDark = themeMode == ThemeMode.dark;
 
     return Drawer(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      surfaceTintColor: Colors.transparent,
       child: Column(
         children: [
-          // 1. Header with User Info
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(color: AppColors.primary),
-            accountName: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            accountEmail: Text(email),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                name[0].toUpperCase(),
-                style: const TextStyle(fontSize: 40, color: AppColors.primary),
+          // 1. Header with Gradient & User Info
+          Container(
+            padding: const EdgeInsets.only(top: 50, bottom: 24, left: 24, right: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.secondary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    firstLetter,
+                    style: GoogleFonts.poppins(
+                      fontSize: 28, 
+                      fontWeight: FontWeight.bold, 
+                      color: AppColors.primary
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        email,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
+          const SizedBox(height: 16),
+
           // 2. Menu Items
-          ListTile(
-            leading: const Icon(Icons.dashboard, color: AppColors.primary),
-            title: const Text("Dashboard"),
-            onTap: () {
-              Navigator.pop(context); // ড্রয়ার বন্ধ
-              // হোম পেজে যেহেতু অলরেডি আছি, তাই কিছু করার দরকার নেই
-            },
-          ),
-
-          const Divider(),
-
-          // 🔥 Blood Section
-          ListTile(
-            leading: const Icon(Icons.bloodtype, color: Colors.red),
-            title: const Text("Blood Bank"),
-            subtitle: const Text("Find donors & Request blood"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BloodHomePage())
-              );
-            },
-          ),
-
-          // 🔥 About App
-          ListTile(
-            leading: const Icon(Icons.info_outline, color: Colors.blue),
-            title: const Text("About App"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: [
+                _buildDrawerItem(
                   context,
-                  MaterialPageRoute(builder: (_) => const AboutAppPage())
-              );
-            },
+                  icon: Icons.dashboard_outlined,
+                  text: "Dashboard",
+                  onTap: () => Navigator.pop(context),
+                  isActive: true, // Assuming we are on dashboard if drawer is opened usually
+                ),
+                
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.bloodtype_outlined,
+                  text: "Blood Bank",
+                  subtitle: "Find donors & Request blood",
+                  iconColor: Colors.red.shade400,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BloodHomePage())
+                    );
+                  },
+                ),
+
+                _buildDrawerItem(
+                  context,
+                  icon: Icons.info_outline,
+                  text: "About App",
+                  iconColor: Colors.blue.shade400,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AboutAppPage())
+                    );
+                  },
+                ),
+
+                const Divider(),
+                
+                // 🌗 Theme Toggle Switch
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withOpacity(0.05) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: SwitchListTile(
+                    title: Text(
+                      "Dark Mode", 
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        color: Theme.of(context).textTheme.bodyMedium?.color
+                      )
+                    ),
+                    secondary: Icon(
+                      isDark ? Icons.dark_mode : Icons.light_mode, 
+                      color: isDark ? Colors.amber : Colors.grey.shade600
+                    ),
+                    value: isDark,
+                    onChanged: (val) {
+                      ref.read(themeProvider.notifier).toggleTheme();
+                    },
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+
+              ],
+            ),
           ),
 
-          const Spacer(),
-          const Divider(),
+          const Divider(height: 1),
 
-          // Logout
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.grey),
-            title: const Text("Logout"),
-            onTap: () async {
-              await Supabase.instance.client.auth.signOut();
-            },
+          // 3. Logout Section
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildDrawerItem(
+              context,
+              icon: Icons.logout,
+              text: "Logout",
+              iconColor: AppColors.error,
+              textColor: AppColors.error,
+              onTap: () async {
+                await Supabase.instance.client.auth.signOut();
+              },
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    String? subtitle,
+    required VoidCallback onTap,
+    Color? iconColor,
+    Color? textColor,
+    bool isActive = false,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final color = isActive 
+        ? AppColors.primary 
+        : (iconColor ?? (isDark ? Colors.white70 : Colors.grey.shade600));
+        
+    final textStyle = GoogleFonts.poppins(
+      color: isActive 
+          ? AppColors.primary 
+          : (textColor ?? theme.textTheme.bodyMedium?.color),
+      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+      fontSize: 15,
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: color),
+        title: Text(text, style: textStyle),
+        subtitle: subtitle != null 
+          ? Text(subtitle, style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.grey.shade500)) 
+          : null,
+        onTap: onTap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }

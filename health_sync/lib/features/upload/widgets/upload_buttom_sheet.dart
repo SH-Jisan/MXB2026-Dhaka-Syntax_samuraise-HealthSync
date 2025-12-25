@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/upload_provider.dart';
 
@@ -77,13 +78,15 @@ class _UploadBottomSheetState extends ConsumerState<UploadBottomSheet> {
   Widget build(BuildContext context) {
     final uploadState = ref.watch(uploadProvider);
     final isLoading = uploadState is AsyncLoading;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       height: 600,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: theme.bottomSheetTheme.modalBackgroundColor ?? (isDark ? AppColors.darkSurface : Colors.white),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,89 +95,169 @@ class _UploadBottomSheetState extends ConsumerState<UploadBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Upload Records", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+               Text(
+                 "Upload Records", 
+                 style: GoogleFonts.poppins(
+                   fontSize: 22, 
+                   fontWeight: FontWeight.bold,
+                   color: theme.textTheme.displayMedium?.color ?? (isDark ? Colors.white : AppColors.textPrimary)
+                 )
+               ),
+              IconButton(
+                onPressed: () => Navigator.pop(context), 
+                icon: const Icon(Icons.close),
+                color: isDark ? Colors.grey.shade400 : Colors.grey,
+              ),
             ],
           ),
           const Divider(),
+          const SizedBox(height: 16),
 
           // File Selection Area
           Expanded(
             child: _selectedFiles.isEmpty
-                ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.upload_file, size: 60, color: Colors.teal.shade200),
-                const SizedBox(height: 10),
-                const Text("Select Reports (Images or PDF)"),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: _pickFiles,
-                  icon: const Icon(Icons.add),
-                  label: const Text("Select Files"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal.shade50,
-                    foregroundColor: Colors.teal,
-                  ),
-                ),
-              ],
-            )
+                ? GestureDetector(
+                    onTap: _pickFiles,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.black12 : AppColors.background,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, 
+                          style: BorderStyle.solid, 
+                          width: 2
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isDark ? AppColors.darkPrimary.withOpacity(0.1) : AppColors.primary.withOpacity(0.1),
+                              shape: BoxShape.circle
+                            ),
+                            child: Icon(
+                              Icons.cloud_upload_outlined, 
+                              size: 48, 
+                              color: isDark ? AppColors.darkPrimary : AppColors.primary
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "Tap to Select Reports",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600, 
+                              fontSize: 16, 
+                              color: theme.textTheme.bodyLarge?.color ?? AppColors.textPrimary
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Supports JPG, PNG & PDF",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12, 
+                              color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 : ListView.builder(
-              itemCount: _selectedFiles.length,
-              itemBuilder: (context, index) {
-                final file = _selectedFiles[index];
-                final isPdf = file.path.endsWith('.pdf');
+                    itemCount: _selectedFiles.length,
+                    itemBuilder: (context, index) {
+                      final file = _selectedFiles[index];
+                      final isPdf = file.path.endsWith('.pdf');
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    leading: Icon(
-                      isPdf ? Icons.picture_as_pdf : Icons.image,
-                      color: isPdf ? Colors.red : Colors.teal,
-                    ),
-                    title: Text(
-                      file.path.split('/').last,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.grey),
-                      onPressed: () {
-                        setState(() => _selectedFiles.removeAt(index));
-                      },
-                    ),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.black12 : AppColors.background,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade200),
+                        ),
+                        child: ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.grey.shade800 : Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              isPdf ? Icons.picture_as_pdf : Icons.image,
+                              color: isPdf ? Colors.red : (isDark ? AppColors.darkPrimary : AppColors.primary),
+                            ),
+                          ),
+                          title: Text(
+                            file.path.split('/').last,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                              color: theme.textTheme.bodyLarge?.color
+                            ),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                            onPressed: () {
+                              setState(() => _selectedFiles.removeAt(index));
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
 
           // Error Show
           if (uploadState is AsyncError)
             Container(
-              padding: const EdgeInsets.all(8),
-              margin: const EdgeInsets.only(bottom: 10),
-              color: Colors.red.shade50,
-              child: Text("Error: ${uploadState.error}", style: const TextStyle(color: Colors.red)),
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: AppColors.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "${uploadState.error}", 
+                      style: const TextStyle(color: AppColors.error)
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+          const SizedBox(height: 16),
 
           // Action Button
           ElevatedButton(
             onPressed: (_selectedFiles.isEmpty || isLoading) ? null : _handleUpload,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              foregroundColor: Colors.white,
+              backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+              foregroundColor: isDark ? Colors.black : Colors.white,
             ),
             child: isLoading
-                ? const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(color: Colors.white),
-                SizedBox(width: 10),
-                Text("Analyzing Files..."),
-              ],
-            )
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: isDark ? Colors.black : Colors.white, 
+                          strokeWidth: 2
+                        )
+                      ),
+                      const SizedBox(width: 12),
+                      const Text("Analyzing Files..."),
+                    ],
+                  )
                 : Text("UPLOAD & ANALYZE (${_selectedFiles.length})"),
           ),
         ],

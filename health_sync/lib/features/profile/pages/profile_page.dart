@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -45,7 +46,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Future<void> _handleLogout() async {
-    // শিউর হওয়ার জন্য ডায়ালগ দেখানো
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -60,7 +60,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (shouldLogout == true) {
       await ref.read(authStateProvider.notifier).logout();
-      if (mounted) context.go('/login'); // লগইন পেজে পাঠিয়ে দেওয়া
+      if (mounted) context.go('/login');
     }
   }
 
@@ -72,115 +72,237 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final phone = _profileData?['phone'] ?? 'No Phone';
     final role = _profileData?['role'] ?? 'CITIZEN';
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: const Text("My Profile")),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             // 1. Profile Header
-            Center(
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark ? theme.cardTheme.color : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
+                ]
+              ),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
-                    child: Text(
-                      name[0].toUpperCase(),
-                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: (isDark ? AppColors.darkPrimary : AppColors.primary).withOpacity(0.2), width: 2),
+                    ),
+                    child: CircleAvatar(
+                      radius: 48,
+                      backgroundColor: (isDark ? AppColors.darkPrimary : AppColors.primary).withOpacity(0.1),
+                      child: Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : "U",
+                        style: GoogleFonts.poppins(
+                          fontSize: 36, 
+                          fontWeight: FontWeight.bold, 
+                          color: isDark ? AppColors.darkPrimary : AppColors.primary
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  Text(email, style: TextStyle(color: Colors.grey.shade600)),
-                  const SizedBox(height: 8),
+                  Text(
+                    name, 
+                    style: GoogleFonts.poppins(
+                      fontSize: 24, 
+                      fontWeight: FontWeight.bold, 
+                      color: isDark ? Colors.white : AppColors.textPrimary
+                    )
+                  ),
+                  Text(
+                    email, 
+                    style: GoogleFonts.poppins(
+                      color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, 
+                      fontSize: 14
+                    )
+                  ),
+                  const SizedBox(height: 12),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: isDark ? Colors.blue.shade900.withOpacity(0.3) : Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.blue.shade100),
+                      border: Border.all(color: isDark ? Colors.blue.shade700 : Colors.blue.shade100),
                     ),
-                    child: Text(role, style: TextStyle(fontSize: 12, color: Colors.blue.shade800, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      role, 
+                      style: GoogleFonts.poppins(
+                        fontSize: 12, 
+                        color: isDark ? Colors.blue.shade200 : Colors.blue.shade800, 
+                        fontWeight: FontWeight.bold, 
+                        letterSpacing: 0.5
+                      )
+                    ),
                   )
                 ],
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
-            // 2. Info Cards
-            _buildInfoTile(Icons.phone, "Phone Number", phone),
-            _buildInfoTile(Icons.email, "Email Address", email),
+            // 2. Info Section
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 12),
+                child: Text(
+                  "Personal Information",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16, 
+                    fontWeight: FontWeight.bold, 
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
+                  ),
+                ),
+              ),
+            ),
+            _buildInfoTile(Icons.phone_outlined, "Phone Number", phone, isDark),
+            _buildInfoTile(Icons.email_outlined, "Email Address", email, isDark),
 
             const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 16),
 
-            // 3. Actions
-            ListTile(
-              leading: const Icon(Icons.history, color: Colors.purple),
-              title: const Text("My Blood Requests"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            // 3. Settings Section
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 12),
+                child: Text(
+                  "Settings & Activity",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16, 
+                    fontWeight: FontWeight.bold, 
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
+                  ),
+                ),
+              ),
+            ),
+            
+            _buildActionTile(
+              icon: Icons.history, 
+              color: Colors.purple, 
+              title: "My Blood Requests", 
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const MyBloodRequestsPage()));
               },
+              isDark: isDark
             ),
-            ListTile(
-              leading: const Icon(Icons.lock_outline, color: Colors.grey),
-              title: const Text("Change Password"),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            _buildActionTile(
+              icon: Icons.lock_outline, 
+              color: Colors.teal, 
+              title: "Change Password", 
               onTap: () {
-                // TODO: Change password logic
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Feature coming soon!")));
               },
+              isDark: isDark
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
 
             // 4. Logout Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _handleLogout,
-                icon: const Icon(Icons.logout),
-                label: const Text("LOGOUT"),
+                icon: const Icon(Icons.logout, size: 20),
+                label: Text(
+                  "LOGOUT", 
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, letterSpacing: 1)
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade50,
-                  foregroundColor: Colors.red,
+                  backgroundColor: isDark ? Colors.red.shade900.withOpacity(0.3) : Colors.red.shade50,
+                  foregroundColor: isDark ? Colors.red.shade200 : Colors.red,
                   elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: isDark ? Colors.red.shade800 : Colors.red.shade100),
+                  )
                 ),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoTile(IconData icon, String title, String value) {
+  Widget _buildInfoTile(IconData icon, String title, String value, bool isDark) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
+        ]
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey.shade600),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey.shade800 : AppColors.background,
+              shape: BoxShape.circle
+            ),
+            child: Icon(icon, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, size: 20),
+          ),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              Text(title, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.grey.shade500 : AppColors.textSecondary)),
+              Text(value, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionTile({required IconData icon, required Color color, required String title, required VoidCallback onTap, required bool isDark}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
+        ]
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(isDark ? 0.2 : 0.1),
+            shape: BoxShape.circle
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 15, color: isDark ? AppColors.darkTextPrimary : Colors.black87)),
+        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
+        onTap: onTap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

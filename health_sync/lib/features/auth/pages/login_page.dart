@@ -18,8 +18,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authStateProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -32,25 +35,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: isDark ? AppColors.darkPrimary.withOpacity(0.1) : AppColors.primary.withOpacity(0.1),
                 ),
-                child: const Icon(Icons.health_and_safety, size: 64, color: AppColors.primary),
+                child: Icon(
+                  Icons.health_and_safety, 
+                  size: 64, 
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary
+                ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 "Welcome Back!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28, 
                   fontWeight: FontWeight.bold, 
-                  color: AppColors.textPrimary
+                  color: theme.textTheme.displayMedium?.color ?? (isDark ? Colors.white : AppColors.textPrimary)
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 "Sign in to continue to HealthSync",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                style: TextStyle(
+                  fontSize: 16, 
+                  color: theme.textTheme.bodyMedium?.color ?? (isDark ? Colors.grey.shade400 : AppColors.textSecondary)
+                ),
               ),
               const SizedBox(height: 40),
 
@@ -86,11 +96,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               // Action Button
               ElevatedButton(
                 onPressed: isLoading ? null : _handleLogin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+                  foregroundColor: isDark ? Colors.black : Colors.white,
+                ),
                 child: isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20, 
                         width: 20, 
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        child: CircularProgressIndicator(
+                          color: isDark ? Colors.black : Colors.white, 
+                          strokeWidth: 2
+                        )
                       )
                     : const Text("LOGIN"),
               ),
@@ -101,10 +118,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account?", style: TextStyle(color: AppColors.textSecondary)),
+                  Text(
+                    "Don't have an account?", 
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color)
+                  ),
                   TextButton(
                     onPressed: () => context.go('/signup'),
-                    child: const Text("Sign Up", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(
+                      "Sign Up", 
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold, 
+                        color: isDark ? AppColors.darkPrimary : AppColors.primary
+                      )
+                    ),
                   ),
                 ],
               ),

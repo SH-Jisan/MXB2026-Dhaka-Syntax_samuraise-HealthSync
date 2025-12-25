@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/models/medical_event_model.dart';
@@ -10,118 +11,303 @@ class MedicalEventDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Report Details"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              // TODO: Implement share logic
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Share feature coming soon!")),
+              );
+            },
+            icon: Icon(Icons.share_outlined, color: isDark ? Colors.white : Colors.black87),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Report Image Preview (Zoomable)
-            if (event.attachmentUrls.isNotEmpty)
-              GestureDetector(
-                onTap: () {
-                  // TODO: Full screen image view logic can be added here
-                },
-                child: Container(
-                  height: 250,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(16),
-                    image: DecorationImage(
-                      image: NetworkImage(event.attachmentUrls.first),
-                      fit: BoxFit.cover,
+            // 1. Image / File Preview
+            _buildAttachmentPreview(context, isDark),
+
+            const SizedBox(height: 24),
+
+            // 2. Title & Header Info
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDark ? theme.cardTheme.color : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: isDark ? Border.all(color: Colors.grey.shade800) : null,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSeverityBadge(event.severity, isDark),
+                      Text(
+                        DateFormat('dd MMM yyyy').format(event.eventDate),
+                        style: GoogleFonts.poppins(
+                          color: isDark ? Colors.grey.shade400 : AppColors.textSecondary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    event.title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
-                ),
-              ),
-
-            const SizedBox(height: 20),
-
-            // 2. Title & Meta Info
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    event.title,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.category_outlined, size: 16, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Type: ${event.eventType.toUpperCase()}",
+                        style: GoogleFonts.poppins(
+                          color: isDark ? Colors.grey.shade400 : AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                _buildSeverityBadge(event.severity),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Date: ${DateFormat('dd MMM yyyy').format(event.eventDate)}",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                ],
+              ),
             ),
 
-            const Divider(height: 30),
+            const SizedBox(height: 24),
 
-            // 3. AI Summary Section 🧠
+            // 3. AI Summary Section
             if (event.summary != null) ...[
-              const Text(
-                "AI Summary",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 12),
+                child: Row(
+                  children: [
+                    Icon(Icons.auto_awesome, color: isDark ? Colors.purple.shade300 : Colors.purple, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      "AI Analysis Summary",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.teal.shade100),
+                  gradient: LinearGradient(
+                    colors: isDark 
+                        ? [Colors.purple.shade900.withOpacity(0.4), AppColors.darkSurface]
+                        : [Colors.purple.shade50, Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? Colors.purple.shade700.withOpacity(0.5) : Colors.purple.shade100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.purple.withOpacity(isDark ? 0.1 : 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  event.summary!,
-                  style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.black87),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.summary!,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        height: 1.6,
+                        color: isDark ? Colors.grey.shade300 : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          "Generated by HealthSync AI",
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: isDark ? Colors.purple.shade200 : Colors.purple.shade300,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
             ],
-
-            // 4. Key Findings (যদি থাকে) - এটা আমাদের মডেলে অ্যাড করতে হবে যদি না থাকে
-            // আপাতত আমরা 'summary' এর উপরই ফোকাস করছি।
-            // যদি আপনার মডেলে 'keyFindings' থাকে, তবে এভাবে দেখাবেন:
-            /*
-            if (event.keyFindings != null && event.keyFindings!.isNotEmpty) ...[
-              const Text("Key Findings", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ...event.keyFindings!.map((finding) => ListTile(
-                leading: const Icon(Icons.check_circle, color: AppColors.primary, size: 20),
-                title: Text(finding),
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-              )),
-            ],
-            */
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSeverityBadge(String severity) {
+  Widget _buildAttachmentPreview(BuildContext context, bool isDark) {
+    if (event.attachmentUrls.isEmpty) {
+      return Container(
+        height: 150,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, style: BorderStyle.solid),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.image_not_supported_outlined, size: 48, color: isDark ? Colors.grey.shade500 : Colors.grey.shade400),
+            const SizedBox(height: 8),
+            Text("No attachment available", style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
+          ],
+        ),
+      );
+    }
+
+    // Showing first attachment
+    return GestureDetector(
+      onTap: () {
+        _showFullScreenImage(context, event.attachmentUrls.first);
+      },
+      child: Hero(
+        tag: 'report_image_${event.id}',
+        child: Container(
+          height: 280,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.1), blurRadius: 15, offset: const Offset(0, 5)),
+            ],
+            image: DecorationImage(
+              image: NetworkImage(event.attachmentUrls.first),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black.withOpacity(0.5)],
+                stops: const [0.7, 1.0],
+              ),
+            ),
+            padding: const EdgeInsets.all(16),
+            alignment: Alignment.bottomRight,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+              child: const Icon(Icons.fullscreen, color: Colors.white, size: 24),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              child: Hero(
+                tag: 'report_image_${event.id}',
+                child: Image.network(imageUrl),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeverityBadge(String severity, bool isDark) {
     Color color;
+    Color bg;
+
     switch (severity) {
-      case 'HIGH': color = Colors.red; break;
-      case 'MEDIUM': color = Colors.orange; break;
-      default: color = Colors.green;
+      case 'HIGH':
+        color = isDark ? Colors.red.shade300 : Colors.red.shade700;
+        bg = isDark ? Colors.red.shade900.withOpacity(0.3) : Colors.red.shade50;
+        break;
+      case 'MEDIUM':
+        color = isDark ? Colors.orange.shade300 : Colors.orange.shade800;
+        bg = isDark ? Colors.orange.shade900.withOpacity(0.3) : Colors.orange.shade50;
+        break;
+      default:
+        color = isDark ? Colors.green.shade300 : Colors.green.shade700;
+        bg = isDark ? Colors.green.shade900.withOpacity(0.3) : Colors.green.shade50;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        color: bg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: bg.withOpacity(isDark ? 0.8 : 0.5)),
       ),
-      child: Text(
-        severity,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.circle, size: 8, color: color),
+          const SizedBox(width: 6),
+          Text(
+            severity,
+            style: GoogleFonts.poppins(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

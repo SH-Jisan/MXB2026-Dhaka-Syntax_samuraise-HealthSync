@@ -12,87 +12,108 @@ class BloodHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Blood Bank"),
-        // অপশনাল: আইকনটি রাখতেও পারেন শর্টকাট হিসেবে, না রাখলে মুছে দিন
         actions: [
           IconButton(
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const MyBloodRequestsPage()));
             },
-            icon: const Icon(Icons.history, color: AppColors.primary),
+            icon: Icon(Icons.history, color: isDark ? AppColors.darkPrimary : AppColors.primary),
             tooltip: "My Requests",
           )
         ],
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 🚑 Option 1: Request Blood
-              _buildOptionCard(
-                context,
-                title: "Request for Blood",
-                subtitle: "Find donors nearby instantly",
-                icon: Icons.bloodtype,
-                color: Colors.red,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BloodRequestPage())),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Column(
+          children: [
+            // Header Text
+            Text(
+              "Save a Life Today",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 24, 
+                fontWeight: FontWeight.bold, 
+                color: theme.textTheme.displayMedium?.color ?? (isDark ? Colors.white : AppColors.textPrimary)
               ),
-
-              const SizedBox(height: 16),
-
-              // 🤝 Option 2: Become a Donor
-              _buildOptionCard(
-                context,
-                title: "Become a Donor",
-                subtitle: "Register to save lives",
-                icon: Icons.volunteer_activism,
-                color: Colors.teal,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DonorRegistrationPage())),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Choose an option below to proceed",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 14, 
+                color: theme.textTheme.bodyMedium?.color ?? (isDark ? Colors.grey.shade400 : AppColors.textSecondary)
               ),
+            ),
+            const SizedBox(height: 32),
 
-              const SizedBox(height: 16),
+            // 🚑 Option 1: Request Blood
+            _buildOptionCard(
+              context,
+              title: "Request for Blood",
+              subtitle: "Find donors nearby instantly",
+              icon: Icons.bloodtype_outlined,
+              color: Colors.red.shade600,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BloodRequestPage())),
+            ),
 
-              // 🔍 Option 3: Find Donors
-              _buildOptionCard(
-                context,
-                title: "Find Blood Donors",
-                subtitle: "Search by group & location",
-                icon: Icons.search,
-                color: Colors.blue,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DonorSearchPage())),
-              ),
+            const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
+            // 🤝 Option 2: Become a Donor
+            _buildOptionCard(
+              context,
+              title: "Become a Donor",
+              subtitle: "Register to save lives",
+              icon: Icons.volunteer_activism_outlined,
+              color: Colors.teal.shade600,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DonorRegistrationPage())),
+            ),
 
-              // 🆘 Option 4: Live Requests
-              _buildOptionCard(
-                context,
-                title: "Live Requests (Feed)",
-                subtitle: "See who needs help right now",
-                icon: Icons.emergency,
-                color: Colors.orange,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BloodRequestsFeedPage())),
-              ),
+            const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
+            // 🔍 Option 3: Find Donors
+            _buildOptionCard(
+              context,
+              title: "Find Blood Donors",
+              subtitle: "Search by group & location",
+              icon: Icons.search,
+              color: Colors.blue.shade600,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DonorSearchPage())),
+            ),
 
-              // 🔥 Option 5: My Requests (NEW) - এখন ইউজাররা সহজেই খুঁজে পাবে
-              _buildOptionCard(
-                context,
-                title: "My Requests & History",
-                subtitle: "Check donors for your requests",
-                icon: Icons.history_edu,
-                color: Colors.purple,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyBloodRequestsPage())),
-              ),
+            const SizedBox(height: 16),
 
-              const SizedBox(height: 20),
-            ],
-          ),
+            // 🆘 Option 4: Live Requests
+            _buildOptionCard(
+              context,
+              title: "Live Requests (Feed)",
+              subtitle: "See who needs help right now",
+              icon: Icons.emergency_outlined,
+              color: Colors.orange.shade700,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BloodRequestsFeedPage())),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 🔥 Option 5: My Requests
+            _buildOptionCard(
+              context,
+              title: "My Requests & History",
+              subtitle: "Track your requests",
+              icon: Icons.history_edu,
+              color: Colors.purple.shade600,
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyBloodRequestsPage())),
+            ),
+
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );
@@ -105,50 +126,72 @@ class BloodHomePage extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? theme.cardTheme.color : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          )
+        ],
+        border: isDark ? Border.all(color: Colors.grey.shade800) : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.3), width: 2),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 36, color: color),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(isDark ? 0.2 : 0.1),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                  child: Icon(icon, size: 28, color: color),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, 
+                          fontSize: 13
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded, 
+                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade400, 
+                  size: 16
+                ),
+              ],
             ),
-            Icon(Icons.arrow_forward_ios, color: color, size: 18),
-          ],
+          ),
         ),
       ),
     );
