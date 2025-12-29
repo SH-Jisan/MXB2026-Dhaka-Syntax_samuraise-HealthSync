@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { GoogleAuth } from "google-auth-library"
+import { GoogleAuth } from "npm:google-auth-library@9.0.0"
+// নোট: Deno তে google-auth-library ব্যবহারের জন্য 'npm:' প্রিফিক্স ব্যবহার করা ভালো
 
 console.log("🚀 Function started (HTTP v1 Mode)")
 
@@ -23,7 +24,7 @@ serve(async (req) => {
     // Private Key ফরম্যাট ফিক্স করা
     const privateKey = serviceAccount.private_key.replace(/\\n/g, '\n')
 
-    // ২. Google Auth ক্লায়েন্ট তৈরি (Access Token পাওয়ার জন্য)
+    // ২. Google Auth ক্লায়েন্ট তৈরি (Access Token পাওয়ার জন্য)
     const auth = new GoogleAuth({
       credentials: {
         client_email: serviceAccount.client_email,
@@ -40,7 +41,7 @@ serve(async (req) => {
         throw new Error("Failed to generate Access Token")
     }
 
-    // ৩. রিকোয়েস্ট ডাটা রিসিভ করা
+    // ৩. রিকোয়েস্ট ডাটা রিসিভ করা
     const { blood_group, hospital, urgency } = await req.json()
 
     // ৪. Supabase থেকে ডোনার খোঁজা
@@ -50,14 +51,19 @@ serve(async (req) => {
 
     console.log(`🔍 Finding donors for ${blood_group}...`)
 
+    // 🔥 UPDATE: এখানে লজিক চেঞ্জ হয়েছে
+    // blood_group এখন profiles টেবিলে আছে, তাই profiles!inner ব্যবহার করে ফিল্টার করছি
     const { data: donors, error } = await supabase
       .from('blood_donors')
       .select(`
         user_id,
-        profiles!inner ( fcm_token )
+        profiles!inner (
+          fcm_token,
+          blood_group
+        )
       `)
-      .eq('blood_group', blood_group)
-      .eq('availability', true)
+      .eq('availability', true) // ডোনার অ্যাভেইলেবল কিনা
+      .eq('profiles.blood_group', blood_group) // 🔥 প্রোফাইল টেবিলে ব্লাড গ্রুপ চেক
 
     if (error) throw error
 
@@ -69,6 +75,7 @@ serve(async (req) => {
     const uniqueTokens = [...new Set(tokens)] as string[]
 
     if (uniqueTokens.length === 0) {
+      console.log("⚠️ No compatible donors found.")
       return new Response(JSON.stringify({ message: 'No donors found' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -77,7 +84,6 @@ serve(async (req) => {
     console.log(`📢 Sending to ${uniqueTokens.length} devices via HTTP v1...`)
 
     // ৫. নোটিফিকেশন পাঠানো (Parallel Requests)
-    // Firebase HTTP v1 API ব্যাচ সাপোর্ট করে না, তাই আমরা প্যারালাল রিকোয়েস্ট পাঠাব
     const sendPromises = uniqueTokens.map(async (token) => {
       const url = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`
 
@@ -107,7 +113,7 @@ serve(async (req) => {
       return res.ok
     })
 
-    // সব রিকোয়েস্ট একসাথে পাঠানো
+    // সব রিকোয়েস্ট একসাথে পাঠানো
     const results = await Promise.all(sendPromises)
     const successCount = results.filter(r => r === true).length
     const failureCount = results.length - successCount

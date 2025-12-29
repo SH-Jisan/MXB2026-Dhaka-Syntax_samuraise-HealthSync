@@ -7,7 +7,8 @@ import '../widgets/medical_timeline_tile.dart';
 import '../../../core/constants/app_colors.dart';
 
 class MedicalTimelineView extends ConsumerWidget {
-  const MedicalTimelineView({super.key});
+  final String? patientId;
+  const MedicalTimelineView({super.key, this.patientId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

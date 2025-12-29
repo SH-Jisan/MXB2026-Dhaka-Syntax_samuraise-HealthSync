@@ -7,7 +7,6 @@ import 'package:mime/mime.dart';
 import 'package:crypto/crypto.dart';
 import '../../timeline/providers/timeline_provider.dart';
 
-// 🔥 নতুন Enum স্ট্যাটাস বোঝার জন্য
 enum UploadStatus { success, duplicate, failure }
 
 final uploadProvider = StateNotifierProvider<UploadController, AsyncValue<void>>((ref) {
@@ -18,23 +17,28 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
   UploadController(this._ref) : super(const AsyncData(null));
 
-  // Return type void থেকে UploadStatus এ চেঞ্জ করলাম
-  Future<UploadStatus> uploadAndAnalyze(File file) async {
+  // 🔥 UPDATE: patientId অপশনাল প্যারামিটার হিসেবে নেওয়া হচ্ছে
+  Future<UploadStatus> uploadAndAnalyze(File file, {String? patientId}) async {
     state = const AsyncLoading();
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception("User not logged in");
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      if (currentUser == null) throw Exception("User not logged in");
 
-      // ১. ফাইল প্রসেসিং
+      // ১. যদি patientId বাইরে থেকে আসে (Hospital আপলোড করছে), সেটা ব্যবহার হবে
+      // আর না আসলে নিজের আইডি (User নিজে আপলোড করছে)
+      final targetUserId = patientId ?? currentUser.id;
+
+      // ২. ফাইল প্রসেসিং
       final fileBytes = await file.readAsBytes();
       final fileBase64 = base64Encode(fileBytes);
       final fileHash = sha256.convert(fileBytes).toString();
 
       final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
       final fileExt = mimeType.split('/').last;
-      final fileName = '${user.id}/${const Uuid().v4()}.$fileExt';
+      // ফাইলনেমে targetUserId ব্যবহার করছি যাতে ফোল্ডার স্ট্রাকচার ঠিক থাকে
+      final fileName = '$targetUserId/${const Uuid().v4()}.$fileExt';
 
-      // ২. আপলোড
+      // ৩. আপলোড (Storage Bucket)
       await Supabase.instance.client.storage.from('reports').upload(
         fileName,
         file,
@@ -42,13 +46,13 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
       );
       final fileUrl = Supabase.instance.client.storage.from('reports').getPublicUrl(fileName);
 
-      // ৩. ফাংশন কল (Try-Catch দিয়ে হ্যান্ডেল করা)
+      // ৪. ফাংশন কল (Edge Function)
       try {
         await Supabase.instance.client.functions.invoke(
           'process-medical-report',
           body: {
-            'patient_id': user.id,
-            'uploader_id': user.id,
+            'patient_id': targetUserId, // যার প্রোফাইলে রিপোর্ট যাবে
+            'uploader_id': currentUser.id, // যে আপলোড করছে (Hospital/User)
             'imageBase64': fileBase64,
             'mimeType': mimeType,
             'file_url': fileUrl,
@@ -57,19 +61,21 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
           },
         );
 
-        // সব ঠিক থাকলে Success
-        _ref.refresh(timelineProvider);
+        // সব ঠিক থাকলে রিফ্রেশ
+        // যদি নিজের প্রোফাইলে আপলোড হয়, তবেই টাইমলাইন রিফ্রেশ করব
+        if (targetUserId == currentUser.id) {
+          _ref.refresh(timelineProvider);
+        }
+
         state = const AsyncData(null);
         return UploadStatus.success;
 
       } on FunctionException catch (e) {
-        // 🔥 এইখানের লজিকটিই আসল ফিক্স
         if (e.status == 409) {
-          // যদি 409 হয়, তার মানে ডুপ্লিকেট। আমরা এটাকে এরর বলব না।
-          state = const AsyncData(null); // স্টেট নরমাল করে দিলাম (লাল বক্স দেখাবে না)
+          state = const AsyncData(null);
           return UploadStatus.duplicate;
         }
-        rethrow; // অন্য কোনো এরর হলে সেটা আসল এরর
+        rethrow;
       }
 
     } catch (e, stack) {

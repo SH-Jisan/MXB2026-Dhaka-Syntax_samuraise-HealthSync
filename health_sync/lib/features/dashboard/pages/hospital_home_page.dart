@@ -1,61 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/widgets/side_drawer.dart'; // 🔥 Import Drawer
+import '../widgets/hospital_overview_tab.dart';
+import '../widgets/hospital_doctors_tab.dart';
 
-class HospitalHomePage extends StatelessWidget {
+class HospitalHomePage extends StatefulWidget {
   const HospitalHomePage({super.key});
+
+  @override
+  State<HospitalHomePage> createState() => _HospitalHomePageState();
+}
+
+class _HospitalHomePageState extends State<HospitalHomePage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      // 🔥 Sidebar যুক্ত করা হলো এখানে
+      drawer: const SideDrawer(),
       appBar: AppBar(
         title: const Text("Hospital Dashboard"),
-        centerTitle: false,
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: AppColors.primary,
+          tabs: const [
+            Tab(text: "Overview", icon: Icon(Icons.dashboard)),
+            Tab(text: "Doctors", icon: Icon(Icons.medical_services)),
+          ],
+        ),
         actions: [
+          // লগআউট বাটনটি এখানেও রাখতে পারেন অথবা সাইডবারে নিয়ে যেতে পারেন
           IconButton(
-            icon: const Icon(Icons.logout, color: AppColors.error),
-            onPressed: () => Supabase.instance.client.auth.signOut(),
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
           )
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-             Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  )
-                ]
-              ),
-              child: Icon(Icons.local_hospital_outlined, size: 64, color: AppColors.primary.withOpacity(0.8)),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              "Hospital Administration",
-              style: GoogleFonts.poppins(
-                fontSize: 24, 
-                fontWeight: FontWeight.bold, 
-                color: AppColors.textPrimary
-              ),
-            ),
-             const SizedBox(height: 8),
-            Text(
-              "Upload reports & manage doctors.",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 14, color: AppColors.textSecondary),
-            ),
-          ],
-        ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          HospitalOverviewTab(),
+          HospitalDoctorsTab(),
+        ],
       ),
     );
   }
