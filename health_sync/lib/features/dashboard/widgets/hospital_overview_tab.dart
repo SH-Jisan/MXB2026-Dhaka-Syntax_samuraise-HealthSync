@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../upload/widgets/upload_buttom_sheet.dart';
 import '../../timeline/pages/medical_timeline_view.dart';
@@ -16,13 +17,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
   final _patientEmailController = TextEditingController();
   final _doctorEmailController = TextEditingController();
   bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _patientEmailController.dispose();
-    _doctorEmailController.dispose();
-    super.dispose();
-  }
 
   // 🏥 1. পেশেন্ট সার্চ এবং অ্যাকশন
   Future<void> _searchPatient() async {
@@ -41,8 +35,8 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
       if (!mounted) return;
 
       if (data != null) {
-        Navigator.pop(context); // ডায়ালগ বন্ধ
-        _showPatientOptions(data); // অপশন দেখানো
+        Navigator.pop(context); // আগের ডায়ালগ বন্ধ
+        _showPatientOptions(data); // অপশন মেনু ওপেন
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Patient not found! Please check email.")),
@@ -55,7 +49,123 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     }
   }
 
-  // 🩺 2. ডাক্তার অ্যাসাইন করা
+  // 📅 2. অ্যাপয়েন্টমেন্ট বুকিং ফাংশন (NEW FEATURE)
+  Future<void> _bookAppointment(Map<String, dynamic> patient) async {
+    final hospitalId = Supabase.instance.client.auth.currentUser!.id;
+
+    // হসপিটালের ডাক্তারদের লিস্ট আনা
+    final doctorsResponse = await Supabase.instance.client
+        .from('hospital_doctors')
+        .select('doctor_id, profiles:doctor_id(full_name, specialty)')
+        .eq('hospital_id', hospitalId);
+
+    final doctors = List<Map<String, dynamic>>.from(doctorsResponse);
+
+    if (doctors.isEmpty) {
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("No doctors available in your hospital. Please assign doctors first.")));
+      return;
+    }
+
+    String? selectedDoctorId;
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Book Appointment"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Patient: ${patient['full_name']}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+
+                  // Doctor Dropdown
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: "Select Doctor", border: OutlineInputBorder()),
+                    items: doctors.map((doc) {
+                      final profile = doc['profiles'];
+                      return DropdownMenuItem(
+                        value: doc['doctor_id'] as String,
+                        child: Text("${profile['full_name']} (${profile['specialty'] ?? 'GP'})"),
+                      );
+                    }).toList(),
+                    onChanged: (val) => setStateDialog(() => selectedDoctorId = val),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Date Picker
+                  ListTile(
+                    title: Text(selectedDate == null ? "Select Date" : DateFormat.yMMMd().format(selectedDate!)),
+                    leading: const Icon(Icons.calendar_today),
+                    tileColor: Colors.grey.shade100,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    onTap: () async {
+                      final date = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 30)));
+                      if (date != null) setStateDialog(() => selectedDate = date);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Time Picker
+                  ListTile(
+                    title: Text(selectedTime == null ? "Select Time" : selectedTime!.format(context)),
+                    leading: const Icon(Icons.access_time),
+                    tileColor: Colors.grey.shade100,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    onTap: () async {
+                      final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                      if (time != null) setStateDialog(() => selectedTime = time);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (selectedDoctorId == null || selectedDate == null || selectedTime == null) {
+                      return;
+                    }
+
+                    // ফাইনাল ডেটটাইম তৈরি করা
+                    final finalDateTime = DateTime(
+                        selectedDate!.year, selectedDate!.month, selectedDate!.day,
+                        selectedTime!.hour, selectedTime!.minute
+                    );
+
+                    try {
+                      await Supabase.instance.client.from('appointments').insert({
+                        'patient_id': patient['id'],
+                        'doctor_id': selectedDoctorId,
+                        'hospital_id': hospitalId,
+                        'appointment_date': finalDateTime.toIso8601String(),
+                        'status': 'CONFIRMED'
+                      });
+
+                      if (mounted) {
+                        Navigator.pop(ctx);
+                        Navigator.pop(context); // মেইন শিট বন্ধ
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Appointment Booked Successfully!"), backgroundColor: Colors.green));
+                      }
+                    } catch (e) {
+                      debugPrint("Error: $e");
+                    }
+                  },
+                  child: const Text("Confirm Booking"),
+                )
+              ],
+            );
+          }
+      ),
+    );
+  }
+
+  // 🩺 3. ডাক্তার অ্যাসাইন করা (আগের মতোই)
   Future<void> _assignDoctor() async {
     if (_doctorEmailController.text.isEmpty) return;
 
@@ -88,11 +198,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
         );
       }
     } catch (e) {
-      if (e.toString().contains("duplicate") || e.toString().contains("23505")) {
-        if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Doctor is already assigned!")));
-      } else {
-        if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
+      if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -109,6 +215,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Patient Info Header
             Row(
               children: [
                 CircleAvatar(
@@ -129,6 +236,14 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
             const SizedBox(height: 24),
             const Divider(),
 
+            // 🔥 Book Appointment Option
+            ListTile(
+              leading: const Icon(Icons.calendar_month, color: Colors.teal),
+              title: const Text("Book Appointment"),
+              subtitle: const Text("Assign a doctor & schedule visit"),
+              onTap: () => _bookAppointment(patient),
+            ),
+
             ListTile(
               leading: const Icon(Icons.upload_file, color: Colors.blue),
               title: const Text("Upload Report"),
@@ -146,6 +261,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                 );
               },
             ),
+
             ListTile(
               leading: const Icon(Icons.history, color: Colors.purple),
               title: const Text("View Medical History"),
@@ -156,7 +272,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                     context,
                     MaterialPageRoute(builder: (_) => Scaffold(
                       appBar: AppBar(title: Text("${patient['full_name']}'s History")),
-                      body: MedicalTimelineView(patientId: patient['id']),
+                      body: MedicalTimelineView(patientId: patient['id'], isEmbedded: false),
                     ))
                 );
               },
@@ -192,6 +308,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     );
   }
 
+  // Cards (Same as before)
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -255,20 +372,23 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Stats Row
           Row(
             children: [
               Expanded(child: _buildStatCard("Total Doctors", "View List", Icons.people, Colors.blue)),
               const SizedBox(width: 16),
-              Expanded(child: _buildStatCard("Uploads Today", "12", Icons.upload_file, Colors.orange)),
+              Expanded(child: _buildStatCard("Total Appointments", "Checking...", Icons.calendar_today, Colors.orange)),
             ],
           ),
           const SizedBox(height: 32),
           Text("Quick Actions", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
+
+          // Manage Patient (Book Appointment Inside)
           _buildActionCard(
-            title: "Manage Patient",
-            subtitle: "Search, View Details & Upload Reports",
-            icon: Icons.person_search,
+            title: "Manage Patient / Appointment",
+            subtitle: "Search patient, Book Appointment, Upload Reports",
+            icon: Icons.calendar_month_outlined,
             color: Colors.teal,
             onTap: () {
               _patientEmailController.clear();
@@ -276,6 +396,8 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
             },
           ),
           const SizedBox(height: 16),
+
+          // Add Doctor
           _buildActionCard(
             title: "Assign New Doctor",
             subtitle: "Add a doctor to this hospital",

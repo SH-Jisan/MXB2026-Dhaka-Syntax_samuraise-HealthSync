@@ -17,7 +17,8 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    // 🔥 ট্যাব সংখ্যা বাড়িয়ে ৪ করা হলো (Appointments সহ)
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -31,8 +32,10 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
           labelColor: AppColors.primary,
           unselectedLabelColor: Colors.grey,
           indicatorColor: AppColors.primary,
+          isScrollable: true, // বেশি ট্যাব হওয়ায় স্ক্রলেবল করা হলো
           tabs: const [
-            Tab(text: "Doctors", icon: Icon(Icons.person_outline)),
+            Tab(text: "Appointments", icon: Icon(Icons.calendar_month)), // 🔥 New Tab
+            Tab(text: "Prescriptions", icon: Icon(Icons.description_outlined)),
             Tab(text: "Diagnostic", icon: Icon(Icons.analytics_outlined)),
             Tab(text: "Hospitals", icon: Icon(Icons.local_hospital_outlined)),
           ],
@@ -41,7 +44,8 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildDoctorsTab(),
+          _buildAppointmentsTab(), // 🔥 New Content
+          _buildPrescriptionsTab(),
           _buildDiagnosticsTab(),
           _buildHospitalsTab(),
         ],
@@ -49,41 +53,142 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
     );
   }
 
-  // 👨‍⚕️ Tab 1: Doctors History (Appointments & Visits)
-  // বর্তমানে আমাদের appointment টেবিল নেই, তাই আমরা medical_events চেক করব
-  // যেখানে event_type = 'PRESCRIPTION' (মানে ডাক্তার দেখেছেন)
-  Widget _buildDoctorsTab() {
+  // 📅 TAB 1: Appointments (Future & Past)
+  Widget _buildAppointmentsTab() {
+    return FutureBuilder(
+      future: Supabase.instance.client
+          .from('appointments')
+          .select('''
+            *,
+            doctor:doctor_id(full_name, specialty),
+            hospital:hospital_id(full_name, address)
+          ''')
+          .eq('patient_id', userId)
+          .order('appointment_date', ascending: false),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData || (snapshot.data as List).isEmpty) {
+          return _emptyState("No appointments found.");
+        }
+
+        final appointments = snapshot.data as List;
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: appointments.length,
+          itemBuilder: (context, index) {
+            final apt = appointments[index];
+            final doctor = apt['doctor'] ?? {'full_name': 'Unknown Doctor'};
+            final hospital = apt['hospital'] ?? {'full_name': 'Unknown Hospital'};
+            final date = DateTime.parse(apt['appointment_date']);
+            final formattedDate = DateFormat('EEE, dd MMM yyyy').format(date);
+            final formattedTime = DateFormat('hh:mm a').format(date);
+            final status = apt['status'] ?? 'PENDING';
+
+            Color statusColor = status == 'CONFIRMED' ? Colors.green : Colors.orange;
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(DateFormat('MMM').format(date).toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              Text(DateFormat('dd').format(date), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(doctor['full_name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              Text(doctor['specialty'] ?? 'Specialist', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                  const SizedBox(width: 4),
+                                  Text(formattedTime, style: const TextStyle(fontSize: 13)),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(hospital['full_name'], style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: statusColor),
+                          ),
+                          child: Text(status, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 📝 TAB 2: Doctor Visits / Prescriptions (আগের Doctors Tab টি রিনেম করা হয়েছে)
+  Widget _buildPrescriptionsTab() {
     return FutureBuilder(
       future: Supabase.instance.client
           .from('medical_events')
-          .select('*, uploader:uploader_id(full_name, specialty, phone)') // ডাক্তারের ডিটেইলস জয়েন
+          .select('*, uploader:uploader_id(full_name, specialty)')
           .eq('patient_id', userId)
-          .eq('event_type', 'PRESCRIPTION') // শুধু প্রেসক্রিপশন মানেই ডাক্তার ভিজিট
+          .eq('event_type', 'PRESCRIPTION')
           .order('event_date', ascending: false),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
         final list = snapshot.data as List;
-
-        if (list.isEmpty) return _emptyState("No doctor visits found.");
+        if (list.isEmpty) return _emptyState("No prescriptions found.");
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: list.length,
           itemBuilder: (context, index) {
             final event = list[index];
-            final doctor = event['uploader'] ?? {'full_name': 'Unknown Doctor'};
+            final doctor = event['uploader'] ?? {'full_name': 'Doctor'};
             final date = DateFormat.yMMMd().format(DateTime.parse(event['event_date']));
 
             return Card(
               child: ListTile(
-                leading: const CircleAvatar(backgroundColor: Colors.blue, child: Icon(Icons.medical_services, color: Colors.white)),
+                leading: const CircleAvatar(backgroundColor: Colors.purple, child: Icon(Icons.description, color: Colors.white)),
                 title: Text(doctor['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("Visited on: $date\nDiagnosis: ${event['title']}"),
+                subtitle: Text("Date: $date\nRx: ${event['title']}"),
                 isThreeLine: true,
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  // প্রেসক্রিপশন ডিটেইলস পেজে যাওয়ার কোড এখানে হবে
-                },
               ),
             );
           },
@@ -92,54 +197,30 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
     );
   }
 
-  // 🧪 Tab 2: Diagnostic & Tests (Pending & Completed)
-  // আমরা patient_payments টেবিল থেকে ডাটা আনব যা আমরা ডায়াগনস্টিক ফিচারে বানিয়েছি
+  // 🧪 TAB 3: Diagnostic (Same as before)
   Widget _buildDiagnosticsTab() {
     return FutureBuilder(
       future: Supabase.instance.client
           .from('patient_payments')
-          .select('*, provider:provider_id(full_name, address)') // ডায়াগনস্টিক সেন্টারের নাম
+          .select('*, provider:provider_id(full_name)')
           .eq('patient_id', userId)
           .order('created_at', ascending: false),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
         final list = snapshot.data as List;
-
-        if (list.isEmpty) return _emptyState("No diagnostic history.");
+        if (list.isEmpty) return _emptyState("No diagnostic records.");
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: list.length,
           itemBuilder: (context, index) {
             final item = list[index];
-            final center = item['provider'] ?? {'full_name': 'Diagnostic Center'};
-            final isPending = item['report_status'] == 'PENDING';
-            final tests = List.from(item['test_names'] ?? []).join(", ");
-            final date = DateFormat.yMMMd().format(DateTime.parse(item['created_at']));
-
+            final center = item['provider'] ?? {'full_name': 'Lab'};
             return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: isPending ? Colors.orange.shade200 : Colors.transparent),
-              ),
               child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: isPending ? Colors.orange.shade100 : Colors.green.shade100,
-                  child: Icon(isPending ? Icons.hourglass_top : Icons.check, color: isPending ? Colors.orange : Colors.green),
-                ),
-                title: Text(center['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(tests, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-                trailing: Chip(
-                  label: Text(item['report_status']),
-                  backgroundColor: isPending ? Colors.orange.shade50 : Colors.green.shade50,
-                  labelStyle: TextStyle(color: isPending ? Colors.orange : Colors.green, fontSize: 10),
-                ),
+                leading: const CircleAvatar(backgroundColor: Colors.teal, child: Icon(Icons.science, color: Colors.white)),
+                title: Text(center['full_name']),
+                subtitle: Text("Status: ${item['report_status']}"),
               ),
             );
           },
@@ -148,49 +229,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
     );
   }
 
-  // 🏥 Tab 3: Hospitals (Admissions or Visits)
-  // আপাতত আমরা hospital_patients টেবিল চেক করব (যদি অ্যাসাইন করা থাকে) অথবা medical_events
+  // 🏥 TAB 4: Hospitals (Same as before)
   Widget _buildHospitalsTab() {
-    // এখানে লজিক হতে পারে: যেসব medical_events এর uploader এর রোল 'HOSPITAL'
-    // অথবা diagnostic_patients এর মতো hospital_patients টেবিল থাকলে সেটি।
-    // আমরা আপাতত medical_events দিয়ে করছি।
-
-    return FutureBuilder(
-      future: Supabase.instance.client
-          .from('medical_events')
-          .select('*, uploader:uploader_id(full_name, role)')
-          .eq('patient_id', userId)
-      //.eq('uploader.role', 'HOSPITAL') // এটি জয়েন ফিল্টারিং, সুপাবেসে একটু ভিন্নভাবে লিখতে হয়
-          .order('event_date', ascending: false),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-
-        // ক্লায়েন্ট সাইড ফিল্টারিং (সহজ উপায়ের জন্য)
-        final allEvents = snapshot.data as List;
-        final hospitalEvents = allEvents.where((e) => e['uploader'] != null && e['uploader']['role'] == 'HOSPITAL').toList();
-
-        if (hospitalEvents.isEmpty) return _emptyState("No hospital records found.");
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: hospitalEvents.length,
-          itemBuilder: (context, index) {
-            final event = hospitalEvents[index];
-            final hospital = event['uploader'];
-            final date = DateFormat.yMMMd().format(DateTime.parse(event['event_date']));
-
-            return Card(
-              child: ListTile(
-                leading: const CircleAvatar(backgroundColor: Colors.redAccent, child: Icon(Icons.local_hospital, color: Colors.white)),
-                title: Text(hospital['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("Date: $date\nEvent: ${event['title']}"),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              ),
-            );
-          },
-        );
-      },
-    );
+    return _emptyState("Hospital admission history will appear here.");
   }
 
   Widget _emptyState(String text) {
@@ -198,7 +239,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 60, color: Colors.grey.shade300),
+          Icon(Icons.history_toggle_off, size: 60, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(text, style: const TextStyle(color: Colors.grey)),
         ],

@@ -8,7 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../shared/providers/user_profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../blood/pages/my_blood_requests_page.dart';
-import 'patient_history_page.dart'; // 🔥 নতুন ইমপোর্ট (Care History পেজ)
+import 'patient_history_page.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -20,6 +20,7 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isLoading = true;
   Map<String, dynamic>? _profileData;
+  List<Map<String, dynamic>> _assignedHospitals = []; // 🔥 ডাক্তারের জন্য হসপিটাল লিস্ট
 
   @override
   void initState() {
@@ -41,10 +42,34 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           _profileData = data;
           _isLoading = false;
         });
+
+        // 🔥 যদি ইউজার ডাক্তার হয়, তবে তার হসপিটাল লিস্ট লোড হবে
+        if (data['role'] == 'DOCTOR') {
+          _fetchDoctorHospitals(user.id);
+        }
+
       } catch (e) {
         debugPrint("Error fetching profile: $e");
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  // 🏥 হসপিটাল লিস্ট আনার ফাংশন
+  Future<void> _fetchDoctorHospitals(String doctorId) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('hospital_doctors')
+          .select('*, hospital:hospital_id(full_name, address, phone)')
+          .eq('doctor_id', doctorId);
+
+      if (mounted) {
+        setState(() {
+          _assignedHospitals = List<Map<String, dynamic>>.from(response);
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching hospitals: $e");
     }
   }
 
@@ -88,7 +113,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // 1. Profile Header
+            // 1. Profile Header (Same as before)
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -104,78 +129,58 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: (isDark ? AppColors.darkPrimary : AppColors.primary).withOpacity(0.2), width: 2),
-                    ),
-                    child: CircleAvatar(
-                      radius: 48,
-                      backgroundColor: (isDark ? AppColors.darkPrimary : AppColors.primary).withOpacity(0.1),
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : "U",
-                        style: GoogleFonts.poppins(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? AppColors.darkPrimary : AppColors.primary
-                        ),
-                      ),
-                    ),
+                  CircleAvatar(
+                    radius: 48,
+                    backgroundColor: (isDark ? AppColors.darkPrimary : AppColors.primary).withOpacity(0.1),
+                    child: Text(name.isNotEmpty ? name[0].toUpperCase() : "U", style: GoogleFonts.poppins(fontSize: 36, fontWeight: FontWeight.bold, color: isDark ? AppColors.darkPrimary : AppColors.primary)),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                      name,
-                      style: GoogleFonts.poppins(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : AppColors.textPrimary
-                      )
-                  ),
-                  Text(
-                      email,
-                      style: GoogleFonts.poppins(
-                          color: isDark ? Colors.grey.shade400 : AppColors.textSecondary,
-                          fontSize: 14
-                      )
-                  ),
+                  Text(name, style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppColors.textPrimary)),
+                  Text(email, style: GoogleFonts.poppins(color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, fontSize: 14)),
                   const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.blue.shade900.withOpacity(0.3) : Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isDark ? Colors.blue.shade700 : Colors.blue.shade100),
-                    ),
-                    child: Text(
-                        role,
-                        style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: isDark ? Colors.blue.shade200 : Colors.blue.shade800,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5
-                        )
-                    ),
-                  )
+                  Chip(label: Text(role), backgroundColor: isDark ? Colors.blue.shade900 : Colors.blue.shade50, labelStyle: TextStyle(color: isDark ? Colors.blue.shade200 : Colors.blue.shade800)),
                 ],
               ),
             ),
 
             const SizedBox(height: 24),
 
+            // 🔥 DOCTOR ONLY: Assigned Hospitals Section
+            if (role == 'DOCTOR') ...[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 12),
+                  child: Text("My Associated Hospitals", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
+                ),
+              ),
+              if (_assignedHospitals.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Not assigned to any hospital yet.", style: TextStyle(color: Colors.grey)),
+                )
+              else
+                ..._assignedHospitals.map((item) {
+                  final hospital = item['hospital'];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      leading: const Icon(Icons.local_hospital, color: Colors.redAccent),
+                      title: Text(hospital['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(hospital['address'] ?? 'No address'),
+                      trailing: const Icon(Icons.check_circle, color: Colors.green),
+                    ),
+                  );
+                }),
+              const SizedBox(height: 24),
+            ],
+
             // 2. Info Section
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 12),
-                child: Text(
-                  "Personal Information",
-                  style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
-                  ),
-                ),
+                child: Text("Personal Information", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
               ),
             ),
             _buildInfoTile(Icons.phone_outlined, "Phone Number", phone, isDark),
@@ -183,32 +188,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             const SizedBox(height: 24),
 
-            // 3. Settings & Activity Section
+            // 3. Settings & Activity
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 12),
-                child: Text(
-                  "Settings & Activity",
-                  style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
-                  ),
-                ),
+                child: Text("Settings & Activity", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
               ),
             ),
 
-            // 🔥 Care History Button (New Feature)
-            _buildActionTile(
-                icon: Icons.history_edu,
-                color: Colors.blue,
-                title: "Care History",
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const PatientHistoryPage()));
-                },
-                isDark: isDark
-            ),
+            // Care History (Patient Only)
+            if (role == 'CITIZEN')
+              _buildActionTile(
+                  icon: Icons.calendar_month,
+                  color: Colors.blue,
+                  title: "My Appointments & History", // নাম পরিবর্তন করে স্পেসিফিক করা হলো
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PatientHistoryPage()));
+                  },
+                  isDark: isDark
+              ),
 
             _buildActionTile(
                 icon: Icons.bloodtype,
@@ -220,37 +219,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 isDark: isDark
             ),
 
-            _buildActionTile(
-                icon: Icons.lock_outline,
-                color: Colors.teal,
-                title: "Change Password",
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Feature coming soon!")));
-                },
-                isDark: isDark
-            ),
-
             const SizedBox(height: 32),
 
-            // 4. Logout Button
+            // 4. Logout
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _handleLogout,
-                icon: const Icon(Icons.logout, size: 20),
-                label: Text(
-                    "LOGOUT",
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold, letterSpacing: 1)
-                ),
+                icon: const Icon(Icons.logout),
+                label: const Text("LOGOUT"),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: isDark ? Colors.red.shade900.withOpacity(0.3) : Colors.red.shade50,
-                    foregroundColor: isDark ? Colors.red.shade200 : Colors.red,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: isDark ? Colors.red.shade800 : Colors.red.shade100),
-                    )
+                  backgroundColor: Colors.red.shade50,
+                  foregroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
             ),
@@ -262,63 +243,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildInfoTile(IconData icon, String title, String value, bool isDark) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
-          ]
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-                color: isDark ? Colors.grey.shade800 : AppColors.background,
-                shape: BoxShape.circle
-            ),
-            child: Icon(icon, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.grey.shade500 : AppColors.textSecondary)),
-              Text(value, style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
-            ],
-          ),
-        ],
+      child: ListTile(
+        leading: Icon(icon, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+        title: Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        subtitle: Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black)),
       ),
     );
   }
 
   Widget _buildActionTile({required IconData icon, required Color color, required String title, required VoidCallback onTap, required bool isDark}) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
-          ]
-      ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              color: color.withOpacity(isDark ? 0.2 : 0.1),
-              shape: BoxShape.circle
-          ),
-          child: Icon(icon, color: color, size: 20),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+          child: Icon(icon, color: color),
         ),
-        title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 15, color: isDark ? AppColors.darkTextPrimary : Colors.black87)),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
         onTap: onTap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
