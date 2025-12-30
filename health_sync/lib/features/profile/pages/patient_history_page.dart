@@ -70,8 +70,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           .eq('patient_id', userId)
           .order('appointment_date', ascending: false),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
         if (!snapshot.hasData || (snapshot.data as List).isEmpty) {
           return _emptyState("No appointments found.");
         }
@@ -237,8 +238,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           .eq('event_type', 'PRESCRIPTION')
           .order('event_date', ascending: false),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
+        }
         final list = snapshot.data as List;
         if (list.isEmpty) return _emptyState("No prescriptions found.");
 
@@ -281,8 +283,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           .eq('patient_id', userId)
           .order('created_at', ascending: false),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
+        }
         final list = snapshot.data as List;
         if (list.isEmpty) return _emptyState("No diagnostic records.");
 

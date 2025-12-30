@@ -88,11 +88,14 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
 
     try {
       // 1️⃣ Update profile (common data)
-      await Supabase.instance.client.from('profiles').update({
-        'blood_group': _selectedBloodGroup,
-        'district': _districtController.text.trim(),
-        'phone': _phoneController.text.trim(),
-      }).eq('id', user.id);
+      await Supabase.instance.client
+          .from('profiles')
+          .update({
+            'blood_group': _selectedBloodGroup,
+            'district': _districtController.text.trim(),
+            'phone': _phoneController.text.trim(),
+          })
+          .eq('id', user.id);
 
       // 2️⃣ Donor data
       final donorData = {
@@ -114,9 +117,11 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isAlreadyDonor
-              ? "Profile updated successfully!"
-              : "Welcome to the donor family! 🎉"),
+          content: Text(
+            _isAlreadyDonor
+                ? "Profile updated successfully!"
+                : "Welcome to the donor family! 🎉",
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -124,8 +129,9 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
       Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -153,7 +159,9 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(_isAlreadyDonor ? "Manage Donor Profile" : "Become a Donor"),
+        title: Text(
+          _isAlreadyDonor ? "Manage Donor Profile" : "Become a Donor",
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -167,6 +175,7 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
 
               _buildLabel("Blood Group"),
               DropdownButtonFormField<String>(
+                // ignore: deprecated_member_use
                 value: _selectedBloodGroup,
                 items: const ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
                     .map((g) => DropdownMenuItem(value: g, child: Text(g)))
@@ -179,8 +188,10 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
               _buildLabel("District / City"),
               TextFormField(
                 controller: _districtController,
-                decoration:
-                _inputDecoration("Dhaka, Chattogram...", Icons.location_city),
+                decoration: _inputDecoration(
+                  "Dhaka, Chattogram...",
+                  Icons.location_city,
+                ),
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 16),
@@ -189,8 +200,7 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration:
-                _inputDecoration("017xxxxxxxx", Icons.phone),
+                decoration: _inputDecoration("017xxxxxxxx", Icons.phone),
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 16),
@@ -199,8 +209,7 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
               InkWell(
                 onTap: _pickDate,
                 child: InputDecorator(
-                  decoration:
-                  _inputDecoration("", Icons.calendar_today),
+                  decoration: _inputDecoration("", Icons.calendar_today),
                   child: Text(
                     _lastDonationDate == null
                         ? "Tap to select"
@@ -212,13 +221,16 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
 
               const SizedBox(height: 20),
               SwitchListTile(
-                title: Text("Available for donation",
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                title: Text(
+                  "Available for donation",
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                ),
                 subtitle: const Text(
-                    "Turn off if you recently donated or are sick"),
+                  "Turn off if you recently donated or are sick",
+                ),
                 value: _availability,
                 onChanged: (v) => setState(() => _availability = v),
-                activeColor: Colors.green,
+                activeTrackColor: Colors.green,
                 contentPadding: EdgeInsets.zero,
               ),
 
@@ -231,18 +243,22 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: _isSubmitting
                       ? const CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2)
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        )
                       : Text(
-                    _isAlreadyDonor
-                        ? "UPDATE PROFILE"
-                        : "REGISTER AS DONOR",
-                    style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold),
-                  ),
+                          _isAlreadyDonor
+                              ? "UPDATE PROFILE"
+                              : "REGISTER AS DONOR",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -260,17 +276,13 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _availability
-            ? Colors.green.shade50
-            : Colors.grey.shade100,
+        color: _availability ? Colors.green.shade50 : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         children: [
           Icon(
-            _availability
-                ? Icons.check_circle
-                : Icons.do_not_disturb_on,
+            _availability ? Icons.check_circle : Icons.do_not_disturb_on,
             size: 40,
             color: _availability ? Colors.green : Colors.grey,
           ),
@@ -288,8 +300,7 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
 
   Widget _buildLabel(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
-    child: Text(text,
-        style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+    child: Text(text, style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
   );
 
   InputDecoration _inputDecoration(String hint, IconData icon) {
@@ -299,8 +310,9 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
       filled: true,
       fillColor: Colors.white,
       border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
     );
   }
 }

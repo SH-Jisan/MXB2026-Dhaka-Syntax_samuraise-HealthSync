@@ -83,7 +83,7 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                   'hospital_name': nameCtrl.text,
                   'visiting_hours': timeCtrl.text,
                 });
-                if (mounted) {
+                if (ctx.mounted) {
                   Navigator.pop(ctx);
                   _refreshHospitals(); // 🔥 লিস্ট রিফ্রেশ
                 }
@@ -128,26 +128,30 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                   await Supabase.instance.client.from('doctor_patients').insert(
                     {'doctor_id': _doctorId, 'patient_id': data['id']},
                   );
-                  if (mounted) {
+                  if (ctx.mounted) {
                     Navigator.pop(ctx);
-                    _refreshPatients(); // 🔥 লিস্ট রিফ্রেশ
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Patient Added Successfully!"),
-                      ),
-                    );
+                    if (mounted) {
+                      _refreshPatients(); // 🔥 লিস্ট রিফ্রেশ
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Patient Added Successfully!"),
+                        ),
+                      );
+                    }
                   }
                 } else {
-                  if (mounted)
+                  if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Patient not found!")),
                     );
+                  }
                 }
               } catch (e) {
-                if (mounted)
+                if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Already assigned or Error")),
                   );
+                }
               }
             },
             child: const Text("Add Patient"),
@@ -187,19 +191,21 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
           FutureBuilder(
             future: _hospitalsFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SizedBox(
                   height: 100,
                   child: Center(child: CircularProgressIndicator()),
                 );
+              }
               if (!snapshot.hasData) return const SizedBox.shrink();
 
               final hospitals = snapshot.data as List;
-              if (hospitals.isEmpty)
+              if (hospitals.isEmpty) {
                 return const Text(
                   "No hospitals added.",
                   style: TextStyle(color: Colors.grey),
                 );
+              }
 
               return SizedBox(
                 height: 120,
@@ -284,8 +290,9 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
           FutureBuilder(
             future: _patientsFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
+              }
               final list = snapshot.data ?? [];
 
               if (list.isEmpty) {

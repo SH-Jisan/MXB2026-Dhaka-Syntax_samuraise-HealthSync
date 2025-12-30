@@ -328,8 +328,9 @@ class MyBloodRequestsPage extends ConsumerWidget {
                                 ),
                                 onPressed: () async {
                                   final url = Uri.parse("tel:$phone");
-                                  if (await canLaunchUrl(url))
+                                  if (await canLaunchUrl(url)) {
                                     await launchUrl(url);
+                                  }
                                 },
                               ),
                             ),

@@ -70,6 +70,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
                 // 1. Role Selection Dropdown
                 DropdownButtonFormField<String>(
+                  // ignore: deprecated_member_use
                   value: _selectedRole,
                   decoration: _inputDecoration(
                     "Account Type",

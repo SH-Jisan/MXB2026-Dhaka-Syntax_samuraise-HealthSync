@@ -62,7 +62,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     final doctors = List<Map<String, dynamic>>.from(doctorsResponse);
 
     if (doctors.isEmpty) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -70,6 +70,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
             ),
           ),
         );
+      }
       return;
     }
 
@@ -191,7 +192,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                       'status': 'CONFIRMED',
                     });
 
-                    if (mounted) {
+                    if (context.mounted) {
                       Navigator.pop(ctx);
                       Navigator.pop(context); // মেইন শিট বন্ধ
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -230,10 +231,11 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
           .maybeSingle();
 
       if (doctor == null) {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("No Doctor found with this email.")),
           );
+        }
         return;
       }
 
@@ -251,10 +253,11 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
     } finally {}
   }
 

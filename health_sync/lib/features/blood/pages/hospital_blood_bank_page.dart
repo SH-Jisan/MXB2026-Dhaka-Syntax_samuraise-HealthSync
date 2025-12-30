@@ -51,13 +51,11 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
 
       final Map<String, int> loadedData = {};
 
-      // 🛡️ SAFE: type mismatch handling
-      if (data is List) {
-        for (final item in data) {
-          final String group = item['blood_group'] as String;
-          final int qty = item['quantity'] as int? ?? 0;
-          loadedData[group] = qty;
-        }
+      // 🛡️ SAFE: data is already List from typed response logic or just iterate directly
+      for (final item in data) {
+        final String group = item['blood_group'] as String;
+        final int qty = item['quantity'] as int? ?? 0;
+        loadedData[group] = qty;
       }
 
       if (mounted) {

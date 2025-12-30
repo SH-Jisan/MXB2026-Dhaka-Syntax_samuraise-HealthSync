@@ -110,7 +110,7 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
                 const SizedBox(width: 8),
                 Switch(
                   value: _isBangla,
-                  activeColor: isDark
+                  activeTrackColor: isDark
                       ? AppColors.darkPrimary
                       : AppColors.primary,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -61,9 +61,11 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -92,9 +94,11 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error or Already Assigned: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error or Already Assigned: $e")),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -128,9 +132,11 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
         _searchPatient();
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
     } finally {
       setState(() => _isLoading = false);
     }
@@ -219,21 +225,24 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
           .eq('diagnostic_id', diagnosticId)
           .order('assigned_at', ascending: false),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        if (snapshot.hasError)
+        }
+        if (snapshot.hasError) {
           return Center(
             child: Text(
               "Error: ${snapshot.error}",
               style: const TextStyle(color: Colors.red),
             ),
           );
+        }
 
         final list = snapshot.data as List;
-        if (list.isEmpty)
+        if (list.isEmpty) {
           return const Center(
             child: Text("No assigned patients. Go to Search tab."),
           );
+        }
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -278,8 +287,9 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
           .eq('report_status', 'PENDING') // 🔍 ফিল্টার: শুধু পেন্ডিং
           .order('created_at', ascending: false),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
 
         final pendingOrders = snapshot.data as List;
 

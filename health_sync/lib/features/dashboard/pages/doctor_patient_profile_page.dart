@@ -260,7 +260,7 @@ class _DoctorPatientProfilePageState
                                 "Tests Assigned:\n$testsString\n\nNotes:\n${notesCtrl.text}",
                           });
 
-                          if (mounted) {
+                          if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -276,9 +276,11 @@ class _DoctorPatientProfilePageState
                             );
                           }
                         } catch (e) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text("Error: $e")));
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Error: $e")),
+                            );
+                          }
                         }
                       },
                       icon: const Icon(Icons.send),

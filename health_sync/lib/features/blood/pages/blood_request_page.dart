@@ -66,17 +66,21 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
           }
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Form autofilled by AI! Please review."),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Form autofilled by AI! Please review."),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("AI Error: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("AI Error: $e")));
+      }
     } finally {
       setState(() => _isAnalyzing = false);
     }
@@ -334,6 +338,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               // 🩸 Blood Group Dropdown
               _buildInputLabel("Blood Group", isDark),
               DropdownButtonFormField<String>(
+                // ignore: deprecated_member_use
                 value: _selectedBloodGroup,
                 decoration: _inputDecoration(
                   hint: "Select Group",
@@ -378,6 +383,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               // 🚨 Urgency
               _buildInputLabel("Urgency Level", isDark),
               DropdownButtonFormField<String>(
+                // ignore: deprecated_member_use
                 value: _urgency,
                 decoration: _inputDecoration(
                   hint: "Select Urgency",

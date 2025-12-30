@@ -18,7 +18,8 @@ class DoctorListPage extends ConsumerStatefulWidget {
   ConsumerState<DoctorListPage> createState() => _DoctorListPageState();
 }
 
-class _DoctorListPageState extends ConsumerState<DoctorListPage> with SingleTickerProviderStateMixin {
+class _DoctorListPageState extends ConsumerState<DoctorListPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -30,7 +31,9 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage> with SingleTick
   @override
   Widget build(BuildContext context) {
     // লোকাল ডাক্তার খোঁজার প্রোভাইডার
-    final appDoctorsAsync = ref.watch(doctorsBySpecialtyProvider(widget.specialty));
+    final appDoctorsAsync = ref.watch(
+      doctorsBySpecialtyProvider(widget.specialty),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -55,7 +58,9 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage> with SingleTick
             error: (err, stack) => Center(child: Text("Error: $err")),
             data: (doctors) {
               if (doctors.isEmpty) {
-                return _buildEmptyState("No registered doctors found in our app.");
+                return _buildEmptyState(
+                  "No registered doctors found in our app.",
+                );
               }
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -68,11 +73,17 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage> with SingleTick
                         backgroundColor: Colors.teal.shade100,
                         child: const Icon(Icons.person, color: Colors.teal),
                       ),
-                      title: Text(doc['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(
+                        doc['full_name'],
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       subtitle: Text(doc['specialty'] ?? widget.specialty),
                       trailing: ElevatedButton(
                         onPressed: () {},
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                        ),
                         child: const Text("Book"),
                       ),
                     ),
@@ -86,51 +97,75 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage> with SingleTick
           widget.internetDoctors.isEmpty
               ? _buildEmptyState("No results found on Google.")
               : ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: widget.internetDoctors.length,
-            itemBuilder: (context, index) {
-              final doc = widget.internetDoctors[index];
-              return Card(
-                elevation: 3,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(12),
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
-                    child: const Icon(Icons.public, color: Colors.blue),
-                  ),
-                  title: Text(doc['title'] ?? 'Unknown Doctor', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Text(doc['address'] ?? 'No address available', style: const TextStyle(fontSize: 12)),
-                      if (doc['rating'] != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.star, size: 14, color: Colors.amber),
-                              Text(" ${doc['rating']} (${doc['userRatingsTotal'] ?? 0})",
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                            ],
+                  padding: const EdgeInsets.all(16),
+                  itemCount: widget.internetDoctors.length,
+                  itemBuilder: (context, index) {
+                    final doc = widget.internetDoctors[index];
+                    return Card(
+                      elevation: 3,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(12),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        )
-                    ],
-                  ),
-                  trailing: const Icon(Icons.map, color: Colors.green),
-                  onTap: () async {
-                    // Google Maps এ ওপেন হবে
-                    final query = Uri.encodeComponent(doc['title'] + " " + (doc['address'] ?? ""));
-                    final url = Uri.parse("https://www.google.com/maps/search/?api=1&query=$query");
-                    if (await canLaunchUrl(url)) launchUrl(url);
+                          child: const Icon(Icons.public, color: Colors.blue),
+                        ),
+                        title: Text(
+                          doc['title'] ?? 'Unknown Doctor',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(
+                              doc['address'] ?? 'No address available',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            if (doc['rating'] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star,
+                                      size: 14,
+                                      color: Colors.amber,
+                                    ),
+                                    Text(
+                                      " ${doc['rating']} (${doc['userRatingsTotal'] ?? 0})",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                        trailing: const Icon(Icons.map, color: Colors.green),
+                        onTap: () async {
+                          // Google Maps এ ওপেন হবে
+                          final query = Uri.encodeComponent(
+                            "${doc['title']} ${doc['address'] ?? ""}",
+                          );
+                          final url = Uri.parse(
+                            "https://www.google.com/maps/search/?api=1&query=$query",
+                          );
+                          if (await canLaunchUrl(url)) launchUrl(url);
+                        },
+                      ),
+                    );
                   },
                 ),
-              );
-            },
-          ),
         ],
       ),
     );

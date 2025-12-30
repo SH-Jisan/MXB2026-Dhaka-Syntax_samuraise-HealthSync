@@ -55,13 +55,16 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
     final amountController = TextEditingController();
 
     // টেস্ট লোড না হয়ে থাকলে আবার ট্রাই করবে
-    if (_availableTests.isEmpty) await _fetchTests();
+    if (_availableTests.isEmpty) {
+      await _fetchTests();
+    }
+    if (!mounted) return;
 
     await showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
+      builder: (dialogContext) => StatefulBuilder(
         // ডায়ালগের ভেতর স্টেট চেঞ্জ করার জন্য
-        builder: (context, setStateDialog) {
+        builder: (sbContext, setStateDialog) {
           return AlertDialog(
             title: const Text("New Test Order"),
             content: SizedBox(
@@ -174,7 +177,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dialogContext),
                 child: const Text("CANCEL"),
               ),
               ElevatedButton(
@@ -188,7 +191,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                     );
                     return;
                   }
-                  Navigator.pop(context);
+                  Navigator.pop(dialogContext);
 
                   // মেইন উইজেটের লোডিং অন করা
 
@@ -210,18 +213,20 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                         });
 
                     setState(() {}); // UI রিফ্রেশ
-                    if (mounted)
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Order Created Successfully!"),
                           backgroundColor: Colors.green,
                         ),
                       );
+                    }
                   } catch (e) {
-                    if (mounted)
+                    if (mounted) {
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text("Error: $e")));
+                    }
                   } finally {}
                 },
                 style: ElevatedButton.styleFrom(
@@ -345,12 +350,14 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                   .eq('provider_id', providerId)
                   .order('created_at', ascending: false),
               builder: (context, snapshot) {
-                if (!snapshot.hasData)
+                if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
+                }
                 final orders = snapshot.data as List;
 
-                if (orders.isEmpty)
+                if (orders.isEmpty) {
                   return const Center(child: Text("No tests found."));
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
