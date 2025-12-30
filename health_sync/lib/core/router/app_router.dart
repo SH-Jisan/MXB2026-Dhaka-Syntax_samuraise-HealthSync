@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/pages/login_page.dart';
 import '../../features/auth/pages/signup_page.dart';
-import 'go_router_refresh_stream.dart'; // 🔥 নতুন ফাইলটি ইম্পোর্ট করুন
 import '../../features/dashboard/pages/dashboard_page.dart';
 
 
@@ -33,14 +32,19 @@ class PlaceholderHomePage extends StatelessWidget {
 final appRouter = GoRouter(
   initialLocation: '/',
   // 🔥 এই লাইনটিই ম্যাজিক করবে (লগইন/লগআউট হলে অটো রিফ্রেশ হবে)
-  refreshListenable: GoRouterRefreshStream(Supabase.instance.client.auth.onAuthStateChange),
-
   routes: [
-    GoRoute(path: '/',
+    GoRoute(
+      path: '/',
       builder: (context, state) => const DashboardPage(),
     ),
-    GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
-    GoRoute(path: '/signup', builder: (context, state) => const SignupPage()),
+    GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginPage()
+    ),
+    GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupPage()
+    ),
   ],
 
   redirect: (context, state) {

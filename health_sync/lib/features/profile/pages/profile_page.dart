@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/providers/user_profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../blood/pages/my_blood_requests_page.dart';
+import 'patient_history_page.dart'; // 🔥 নতুন ইমপোর্ট (Care History পেজ)
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -60,6 +63,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (shouldLogout == true) {
       await ref.read(authStateProvider.notifier).logout();
+      ref.invalidate(userProfileProvider);
       if (mounted) context.go('/login');
     }
   }
@@ -88,15 +92,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark ? theme.cardTheme.color : Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  )
-                ]
+                  color: isDark ? theme.cardTheme.color : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    )
+                  ]
               ),
               child: Column(
                 children: [
@@ -112,28 +116,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Text(
                         name.isNotEmpty ? name[0].toUpperCase() : "U",
                         style: GoogleFonts.poppins(
-                          fontSize: 36, 
-                          fontWeight: FontWeight.bold, 
-                          color: isDark ? AppColors.darkPrimary : AppColors.primary
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? AppColors.darkPrimary : AppColors.primary
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    name, 
-                    style: GoogleFonts.poppins(
-                      fontSize: 24, 
-                      fontWeight: FontWeight.bold, 
-                      color: isDark ? Colors.white : AppColors.textPrimary
-                    )
+                      name,
+                      style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppColors.textPrimary
+                      )
                   ),
                   Text(
-                    email, 
-                    style: GoogleFonts.poppins(
-                      color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, 
-                      fontSize: 14
-                    )
+                      email,
+                      style: GoogleFonts.poppins(
+                          color: isDark ? Colors.grey.shade400 : AppColors.textSecondary,
+                          fontSize: 14
+                      )
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -144,13 +148,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       border: Border.all(color: isDark ? Colors.blue.shade700 : Colors.blue.shade100),
                     ),
                     child: Text(
-                      role, 
-                      style: GoogleFonts.poppins(
-                        fontSize: 12, 
-                        color: isDark ? Colors.blue.shade200 : Colors.blue.shade800, 
-                        fontWeight: FontWeight.bold, 
-                        letterSpacing: 0.5
-                      )
+                        role,
+                        style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: isDark ? Colors.blue.shade200 : Colors.blue.shade800,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5
+                        )
                     ),
                   )
                 ],
@@ -167,9 +171,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Text(
                   "Personal Information",
                   style: GoogleFonts.poppins(
-                    fontSize: 16, 
-                    fontWeight: FontWeight.bold, 
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
                   ),
                 ),
               ),
@@ -179,7 +183,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             const SizedBox(height: 24),
 
-            // 3. Settings Section
+            // 3. Settings & Activity Section
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -187,31 +191,43 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Text(
                   "Settings & Activity",
                   style: GoogleFonts.poppins(
-                    fontSize: 16, 
-                    fontWeight: FontWeight.bold, 
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
                   ),
                 ),
               ),
             ),
-            
+
+            // 🔥 Care History Button (New Feature)
             _buildActionTile(
-              icon: Icons.history, 
-              color: Colors.purple, 
-              title: "My Blood Requests", 
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const MyBloodRequestsPage()));
-              },
-              isDark: isDark
+                icon: Icons.history_edu,
+                color: Colors.blue,
+                title: "Care History",
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const PatientHistoryPage()));
+                },
+                isDark: isDark
             ),
+
             _buildActionTile(
-              icon: Icons.lock_outline, 
-              color: Colors.teal, 
-              title: "Change Password", 
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Feature coming soon!")));
-              },
-              isDark: isDark
+                icon: Icons.bloodtype,
+                color: Colors.red,
+                title: "My Blood Requests",
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const MyBloodRequestsPage()));
+                },
+                isDark: isDark
+            ),
+
+            _buildActionTile(
+                icon: Icons.lock_outline,
+                color: Colors.teal,
+                title: "Change Password",
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Feature coming soon!")));
+                },
+                isDark: isDark
             ),
 
             const SizedBox(height: 32),
@@ -223,18 +239,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 onPressed: _handleLogout,
                 icon: const Icon(Icons.logout, size: 20),
                 label: Text(
-                  "LOGOUT", 
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold, letterSpacing: 1)
+                    "LOGOUT",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold, letterSpacing: 1)
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isDark ? Colors.red.shade900.withOpacity(0.3) : Colors.red.shade50,
-                  foregroundColor: isDark ? Colors.red.shade200 : Colors.red,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: isDark ? Colors.red.shade800 : Colors.red.shade100),
-                  )
+                    backgroundColor: isDark ? Colors.red.shade900.withOpacity(0.3) : Colors.red.shade50,
+                    foregroundColor: isDark ? Colors.red.shade200 : Colors.red,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: isDark ? Colors.red.shade800 : Colors.red.shade100),
+                    )
                 ),
               ),
             ),
@@ -250,19 +266,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
-        ]
+          color: isDark ? AppColors.darkSurface : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
+          ]
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isDark ? Colors.grey.shade800 : AppColors.background,
-              shape: BoxShape.circle
+                color: isDark ? Colors.grey.shade800 : AppColors.background,
+                shape: BoxShape.circle
             ),
             child: Icon(icon, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, size: 20),
           ),
@@ -283,19 +299,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
-        ]
+          color: isDark ? AppColors.darkSurface : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 2))
+          ]
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: color.withOpacity(isDark ? 0.2 : 0.1),
-            shape: BoxShape.circle
+              color: color.withOpacity(isDark ? 0.2 : 0.1),
+              shape: BoxShape.circle
           ),
           child: Icon(icon, color: color, size: 20),
         ),

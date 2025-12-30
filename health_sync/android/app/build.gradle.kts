@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.Copy
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -39,11 +41,26 @@ flutter {
 }
 
 dependencies {
-    // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+}
 
+android.applicationVariants.all {
+    val variantName = name
 
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
-    // https://firebase.google.com/docs/android/setup#available-libraries
+    outputs.all {
+        val outputImpl = this as BaseVariantOutputImpl
+        val outputFile = outputImpl.outputFile
+
+        val copyTaskName = "copy${variantName.replaceFirstChar { it.uppercase() }}Apk"
+
+        tasks.register<Copy>(copyTaskName) {
+            from(outputFile)
+            into("D:/app_dev/healthSync/apk")
+            rename {
+                "Health Sync.apk"
+            }
+        }
+
+        assembleProvider.get().finalizedBy(copyTaskName)
+    }
 }

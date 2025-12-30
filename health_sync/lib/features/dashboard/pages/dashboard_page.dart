@@ -18,7 +18,20 @@ class DashboardPage extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (err, stack) => Scaffold(
-        body: Center(child: Text("Error loading profile: $err")),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Something went wrong!"),
+              Text("Error: $err", style: const TextStyle(color: Colors.red)),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => ref.refresh(userProfileProvider), // রিট্রাই বাটন
+                child: const Text("Retry"),
+              )
+            ],
+          ),
+        ),
       ),
       data: (profile) {
         if (profile == null) {
@@ -28,6 +41,7 @@ class DashboardPage extends ConsumerWidget {
         }
 
         final role = profile['role'] as String;
+        print("Current Role: $role");
 
         // 🔥 ROLE BASED NAVIGATION
         switch (role) {

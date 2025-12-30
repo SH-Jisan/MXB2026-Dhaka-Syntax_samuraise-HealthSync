@@ -5,11 +5,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'core/constants/app_colors.dart';
-import 'core/router/app_router.dart';
+import 'core/router/app_router.dart'; // appRouter এখানে আছে
 import 'core/services/notification_service.dart';
 import 'shared/providers/theme_provider.dart';
 
-// নোটিফিকেশন একবার ইনিশিয়ালাইজ হয়েছে কিনা ট্র্যাক করার জন্য
+// নোটিফিকেশন একবার ইনিশিয়ালাইজ হয়েছে কিনা ট্র্যাক করার জন্য
 bool _notificationInitialized = false;
 
 void main() async {
@@ -22,8 +22,12 @@ void main() async {
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Y2Vhd3JieGJrc3JibWF0eXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3MjEyODEsImV4cCI6MjA4MTI5NzI4MX0.5ip891FpLXy1J8ZAstxHhg3iBuKrS9mT4j_F_fHC5lg',
   );
 
+  // 🔥 GLOBAL AUTH LISTENER (Notification & Routing)
   Supabase.instance.client.auth.onAuthStateChange.listen((data) {
     final session = data.session;
+    final event = data.event;
+
+    // ১. নোটিফিকেশন সার্ভিস হ্যান্ডলিং
     if (session != null && !_notificationInitialized) {
       NotificationService().initialize();
       _notificationInitialized = true;
@@ -32,6 +36,13 @@ void main() async {
     if (session == null) {
       _notificationInitialized = false;
       debugPrint("🔕 Notification Service Stopped (User Logged Out)");
+    }
+
+    // ২. 🔥 লগআউট হ্যান্ডলিং (Infinite Loop Fix)
+    // রাউটার থেকে অটো রিফ্রেশ সরানোর পর এটি ম্যানুয়ালি হ্যান্ডেল করতে হয়
+    if (event == AuthChangeEvent.signedOut) {
+      debugPrint("🚪 User Signed Out -> Redirecting to Login");
+      appRouter.go('/login');
     }
   });
 
@@ -43,13 +54,13 @@ class HealthSyncApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // থিম মোড প্রোভাইডার থেকে নেওয়া
+    // থিম মোড প্রোভাইডার থেকে নেওয়া
     final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
       title: 'HealthSync',
       debugShowCheckedModeBanner: false,
-      
+
       // 🔥 থিম মোড সেট করা (System / Light / Dark)
       themeMode: themeMode,
 
@@ -68,7 +79,7 @@ class HealthSyncApp extends ConsumerWidget {
         ),
         scaffoldBackgroundColor: AppColors.background,
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
-        
+
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
@@ -120,7 +131,7 @@ class HealthSyncApp extends ConsumerWidget {
           bodyColor: AppColors.darkTextPrimary,
           displayColor: AppColors.darkTextPrimary,
         ),
-        
+
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AppColors.darkSurface,
@@ -132,7 +143,7 @@ class HealthSyncApp extends ConsumerWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.darkPrimary,
-            foregroundColor: Colors.black, // ডার্ক মোডে বাটনের টেক্সট কালো ভালো দেখাবে
+            foregroundColor: Colors.black,
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
