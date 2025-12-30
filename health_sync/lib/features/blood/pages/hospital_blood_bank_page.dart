@@ -7,8 +7,7 @@ class HospitalBloodBankPage extends StatefulWidget {
   const HospitalBloodBankPage({super.key});
 
   @override
-  State<HospitalBloodBankPage> createState() =>
-      _HospitalBloodBankPageState();
+  State<HospitalBloodBankPage> createState() => _HospitalBloodBankPageState();
 }
 
 class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
@@ -20,7 +19,7 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
     'O+',
     'O-',
     'AB+',
-    'AB-'
+    'AB-',
   ];
 
   final int _maxStock = 999;
@@ -52,8 +51,8 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
 
       final Map<String, int> loadedData = {};
 
-      // 🛡️ SAFE: null / type mismatch handling
-      if (data != null && data is List) {
+      // 🛡️ SAFE: type mismatch handling
+      if (data is List) {
         for (final item in data) {
           final String group = item['blood_group'] as String;
           final int qty = item['quantity'] as int? ?? 0;
@@ -100,15 +99,12 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
     setState(() => _inventory[bg] = newQty);
 
     try {
-      await Supabase.instance.client.from('hospital_inventory').upsert(
-        {
-          'hospital_id': user.id,
-          'blood_group': bg,
-          'quantity': newQty,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-        onConflict: 'hospital_id,blood_group',
-      );
+      await Supabase.instance.client.from('hospital_inventory').upsert({
+        'hospital_id': user.id,
+        'blood_group': bg,
+        'quantity': newQty,
+        'updated_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'hospital_id,blood_group');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -145,94 +141,91 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-        onRefresh: _fetchInventory,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: _bloodGroups.length,
-          itemBuilder: (context, index) {
-            final bg = _bloodGroups[index];
-            final qty = _inventory[bg] ?? 0;
-
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
+              onRefresh: _fetchInventory,
+              child: ListView.builder(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    // 🩸 Blood Group Circle
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        bg,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
+                itemCount: _bloodGroups.length,
+                itemBuilder: (context, index) {
+                  final bg = _bloodGroups[index];
+                  final qty = _inventory[bg] ?? 0;
 
-                    // 📊 Stock Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         children: [
-                          Text(
-                            "Available Stock",
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: Colors.grey,
+                          // 🩸 Blood Group Circle
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              bg,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
                             ),
                           ),
-                          Text(
-                            "$qty Bags",
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          const SizedBox(width: 16),
+
+                          // 📊 Stock Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Available Stock",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  "$qty Bags",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+
+                          // ➕ / ➖ Actions
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () => _updateStock(bg, -1),
+                                icon: const Icon(
+                                  Icons.remove_circle_outline,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () => _updateStock(bg, 1),
+                                icon: const Icon(
+                                  Icons.add_circle,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-
-                    // ➕ / ➖ Actions
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () =>
-                              _updateStock(bg, -1),
-                          icon: const Icon(
-                            Icons.remove_circle_outline,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () =>
-                              _updateStock(bg, 1),
-                          icon: const Icon(
-                            Icons.add_circle,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-      ),
+            ),
     );
   }
 }

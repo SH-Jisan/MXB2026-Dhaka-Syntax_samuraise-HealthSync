@@ -6,18 +6,24 @@ final authStateChangesProvider = StreamProvider<AuthState>((ref) {
   return Supabase.instance.client.auth.onAuthStateChange;
 });
 
-// ২. প্রোফাইল ডাটা প্রোভাইডার (এখন Reactive)
+// 🔥 OPTIMIZED: Only rebuild profile when User ID changes
+final currentUserIdProvider = Provider<String?>((ref) {
+  final authState = ref.watch(authStateChangesProvider);
+  return authState.value?.session?.user.id;
+});
+
+// ২. প্রোফাইল ডাটা প্রোভাইডার (এখন Reactive এবং Optimized)
 final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  // 🔥 Reactive But Smart: Only fetches if ID changes
+  final userId = ref.watch(currentUserIdProvider);
 
-  final user = Supabase.instance.client.auth.currentUser;
-
-  if (user == null) return null;
+  if (userId == null) return null;
 
   try {
     final data = await Supabase.instance.client
         .from('profiles')
         .select()
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
 
     return data;

@@ -22,8 +22,10 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
-      if(mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not launch dialer")));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not launch dialer")),
+        );
       }
     }
   }
@@ -51,59 +53,89 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
               color: isDark ? theme.cardTheme.color : Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.05),
+                  color: Colors.grey.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
-                )
-              ]
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min, 
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Blood Group Dropdown
                     SizedBox(
-                      width: 110, 
+                      width: 110,
                       child: DropdownButtonFormField<String>(
                         value: _selectedBloodGroup,
                         isExpanded: true,
-                        dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
+                        dropdownColor: isDark
+                            ? AppColors.darkSurface
+                            : Colors.white,
                         decoration: InputDecoration(
                           labelText: "Group",
-                          prefixIcon: const Icon(Icons.bloodtype, color: Colors.red, size: 20),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+                          prefixIcon: const Icon(
+                            Icons.bloodtype,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 14,
+                          ),
                         ),
-                        items: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
-                            .map((g) => DropdownMenuItem(value: g, child: Text(g, style: const TextStyle(fontSize: 14)))).toList(),
-                        onChanged: (v) => setState(() => _selectedBloodGroup = v),
+                        items:
+                            ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
+                                .map(
+                                  (g) => DropdownMenuItem(
+                                    value: g,
+                                    child: Text(
+                                      g,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (v) =>
+                            setState(() => _selectedBloodGroup = v),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    
+
                     // District Search
                     Expanded(
                       child: TextField(
                         controller: _districtController,
                         decoration: InputDecoration(
                           labelText: "District (e.g. Dhaka)",
-                          prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                          suffixIcon: _districtController.text.isNotEmpty 
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 20),
-                                onPressed: () {
-                                  _districtController.clear();
-                                  setState(() {});
-                                },
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              )
-                            : null,
+                          prefixIcon: const Icon(
+                            Icons.location_on_outlined,
+                            size: 20,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                          suffixIcon: _districtController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 20),
+                                  onPressed: () {
+                                    _districtController.clear();
+                                    setState(() {});
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                )
+                              : null,
                         ),
                         onSubmitted: (_) => setState(() {}),
                       ),
@@ -111,26 +143,36 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 SizedBox(
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () => setState(() {}), 
+                    onPressed: () => setState(() {}),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+                      backgroundColor: isDark
+                          ? AppColors.darkPrimary
+                          : AppColors.primary,
                       foregroundColor: isDark ? Colors.black : Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const FittedBox( 
+                    child: const FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        "SEARCH DONORS", 
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        "SEARCH DONORS",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -143,26 +185,42 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text("Error: $err", textAlign: TextAlign.center),
-                )
+                ),
               ),
               data: (donors) {
                 if (donors.isEmpty) {
                   return Center(
-                    child: SingleChildScrollView( 
+                    child: SingleChildScrollView(
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.person_search_outlined, size: 80, color: isDark ? Colors.grey.shade600 : Colors.grey.shade300),
+                          Icon(
+                            Icons.person_search_outlined,
+                            size: 80,
+                            color: isDark
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade300,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             "No donors found",
-                            style: GoogleFonts.poppins(fontSize: 18, color: isDark ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             "Try changing the location or blood group.",
-                            style: GoogleFonts.poppins(color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                            style: GoogleFonts.poppins(
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : AppColors.textSecondary,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -176,7 +234,7 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                   itemCount: donors.length,
                   itemBuilder: (context, index) {
                     final donor = donors[index];
-                    final profile = donor['profiles'] ?? {}; 
+                    final profile = donor['profiles'] ?? {};
                     final name = profile['full_name'] ?? 'Unknown Donor';
                     final lastDate = donor['last_donation_date'];
 
@@ -186,7 +244,11 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                         color: isDark ? theme.cardTheme.color : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
-                          BoxShadow(color: Colors.grey.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))
+                          BoxShadow(
+                            color: Colors.grey.withValues(alpha: 0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
                         ],
                       ),
                       child: Padding(
@@ -200,22 +262,29 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Colors.red.shade400, Colors.red.shade700],
+                                  colors: [
+                                    Colors.red.shade400,
+                                    Colors.red.shade700,
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.red.withOpacity(0.3),
+                                    color: Colors.red.withValues(alpha: 0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
-                                  )
-                                ]
+                                  ),
+                                ],
                               ),
                               child: Text(
                                 donor['blood_group'],
-                                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -226,26 +295,39 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    name, 
+                                    name,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 16, 
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white : AppColors.textPrimary
-                                    )
+                                      color: isDark
+                                          ? Colors.white
+                                          : AppColors.textPrimary,
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      Icon(Icons.location_on, size: 14, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                                      Icon(
+                                        Icons.location_on,
+                                        size: 14,
+                                        color: isDark
+                                            ? Colors.grey.shade400
+                                            : AppColors.textSecondary,
+                                      ),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          donor['district'] ?? 'Unknown', 
+                                          donor['district'] ?? 'Unknown',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, fontSize: 13)
+                                          style: TextStyle(
+                                            color: isDark
+                                                ? Colors.grey.shade400
+                                                : AppColors.textSecondary,
+                                            fontSize: 13,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -253,10 +335,16 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                                   if (lastDate != null) ...[
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Last donated: $lastDate", 
-                                      style: TextStyle(fontSize: 11, color: isDark ? Colors.green.shade300 : Colors.green.shade700, fontStyle: FontStyle.italic)
+                                      "Last donated: $lastDate",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark
+                                            ? Colors.green.shade300
+                                            : Colors.green.shade700,
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                     ),
-                                  ]
+                                  ],
                                 ],
                               ),
                             ),
@@ -270,11 +358,25 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                                 child: Ink(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.green.shade900.withOpacity(0.3) : Colors.green.shade50,
+                                    color: isDark
+                                        ? Colors.green.shade900.withValues(
+                                            alpha: 0.3,
+                                          )
+                                        : Colors.green.shade50,
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: isDark ? Colors.green.shade700 : Colors.green.shade200)
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.green.shade700
+                                          : Colors.green.shade200,
+                                    ),
                                   ),
-                                  child: Icon(Icons.phone, color: isDark ? Colors.green.shade300 : Colors.green.shade700, size: 22),
+                                  child: Icon(
+                                    Icons.phone,
+                                    color: isDark
+                                        ? Colors.green.shade300
+                                        : Colors.green.shade700,
+                                    size: 22,
+                                  ),
                                 ),
                               ),
                             ),

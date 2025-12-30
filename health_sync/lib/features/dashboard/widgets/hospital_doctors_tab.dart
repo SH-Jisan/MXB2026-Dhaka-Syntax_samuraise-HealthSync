@@ -29,7 +29,11 @@ class _HospitalDoctorsTabState extends State<HospitalDoctorsTab> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.medical_services_outlined, size: 64, color: Colors.grey.shade300),
+                Icon(
+                  Icons.medical_services_outlined,
+                  size: 64,
+                  color: Colors.grey.shade300,
+                ),
                 const SizedBox(height: 16),
                 const Text("No doctors assigned yet."),
               ],
@@ -43,22 +47,32 @@ class _HospitalDoctorsTabState extends State<HospitalDoctorsTab> {
           itemCount: doctors.length,
           itemBuilder: (context, index) {
             final doc = doctors[index]['profiles'];
-            final joinDate = DateTime.parse(doctors[index]['joined_at']).toLocal();
+            final joinDate = DateTime.parse(
+              doctors[index]['joined_at'],
+            ).toLocal();
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: const Icon(Icons.person, color: AppColors.primary),
                 ),
-                title: Text(doc['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(
+                  doc['full_name'],
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(doc['specialty'] ?? 'General Physician'),
-                    Text("Joined: ${DateFormat.yMMMd().format(joinDate)}", style: const TextStyle(fontSize: 12)),
+                    Text(
+                      "Joined: ${DateFormat.yMMMd().format(joinDate)}",
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ],
                 ),
                 trailing: IconButton(

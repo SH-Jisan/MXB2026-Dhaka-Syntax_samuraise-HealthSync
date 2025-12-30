@@ -9,9 +9,10 @@ import '../../timeline/providers/timeline_provider.dart';
 
 enum UploadStatus { success, duplicate, failure }
 
-final uploadProvider = StateNotifierProvider<UploadController, AsyncValue<void>>((ref) {
-  return UploadController(ref);
-});
+final uploadProvider =
+    StateNotifierProvider<UploadController, AsyncValue<void>>((ref) {
+      return UploadController(ref);
+    });
 
 class UploadController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
@@ -38,12 +39,16 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
       final fileName = '$targetUserId/${const Uuid().v4()}.$fileExt';
 
       // ৩. আপলোড (Storage Bucket)
-      await Supabase.instance.client.storage.from('reports').upload(
-        fileName,
-        file,
-        fileOptions: FileOptions(contentType: mimeType),
-      );
-      final fileUrl = Supabase.instance.client.storage.from('reports').getPublicUrl(fileName);
+      await Supabase.instance.client.storage
+          .from('reports')
+          .upload(
+            fileName,
+            file,
+            fileOptions: FileOptions(contentType: mimeType),
+          );
+      final fileUrl = Supabase.instance.client.storage
+          .from('reports')
+          .getPublicUrl(fileName);
 
       // ৪. ফাংশন কল (Edge Function)
       try {
@@ -63,17 +68,16 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
         // 🔥 FIX: রিফ্রেশ লজিক আপডেট (Family Provider এর জন্য)
 
         // ১. যার জন্য আপলোড হলো, তার স্পেসিফিক টাইমলাইন রিফ্রেশ করা (Doctor View এর জন্য জরুরি)
-        _ref.refresh(timelineProvider(targetUserId));
+        _ref.invalidate(timelineProvider(targetUserId));
 
         // ২. যদি ইউজার নিজের জন্য আপলোড করে, তবে ডিফল্ট (null) টাইমলাইনও রিফ্রেশ করা
         // (কারণ Citizen Home Page এ সাধারণত কোনো আইডি ছাড়া কল হয়)
         if (targetUserId == currentUser.id) {
-          _ref.refresh(timelineProvider(null));
+          _ref.invalidate(timelineProvider(null));
         }
 
         state = const AsyncData(null);
         return UploadStatus.success;
-
       } on FunctionException catch (e) {
         if (e.status == 409) {
           state = const AsyncData(null);
@@ -81,7 +85,6 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
         }
         rethrow;
       }
-
     } catch (e, stack) {
       state = AsyncError(e, stack);
       return UploadStatus.failure;

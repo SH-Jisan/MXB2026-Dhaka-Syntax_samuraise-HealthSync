@@ -10,7 +10,8 @@ class PatientHistoryPage extends StatefulWidget {
   State<PatientHistoryPage> createState() => _PatientHistoryPageState();
 }
 
-class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTickerProviderStateMixin {
+class _PatientHistoryPageState extends State<PatientHistoryPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final String userId = Supabase.instance.client.auth.currentUser!.id;
 
@@ -34,7 +35,10 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
           indicatorColor: AppColors.primary,
           isScrollable: true, // বেশি ট্যাব হওয়ায় স্ক্রলেবল করা হলো
           tabs: const [
-            Tab(text: "Appointments", icon: Icon(Icons.calendar_month)), // 🔥 New Tab
+            Tab(
+              text: "Appointments",
+              icon: Icon(Icons.calendar_month),
+            ), // 🔥 New Tab
             Tab(text: "Prescriptions", icon: Icon(Icons.description_outlined)),
             Tab(text: "Diagnostic", icon: Icon(Icons.analytics_outlined)),
             Tab(text: "Hospitals", icon: Icon(Icons.local_hospital_outlined)),
@@ -66,7 +70,8 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
           .eq('patient_id', userId)
           .order('appointment_date', ascending: false),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+        if (snapshot.connectionState == ConnectionState.waiting)
+          return const Center(child: CircularProgressIndicator());
         if (!snapshot.hasData || (snapshot.data as List).isEmpty) {
           return _emptyState("No appointments found.");
         }
@@ -79,17 +84,22 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
           itemBuilder: (context, index) {
             final apt = appointments[index];
             final doctor = apt['doctor'] ?? {'full_name': 'Unknown Doctor'};
-            final hospital = apt['hospital'] ?? {'full_name': 'Unknown Hospital'};
+            final hospital =
+                apt['hospital'] ?? {'full_name': 'Unknown Hospital'};
             final date = DateTime.parse(apt['appointment_date']);
-            final formattedDate = DateFormat('EEE, dd MMM yyyy').format(date);
+
             final formattedTime = DateFormat('hh:mm a').format(date);
             final status = apt['status'] ?? 'PENDING';
 
-            Color statusColor = status == 'CONFIRMED' ? Colors.green : Colors.orange;
+            Color statusColor = status == 'CONFIRMED'
+                ? Colors.green
+                : Colors.orange;
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -97,15 +107,32 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
                             children: [
-                              Text(DateFormat('MMM').format(date).toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                              Text(DateFormat('dd').format(date), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              Text(
+                                DateFormat('MMM').format(date).toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              Text(
+                                DateFormat('dd').format(date),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -114,16 +141,35 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(doctor['full_name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              Text(doctor['specialty'] ?? 'Specialist', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                              Text(
+                                doctor['full_name'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                doctor['specialty'] ?? 'Specialist',
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                  const Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: Colors.grey,
+                                  ),
                                   const SizedBox(width: 4),
-                                  Text(formattedTime, style: const TextStyle(fontSize: 13)),
+                                  Text(
+                                    formattedTime,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
                                 ],
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -135,22 +181,42 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                            const Icon(
+                              Icons.location_on,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 4),
-                            Text(hospital['full_name'], style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                            Text(
+                              hospital['full_name'],
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.1),
+                            color: statusColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: statusColor),
                           ),
-                          child: Text(status, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
-                        )
+                          child: Text(
+                            status,
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -171,7 +237,8 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
           .eq('event_type', 'PRESCRIPTION')
           .order('event_date', ascending: false),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData)
+          return const Center(child: CircularProgressIndicator());
         final list = snapshot.data as List;
         if (list.isEmpty) return _emptyState("No prescriptions found.");
 
@@ -181,12 +248,20 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
           itemBuilder: (context, index) {
             final event = list[index];
             final doctor = event['uploader'] ?? {'full_name': 'Doctor'};
-            final date = DateFormat.yMMMd().format(DateTime.parse(event['event_date']));
+            final date = DateFormat.yMMMd().format(
+              DateTime.parse(event['event_date']),
+            );
 
             return Card(
               child: ListTile(
-                leading: const CircleAvatar(backgroundColor: Colors.purple, child: Icon(Icons.description, color: Colors.white)),
-                title: Text(doctor['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.purple,
+                  child: Icon(Icons.description, color: Colors.white),
+                ),
+                title: Text(
+                  doctor['full_name'],
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Text("Date: $date\nRx: ${event['title']}"),
                 isThreeLine: true,
               ),
@@ -206,7 +281,8 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
           .eq('patient_id', userId)
           .order('created_at', ascending: false),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData)
+          return const Center(child: CircularProgressIndicator());
         final list = snapshot.data as List;
         if (list.isEmpty) return _emptyState("No diagnostic records.");
 
@@ -218,7 +294,10 @@ class _PatientHistoryPageState extends State<PatientHistoryPage> with SingleTick
             final center = item['provider'] ?? {'full_name': 'Lab'};
             return Card(
               child: ListTile(
-                leading: const CircleAvatar(backgroundColor: Colors.teal, child: Icon(Icons.science, color: Colors.white)),
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.teal,
+                  child: Icon(Icons.science, color: Colors.white),
+                ),
                 title: Text(center['full_name']),
                 subtitle: Text("Status: ${item['report_status']}"),
               ),

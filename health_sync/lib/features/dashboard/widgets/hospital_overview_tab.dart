@@ -16,13 +16,11 @@ class HospitalOverviewTab extends StatefulWidget {
 class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
   final _patientEmailController = TextEditingController();
   final _doctorEmailController = TextEditingController();
-  bool _isLoading = false;
 
   // 🏥 1. পেশেন্ট সার্চ এবং অ্যাকশন
   Future<void> _searchPatient() async {
     if (_patientEmailController.text.isEmpty) return;
 
-    setState(() => _isLoading = true);
     try {
       final email = _patientEmailController.text.trim();
       final data = await Supabase.instance.client
@@ -39,14 +37,16 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
         _showPatientOptions(data); // অপশন মেনু ওপেন
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Patient not found! Please check email.")),
+          const SnackBar(
+            content: Text("Patient not found! Please check email."),
+          ),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {}
   }
 
   // 📅 2. অ্যাপয়েন্টমেন্ট বুকিং ফাংশন (NEW FEATURE)
@@ -62,7 +62,14 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     final doctors = List<Map<String, dynamic>>.from(doctorsResponse);
 
     if (doctors.isEmpty) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("No doctors available in your hospital. Please assign doctors first.")));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "No doctors available in your hospital. Please assign doctors first.",
+            ),
+          ),
+        );
       return;
     }
 
@@ -75,92 +82,134 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text("Book Appointment"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("Patient: ${patient['full_name']}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Text("Book Appointment"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Patient: ${patient['full_name']}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
 
-                  // Doctor Dropdown
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: "Select Doctor", border: OutlineInputBorder()),
-                    items: doctors.map((doc) {
-                      final profile = doc['profiles'];
-                      return DropdownMenuItem(
-                        value: doc['doctor_id'] as String,
-                        child: Text("${profile['full_name']} (${profile['specialty'] ?? 'GP'})"),
-                      );
-                    }).toList(),
-                    onChanged: (val) => setStateDialog(() => selectedDoctorId = val),
+                // Doctor Dropdown
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Select Doctor",
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-
-                  // Date Picker
-                  ListTile(
-                    title: Text(selectedDate == null ? "Select Date" : DateFormat.yMMMd().format(selectedDate!)),
-                    leading: const Icon(Icons.calendar_today),
-                    tileColor: Colors.grey.shade100,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    onTap: () async {
-                      final date = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 30)));
-                      if (date != null) setStateDialog(() => selectedDate = date);
-                    },
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Time Picker
-                  ListTile(
-                    title: Text(selectedTime == null ? "Select Time" : selectedTime!.format(context)),
-                    leading: const Icon(Icons.access_time),
-                    tileColor: Colors.grey.shade100,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    onTap: () async {
-                      final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-                      if (time != null) setStateDialog(() => selectedTime = time);
-                    },
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedDoctorId == null || selectedDate == null || selectedTime == null) {
-                      return;
-                    }
-
-                    // ফাইনাল ডেটটাইম তৈরি করা
-                    final finalDateTime = DateTime(
-                        selectedDate!.year, selectedDate!.month, selectedDate!.day,
-                        selectedTime!.hour, selectedTime!.minute
+                  items: doctors.map((doc) {
+                    final profile = doc['profiles'];
+                    return DropdownMenuItem(
+                      value: doc['doctor_id'] as String,
+                      child: Text(
+                        "${profile['full_name']} (${profile['specialty'] ?? 'GP'})",
+                      ),
                     );
+                  }).toList(),
+                  onChanged: (val) =>
+                      setStateDialog(() => selectedDoctorId = val),
+                ),
+                const SizedBox(height: 12),
 
-                    try {
-                      await Supabase.instance.client.from('appointments').insert({
-                        'patient_id': patient['id'],
-                        'doctor_id': selectedDoctorId,
-                        'hospital_id': hospitalId,
-                        'appointment_date': finalDateTime.toIso8601String(),
-                        'status': 'CONFIRMED'
-                      });
-
-                      if (mounted) {
-                        Navigator.pop(ctx);
-                        Navigator.pop(context); // মেইন শিট বন্ধ
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Appointment Booked Successfully!"), backgroundColor: Colors.green));
-                      }
-                    } catch (e) {
-                      debugPrint("Error: $e");
-                    }
+                // Date Picker
+                ListTile(
+                  title: Text(
+                    selectedDate == null
+                        ? "Select Date"
+                        : DateFormat.yMMMd().format(selectedDate!),
+                  ),
+                  leading: const Icon(Icons.calendar_today),
+                  tileColor: Colors.grey.shade100,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 30)),
+                    );
+                    if (date != null) setStateDialog(() => selectedDate = date);
                   },
-                  child: const Text("Confirm Booking"),
-                )
+                ),
+                const SizedBox(height: 8),
+
+                // Time Picker
+                ListTile(
+                  title: Text(
+                    selectedTime == null
+                        ? "Select Time"
+                        : selectedTime!.format(context),
+                  ),
+                  leading: const Icon(Icons.access_time),
+                  tileColor: Colors.grey.shade100,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (time != null) setStateDialog(() => selectedTime = time);
+                  },
+                ),
               ],
-            );
-          }
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (selectedDoctorId == null ||
+                      selectedDate == null ||
+                      selectedTime == null) {
+                    return;
+                  }
+
+                  // ফাইনাল ডেটটাইম তৈরি করা
+                  final finalDateTime = DateTime(
+                    selectedDate!.year,
+                    selectedDate!.month,
+                    selectedDate!.day,
+                    selectedTime!.hour,
+                    selectedTime!.minute,
+                  );
+
+                  try {
+                    await Supabase.instance.client.from('appointments').insert({
+                      'patient_id': patient['id'],
+                      'doctor_id': selectedDoctorId,
+                      'hospital_id': hospitalId,
+                      'appointment_date': finalDateTime.toIso8601String(),
+                      'status': 'CONFIRMED',
+                    });
+
+                    if (mounted) {
+                      Navigator.pop(ctx);
+                      Navigator.pop(context); // মেইন শিট বন্ধ
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Appointment Booked Successfully!"),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    debugPrint("Error: $e");
+                  }
+                },
+                child: const Text("Confirm Booking"),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -169,7 +218,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
   Future<void> _assignDoctor() async {
     if (_doctorEmailController.text.isEmpty) return;
 
-    setState(() => _isLoading = true);
     try {
       final email = _doctorEmailController.text.trim();
       final hospitalId = Supabase.instance.client.auth.currentUser!.id;
@@ -182,33 +230,41 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
           .maybeSingle();
 
       if (doctor == null) {
-        if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("No Doctor found with this email.")));
+        if (mounted)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("No Doctor found with this email.")),
+          );
         return;
       }
 
       await Supabase.instance.client.from('hospital_doctors').insert({
         'hospital_id': hospitalId,
-        'doctor_id': doctor['id']
+        'doctor_id': doctor['id'],
       });
 
-      if(mounted) {
+      if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${doctor['full_name']} added to hospital list!")),
+          SnackBar(
+            content: Text("${doctor['full_name']} added to hospital list!"),
+          ),
         );
       }
     } catch (e) {
-      if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {}
   }
 
   // UI Helpers
   void _showPatientOptions(Map<String, dynamic> patient) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -220,17 +276,32 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  child: Text(patient['full_name'][0], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  child: Text(
+                    patient['full_name'][0],
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(patient['full_name'], style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(patient['phone'] ?? 'No Phone', style: GoogleFonts.poppins(color: Colors.grey)),
+                    Text(
+                      patient['full_name'],
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      patient['phone'] ?? 'No Phone',
+                      style: GoogleFonts.poppins(color: Colors.grey),
+                    ),
                   ],
-                )
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -269,11 +340,18 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => Scaffold(
-                      appBar: AppBar(title: Text("${patient['full_name']}'s History")),
-                      body: MedicalTimelineView(patientId: patient['id'], isEmbedded: false),
-                    ))
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(
+                        title: Text("${patient['full_name']}'s History"),
+                      ),
+                      body: MedicalTimelineView(
+                        patientId: patient['id'],
+                        isEmbedded: false,
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
@@ -283,11 +361,19 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     );
   }
 
-  void _showInputDialog({required String title, required String hint, required TextEditingController controller, required VoidCallback onConfirm}) {
+  void _showInputDialog({
+    required String title,
+    required String hint,
+    required TextEditingController controller,
+    required VoidCallback onConfirm,
+  }) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title: Text(
+          title,
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
@@ -297,55 +383,94 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCEL")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCEL"),
+          ),
           ElevatedButton(
             onPressed: onConfirm,
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
             child: const Text("CONFIRM"),
-          )
+          ),
         ],
       ),
     );
   }
 
   // Cards (Same as before)
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: color, size: 28),
           const SizedBox(height: 12),
-          Text(value, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold)),
-          Text(title, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            title,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildActionCard({required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
               child: Icon(icon, color: color),
             ),
             const SizedBox(width: 16),
@@ -353,8 +478,20 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -375,13 +512,33 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
           // Stats Row
           Row(
             children: [
-              Expanded(child: _buildStatCard("Total Doctors", "View List", Icons.people, Colors.blue)),
+              Expanded(
+                child: _buildStatCard(
+                  "Total Doctors",
+                  "View List",
+                  Icons.people,
+                  Colors.blue,
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildStatCard("Total Appointments", "Checking...", Icons.calendar_today, Colors.orange)),
+              Expanded(
+                child: _buildStatCard(
+                  "Total Appointments",
+                  "Checking...",
+                  Icons.calendar_today,
+                  Colors.orange,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 32),
-          Text("Quick Actions", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            "Quick Actions",
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 16),
 
           // Manage Patient (Book Appointment Inside)
@@ -392,7 +549,12 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
             color: Colors.teal,
             onTap: () {
               _patientEmailController.clear();
-              _showInputDialog(title: "Find Patient", hint: "Enter patient email", controller: _patientEmailController, onConfirm: _searchPatient);
+              _showInputDialog(
+                title: "Find Patient",
+                hint: "Enter patient email",
+                controller: _patientEmailController,
+                onConfirm: _searchPatient,
+              );
             },
           ),
           const SizedBox(height: 16),
@@ -405,7 +567,12 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
             color: Colors.purple,
             onTap: () {
               _doctorEmailController.clear();
-              _showInputDialog(title: "Add Doctor", hint: "Enter doctor email", controller: _doctorEmailController, onConfirm: _assignDoctor);
+              _showInputDialog(
+                title: "Add Doctor",
+                hint: "Enter doctor email",
+                controller: _doctorEmailController,
+                onConfirm: _assignDoctor,
+              );
             },
           ),
         ],

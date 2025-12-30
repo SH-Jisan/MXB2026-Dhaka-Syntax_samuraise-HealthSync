@@ -12,10 +12,12 @@ class DoctorPatientProfilePage extends ConsumerStatefulWidget {
   const DoctorPatientProfilePage({super.key, required this.patient});
 
   @override
-  ConsumerState<DoctorPatientProfilePage> createState() => _DoctorPatientProfilePageState();
+  ConsumerState<DoctorPatientProfilePage> createState() =>
+      _DoctorPatientProfilePageState();
 }
 
-class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfilePage> {
+class _DoctorPatientProfilePageState
+    extends ConsumerState<DoctorPatientProfilePage> {
   final List<String> _selectedTests = [];
   List<String> _allAvailableTests = [];
 
@@ -35,7 +37,9 @@ class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfileP
 
       if (mounted) {
         setState(() {
-          _allAvailableTests = (response as List).map((e) => e['name'] as String).toList();
+          _allAvailableTests = (response as List)
+              .map((e) => e['name'] as String)
+              .toList();
         });
       }
     } catch (e) {
@@ -52,7 +56,10 @@ class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfileP
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             final filteredTests = _allAvailableTests
-                .where((test) => test.toLowerCase().contains(searchQuery.toLowerCase()))
+                .where(
+                  (test) =>
+                      test.toLowerCase().contains(searchQuery.toLowerCase()),
+                )
                 .toList();
 
             return AlertDialog(
@@ -75,33 +82,39 @@ class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfileP
                     const SizedBox(height: 10),
                     Expanded(
                       child: filteredTests.isEmpty
-                          ? const Center(child: Text("No tests found. Run SQL."))
+                          ? const Center(
+                              child: Text("No tests found. Run SQL."),
+                            )
                           : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: filteredTests.length,
-                        itemBuilder: (context, index) {
-                          final testName = filteredTests[index];
-                          final isSelected = _selectedTests.contains(testName);
+                              shrinkWrap: true,
+                              itemCount: filteredTests.length,
+                              itemBuilder: (context, index) {
+                                final testName = filteredTests[index];
+                                final isSelected = _selectedTests.contains(
+                                  testName,
+                                );
 
-                          return CheckboxListTile(
-                            title: Text(testName),
-                            value: isSelected,
-                            activeColor: AppColors.primary,
-                            onChanged: (val) {
-                              setStateDialog(() {
-                                if (val == true) {
-                                  if (!_selectedTests.contains(testName)) {
-                                    _selectedTests.add(testName);
-                                  }
-                                } else {
-                                  _selectedTests.remove(testName);
-                                }
-                              });
-                              updateModalState(() {});
-                            },
-                          );
-                        },
-                      ),
+                                return CheckboxListTile(
+                                  title: Text(testName),
+                                  value: isSelected,
+                                  activeColor: AppColors.primary,
+                                  onChanged: (val) {
+                                    setStateDialog(() {
+                                      if (val == true) {
+                                        if (!_selectedTests.contains(
+                                          testName,
+                                        )) {
+                                          _selectedTests.add(testName);
+                                        }
+                                      } else {
+                                        _selectedTests.remove(testName);
+                                      }
+                                    });
+                                    updateModalState(() {});
+                                  },
+                                );
+                              },
+                            ),
                     ),
                   ],
                 ),
@@ -128,111 +141,160 @@ class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfileP
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 20, right: 20, top: 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Assign Tests & Advice", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Assign Tests & Advice",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-                    const Text("Selected Tests:", style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
+                  const Text(
+                    "Selected Tests:",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
 
-                    Wrap(
-                      spacing: 8.0,
-                      runSpacing: 4.0,
-                      children: [
-                        ..._selectedTests.map((test) => Chip(
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: [
+                      ..._selectedTests.map(
+                        (test) => Chip(
                           label: Text(test),
-                          backgroundColor: AppColors.primary.withOpacity(0.1),
+                          backgroundColor: AppColors.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           deleteIcon: const Icon(Icons.close, size: 18),
                           onDeleted: () {
                             setModalState(() {
                               _selectedTests.remove(test);
                             });
                           },
-                        )),
-                        ActionChip(
-                          avatar: const Icon(Icons.add, size: 18, color: Colors.white),
-                          label: const Text("Add Test", style: TextStyle(color: Colors.white)),
-                          backgroundColor: AppColors.primary,
-                          onPressed: () {
-                            _showTestSelectionDialog(setModalState);
-                          },
                         ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      controller: notesCtrl,
-                      maxLines: 2,
-                      decoration: const InputDecoration(
-                          labelText: "Clinical Notes / Additional Advice",
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.note_alt_outlined)
                       ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          if (_selectedTests.isEmpty && notesCtrl.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please select a test or add a note.")));
-                            return;
-                          }
-
-                          Navigator.pop(ctx);
-
-                          try {
-                            final doctorId = Supabase.instance.client.auth.currentUser!.id;
-                            final testsString = _selectedTests.join(", ");
-
-                            await Supabase.instance.client.from('medical_events').insert({
-                              'patient_id': widget.patient['id'],
-                              'uploader_id': doctorId,
-                              'title': _selectedTests.isNotEmpty ? 'Test Assigned: ${_selectedTests.length}' : 'Doctor Advice',
-                              'event_type': 'PRESCRIPTION',
-                              'event_date': DateTime.now().toIso8601String(),
-                              'severity': 'MEDIUM',
-                              'summary': 'Assigned Tests: $testsString. \nAdvice: ${notesCtrl.text}',
-                              'key_findings': _selectedTests,
-                              'extracted_text': "Tests Assigned:\n$testsString\n\nNotes:\n${notesCtrl.text}"
-                            });
-
-                            if(mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Prescription Sent Successfully!"), backgroundColor: Colors.green));
-
-                              // 🔥 টাইমলাইন রিফ্রেশ
-                              ref.invalidate(timelineProvider(widget.patient['id']));
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
-                          }
+                      ActionChip(
+                        avatar: const Icon(
+                          Icons.add,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          "Add Test",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: AppColors.primary,
+                        onPressed: () {
+                          _showTestSelectionDialog(setModalState);
                         },
-                        icon: const Icon(Icons.send),
-                        label: const Text("CONFIRM & ASSIGN"),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16)
-                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  TextField(
+                    controller: notesCtrl,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: "Clinical Notes / Additional Advice",
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.note_alt_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        if (_selectedTests.isEmpty && notesCtrl.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Please select a test or add a note.",
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        Navigator.pop(ctx);
+
+                        try {
+                          final doctorId =
+                              Supabase.instance.client.auth.currentUser!.id;
+                          final testsString = _selectedTests.join(", ");
+
+                          await Supabase.instance.client.from('medical_events').insert({
+                            'patient_id': widget.patient['id'],
+                            'uploader_id': doctorId,
+                            'title': _selectedTests.isNotEmpty
+                                ? 'Test Assigned: ${_selectedTests.length}'
+                                : 'Doctor Advice',
+                            'event_type': 'PRESCRIPTION',
+                            'event_date': DateTime.now().toIso8601String(),
+                            'severity': 'MEDIUM',
+                            'summary':
+                                'Assigned Tests: $testsString. \nAdvice: ${notesCtrl.text}',
+                            'key_findings': _selectedTests,
+                            'extracted_text':
+                                "Tests Assigned:\n$testsString\n\nNotes:\n${notesCtrl.text}",
+                          });
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Prescription Sent Successfully!",
+                                ),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+
+                            // 🔥 টাইমলাইন রিফ্রেশ
+                            ref.invalidate(
+                              timelineProvider(widget.patient['id']),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text("Error: $e")));
+                        }
+                      },
+                      icon: const Icon(Icons.send),
+                      label: const Text("CONFIRM & ASSIGN"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              );
-            }
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -241,7 +303,9 @@ class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfileP
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.patient['full_name'] ?? 'Patient Profile')),
+      appBar: AppBar(
+        title: Text(widget.patient['full_name'] ?? 'Patient Profile'),
+      ),
 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAssignTestDialog,
@@ -257,29 +321,50 @@ class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfileP
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
             ),
             child: Row(
               children: [
                 CircleAvatar(
-                    radius: 30,
-                    backgroundColor: AppColors.primary,
-                    child: Text(
-                        widget.patient['full_name'] != null ? widget.patient['full_name'][0].toUpperCase() : 'P',
-                        style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)
-                    )
+                  radius: 30,
+                  backgroundColor: AppColors.primary,
+                  child: Text(
+                    widget.patient['full_name'] != null
+                        ? widget.patient['full_name'][0].toUpperCase()
+                        : 'P',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.patient['full_name'] ?? 'Unknown', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(widget.patient['email'] ?? '', style: GoogleFonts.poppins(color: Colors.grey.shade700)),
-                    if(widget.patient['phone'] != null)
-                      Text(widget.patient['phone'], style: GoogleFonts.poppins(color: Colors.grey.shade700)),
+                    Text(
+                      widget.patient['full_name'] ?? 'Unknown',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      widget.patient['email'] ?? '',
+                      style: GoogleFonts.poppins(color: Colors.grey.shade700),
+                    ),
+                    if (widget.patient['phone'] != null)
+                      Text(
+                        widget.patient['phone'],
+                        style: GoogleFonts.poppins(color: Colors.grey.shade700),
+                      ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -293,7 +378,13 @@ class _DoctorPatientProfilePageState extends ConsumerState<DoctorPatientProfileP
               children: [
                 const Icon(Icons.history_edu, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text("Medical History & Reports", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  "Medical History & Reports",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),

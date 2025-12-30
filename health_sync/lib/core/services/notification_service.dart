@@ -1,44 +1,72 @@
+import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:developer';
 
-class NotificationService {
+// 🔥 Provider for Notification Service
+// This ensures we only have ONE instance active and it disposes properly
+final notificationServiceProvider = StateNotifierProvider<NotificationService, bool>((ref) {
+  return NotificationService();
+});
+
+class NotificationService extends StateNotifier<bool> {
+  NotificationService() : super(false);
+
   final _firebaseMessaging = FirebaseMessaging.instance;
   final _supabase = Supabase.instance.client;
+  
+  StreamSubscription<String>? _tokenRefreshSubscription;
+  StreamSubscription<RemoteMessage>? _messageSubscription;
 
   // ১. ইনিশিয়ালাইজেশন
   Future<void> initialize() async {
-    // পারমিশন চাওয়া
-    await _firebaseMessaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    if (state) return; // Already initialized
 
-    // টোকেন নেওয়া
-    final fcmToken = await _firebaseMessaging.getToken();
+    try {
+      // পারমিশন চাওয়া
+      await _firebaseMessaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
-    if (fcmToken != null) {
-      log("🔥 FCM Token: $fcmToken");
-      await _saveTokenToDatabase(fcmToken);
-    }
-
-    // টোকেন রিফ্রেশ হলে আপডেট করা (অ্যাপ আনইনস্টল/ক্লিয়ার ডাটা হলে টোকেন বদলায়)
-    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-      _saveTokenToDatabase(newToken);
-    });
-
-    // ফোরগ্রাউন্ডে নোটিফিকেশন হ্যান্ডেল করা (অপশনাল)
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      log('Got a message whilst in the foreground!');
-      log('Message data: ${message.data}');
-      if (message.notification != null) {
-        log('Message also contained a notification: ${message.notification}');
+      // টোকেন নেওয়া
+      final fcmToken = await _firebaseMessaging.getToken();
+      if (fcmToken != null) {
+        log("🔥 FCM Token found");
+        await _saveTokenToDatabase(fcmToken);
       }
-    });
+
+      // টোকেন রিফ্রেশ হলে আপডেট করা - Dispose handle করা হচ্ছে
+      _tokenRefreshSubscription = _firebaseMessaging.onTokenRefresh.listen((newToken) {
+        _saveTokenToDatabase(newToken);
+      });
+
+      // ফোরগ্রাউন্ডে নোটিফিকেশন হ্যান্ডেল করা
+      _messageSubscription = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        log('Got a message whilst in the foreground!');
+        if (message.notification != null) {
+          log('Message also contained a notification: ${message.notification}');
+        }
+      });
+
+      state = true; // Initialized
+      log("🔔 Notification Service Started Successfully");
+    } catch (e) {
+      log("❌ Notification Init Failed: $e");
+    }
   }
 
-  // ২. ডাটাবেসে সেভ করা
+  // ২. ডিসপোজ/ রিসেট (লগআউটের সময় কল হবে)
+  void disposeSubscriptions() {
+    _tokenRefreshSubscription?.cancel();
+    _messageSubscription?.cancel();
+    state = false;
+    log("🔕 Notification Service Stopped & Disposed");
+  }
+
+  // ৩. ডাটাবেসে সেভ করা
   Future<void> _saveTokenToDatabase(String token) async {
     final user = _supabase.auth.currentUser;
     if (user != null) {
@@ -48,8 +76,14 @@ class NotificationService {
         }).eq('id', user.id);
         log("✅ FCM Token saved to Supabase");
       } catch (e) {
-        log("❌ Error saving token: $e");
+        // Silent error
       }
     }
+  }
+  
+  @override
+  void dispose() {
+    disposeSubscriptions();
+    super.dispose();
   }
 }

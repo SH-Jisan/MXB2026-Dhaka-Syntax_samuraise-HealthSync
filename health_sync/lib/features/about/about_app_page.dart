@@ -22,30 +22,44 @@ class AboutAppPage extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: isDark 
-                      ? [AppColors.darkPrimary.withOpacity(0.2), AppColors.darkSurface]
-                      : [AppColors.primary.withOpacity(0.1), Colors.white],
+                  colors: isDark
+                      ? [
+                          AppColors.darkPrimary.withValues(alpha: 0.2),
+                          AppColors.darkSurface,
+                        ]
+                      : [
+                          AppColors.primary.withValues(alpha: 0.1),
+                          Colors.white,
+                        ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.health_and_safety, size: 80, color: isDark ? AppColors.darkPrimary : AppColors.primary),
+              child: Icon(
+                Icons.health_and_safety,
+                size: 80,
+                color: isDark ? AppColors.darkPrimary : AppColors.primary,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               "HealthSync Pro",
               style: GoogleFonts.poppins(
-                fontSize: 28, 
-                fontWeight: FontWeight.bold, 
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
             Text(
               "Version 1.0.0",
               style: GoogleFonts.poppins(
-                fontSize: 14, 
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary
+                fontSize: 14,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 40),
@@ -58,16 +72,36 @@ class AboutAppPage extends StatelessWidget {
                 color: isDark ? AppColors.darkSurface : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.08), blurRadius: 10, offset: const Offset(0, 4))
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
                 border: isDark ? Border.all(color: Colors.grey.shade800) : null,
               ),
               child: Column(
                 children: [
-                  _buildStepRow("1", "Upload medical reports or prescriptions to maintain history.", isDark),
-                  _buildStepRow("2", "AI analyzes reports and creates a timeline automatically.", isDark),
-                  _buildStepRow("3", "Consult AI Doctor for instant symptom checking.", isDark),
-                  _buildStepRow("4", "Use Blood Bank to find donors or request blood.", isDark),
+                  _buildStepRow(
+                    "1",
+                    "Upload medical reports or prescriptions to maintain history.",
+                    isDark,
+                  ),
+                  _buildStepRow(
+                    "2",
+                    "AI analyzes reports and creates a timeline automatically.",
+                    isDark,
+                  ),
+                  _buildStepRow(
+                    "3",
+                    "Consult AI Doctor for instant symptom checking.",
+                    isDark,
+                  ),
+                  _buildStepRow(
+                    "4",
+                    "Use Blood Bank to find donors or request blood.",
+                    isDark,
+                  ),
                 ],
               ),
             ),
@@ -84,29 +118,58 @@ class AboutAppPage extends StatelessWidget {
               mainAxisSpacing: 12,
               childAspectRatio: 2.5,
               children: [
-                _buildTechCard(Icons.code, "Flutter", "UI Framework", Colors.blue, isDark),
-                _buildTechCard(Icons.storage_rounded, "Supabase", "Backend DB", Colors.green, isDark),
-                _buildTechCard(Icons.psychology, "Gemini AI", "Intelligence", Colors.purple, isDark),
-                _buildTechCard(Icons.search, "Serper API", "Doc Search", Colors.orange, isDark),
+                _buildTechCard(
+                  Icons.code,
+                  "Flutter",
+                  "UI Framework",
+                  Colors.blue,
+                  isDark,
+                ),
+                _buildTechCard(
+                  Icons.storage_rounded,
+                  "Supabase",
+                  "Backend DB",
+                  Colors.green,
+                  isDark,
+                ),
+                _buildTechCard(
+                  Icons.psychology,
+                  "Gemini AI",
+                  "Intelligence",
+                  Colors.purple,
+                  isDark,
+                ),
+                _buildTechCard(
+                  Icons.search,
+                  "Serper API",
+                  "Doc Search",
+                  Colors.orange,
+                  isDark,
+                ),
               ],
             ),
 
             const SizedBox(height: 48),
-            
+
             // Footer
             Column(
               children: [
                 Text(
                   "Made with ❤️ for Better Healthcare",
                   style: GoogleFonts.poppins(
-                    color: isDark ? Colors.grey.shade400 : AppColors.textSecondary, 
-                    fontWeight: FontWeight.w500
+                    color: isDark
+                        ? Colors.grey.shade400
+                        : AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "© 2024 HealthSync Inc.",
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
                 ),
               ],
             ),
@@ -125,9 +188,9 @@ class AboutAppPage extends StatelessWidget {
         child: Text(
           title,
           style: GoogleFonts.poppins(
-            fontSize: 18, 
-            fontWeight: FontWeight.bold, 
-            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           ),
         ),
       ),
@@ -143,14 +206,16 @@ class AboutAppPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkPrimary.withOpacity(0.2) : AppColors.primary.withOpacity(0.1),
+              color: isDark
+                  ? AppColors.darkPrimary.withValues(alpha: 0.2)
+                  : AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Text(
               number,
               style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold, 
-                color: isDark ? AppColors.darkPrimary : AppColors.primary
+                fontWeight: FontWeight.bold,
+                color: isDark ? AppColors.darkPrimary : AppColors.primary,
               ),
             ),
           ),
@@ -159,9 +224,11 @@ class AboutAppPage extends StatelessWidget {
             child: Text(
               text,
               style: GoogleFonts.poppins(
-                fontSize: 14, 
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary, 
-                height: 1.5
+                fontSize: 14,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+                height: 1.5,
               ),
             ),
           ),
@@ -170,23 +237,35 @@ class AboutAppPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTechCard(IconData icon, String title, String subtitle, Color color, bool isDark) {
+  Widget _buildTechCard(
+    IconData icon,
+    String title,
+    String subtitle,
+    Color color,
+    bool isDark,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade100),
+        border: Border.all(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+        ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), blurRadius: 5, offset: const Offset(0, 2))
-        ]
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(isDark ? 0.2 : 0.1),
+              color: color.withValues(alpha: isDark ? 0.2 : 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 20, color: color),
@@ -198,20 +277,20 @@ class AboutAppPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  title, 
+                  title,
                   style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.bold, 
+                    fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: isDark ? AppColors.darkTextPrimary : Colors.black87
-                  )
+                    color: isDark ? AppColors.darkTextPrimary : Colors.black87,
+                  ),
                 ),
                 Text(
-                  subtitle, 
+                  subtitle,
                   style: GoogleFonts.poppins(
-                    fontSize: 10, 
-                    color: isDark ? Colors.grey.shade400 : Colors.grey
-                  ), 
-                  overflow: TextOverflow.ellipsis
+                    fontSize: 10,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

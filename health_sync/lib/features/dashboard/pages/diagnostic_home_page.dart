@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:intl/intl.dart'; // তারিখ ফরম্যাটের জন্য
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/side_drawer.dart';
@@ -13,7 +13,8 @@ class DiagnosticHomePage extends StatefulWidget {
   State<DiagnosticHomePage> createState() => _DiagnosticHomePageState();
 }
 
-class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTickerProviderStateMixin {
+class _DiagnosticHomePageState extends State<DiagnosticHomePage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // সার্চ ও রেজিস্ট্রেশন কন্ট্রোলার
@@ -36,19 +37,33 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
 
   Future<void> _searchPatient() async {
     if (_searchController.text.isEmpty) return;
-    setState(() { _isLoading = true; _searchedPatient = null; });
+    setState(() {
+      _isLoading = true;
+      _searchedPatient = null;
+    });
     try {
-      final data = await Supabase.instance.client.from('profiles').select().eq('email', _searchController.text.trim()).eq('role', 'CITIZEN').maybeSingle();
+      final data = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('email', _searchController.text.trim())
+          .eq('role', 'CITIZEN')
+          .maybeSingle();
       if (mounted) {
         if (data != null) {
           setState(() => _searchedPatient = data);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Patient not found!")));
-          _showRegistrationDialog(preFilledEmail: _searchController.text.trim());
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Patient not found!")));
+          _showRegistrationDialog(
+            preFilledEmail: _searchController.text.trim(),
+          );
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -64,12 +79,22 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
         'patient_id': _searchedPatient!['id'],
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Assigned Successfully!"), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Assigned Successfully!"),
+            backgroundColor: Colors.green,
+          ),
+        );
         _tabController.animateTo(0); // লিস্টে ফিরে যাওয়া
-        setState(() { _searchedPatient = null; _searchController.clear(); });
+        setState(() {
+          _searchedPatient = null;
+          _searchController.clear();
+        });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error or Already Assigned: $e")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error or Already Assigned: $e")));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -81,21 +106,31 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
     Navigator.pop(context);
     setState(() => _isLoading = true);
     try {
-      await Supabase.instance.client.rpc('create_dummy_user', params: {
-        'u_email': _emailController.text.trim(),
-        'u_password': '123456',
-        'u_name': _nameController.text.trim(),
-        'u_phone': _phoneController.text.trim(),
-        'u_role': 'CITIZEN',
-        'u_address': ''
-      });
-      if(mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Registered!"), backgroundColor: Colors.green));
+      await Supabase.instance.client.rpc(
+        'create_dummy_user',
+        params: {
+          'u_email': _emailController.text.trim(),
+          'u_password': '123456',
+          'u_name': _nameController.text.trim(),
+          'u_phone': _phoneController.text.trim(),
+          'u_role': 'CITIZEN',
+          'u_address': '',
+        },
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Registered!"),
+            backgroundColor: Colors.green,
+          ),
+        );
         _searchController.text = _emailController.text.trim();
         _searchPatient();
       }
-    } catch(e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -110,14 +145,29 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: _nameController, decoration: const InputDecoration(labelText: "Full Name")),
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: "Email")),
-            TextField(controller: _phoneController, decoration: const InputDecoration(labelText: "Phone")),
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: "Full Name"),
+            ),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: "Email"),
+            ),
+            TextField(
+              controller: _phoneController,
+              decoration: const InputDecoration(labelText: "Phone"),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCEL")),
-          ElevatedButton(onPressed: _registerNewPatient, child: const Text("REGISTER")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCEL"),
+          ),
+          ElevatedButton(
+            onPressed: _registerNewPatient,
+            child: const Text("REGISTER"),
+          ),
         ],
       ),
     );
@@ -142,15 +192,18 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
           ],
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: () => setState((){}))
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => setState(() {}),
+          ),
         ],
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
           _buildAssignedPatientsTab(), // 1. সব রোগী
-          _buildPendingReportsTab(),   // 2. শুধু পেন্ডিং কাজ (🔥 NEW)
-          _buildSearchTab(),           // 3. নতুন অ্যাসাইন
+          _buildPendingReportsTab(), // 2. শুধু পেন্ডিং কাজ (🔥 NEW)
+          _buildSearchTab(), // 3. নতুন অ্যাসাইন
         ],
       ),
     );
@@ -166,11 +219,21 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
           .eq('diagnostic_id', diagnosticId)
           .order('assigned_at', ascending: false),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-        if (snapshot.hasError) return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red)));
+        if (snapshot.connectionState == ConnectionState.waiting)
+          return const Center(child: CircularProgressIndicator());
+        if (snapshot.hasError)
+          return Center(
+            child: Text(
+              "Error: ${snapshot.error}",
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
 
         final list = snapshot.data as List;
-        if (list.isEmpty) return const Center(child: Text("No assigned patients. Go to Search tab."));
+        if (list.isEmpty)
+          return const Center(
+            child: Text("No assigned patients. Go to Search tab."),
+          );
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -182,10 +245,18 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
             return Card(
               child: ListTile(
                 leading: CircleAvatar(child: Text(patient['full_name'][0])),
-                title: Text(patient['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(
+                  patient['full_name'],
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Text(patient['phone'] ?? patient['email']),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DiagnosticPatientView(patient: patient))),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DiagnosticPatientView(patient: patient),
+                  ),
+                ),
               ),
             );
           },
@@ -207,7 +278,8 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
           .eq('report_status', 'PENDING') // 🔍 ফিল্টার: শুধু পেন্ডিং
           .order('created_at', ascending: false),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+        if (snapshot.connectionState == ConnectionState.waiting)
+          return const Center(child: CircularProgressIndicator());
 
         final pendingOrders = snapshot.data as List;
 
@@ -218,7 +290,13 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
               children: [
                 Icon(Icons.task_alt, size: 60, color: Colors.green.shade300),
                 const SizedBox(height: 16),
-                const Text("Great! No pending reports.", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                const Text(
+                  "Great! No pending reports.",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
+                ),
               ],
             ),
           );
@@ -231,36 +309,61 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
             final order = pendingOrders[index];
             final patient = order['profiles'];
             final tests = List.from(order['test_names'] ?? []).join(", ");
-            final date = DateFormat('dd MMM, hh:mm a').format(DateTime.parse(order['created_at']));
+            final date = DateFormat(
+              'dd MMM, hh:mm a',
+            ).format(DateTime.parse(order['created_at']));
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.orange.shade200)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.orange.shade200),
+              ),
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
                   backgroundColor: Colors.orange.shade50,
-                  child: const Icon(Icons.pending_actions, color: Colors.orange),
+                  child: const Icon(
+                    Icons.pending_actions,
+                    color: Colors.orange,
+                  ),
                 ),
-                title: Text(patient['full_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(
+                  patient['full_name'],
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 4),
-                    Text(tests, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
-                    Text("Ordered: $date", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(
+                      tests,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      "Ordered: $date",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                   ],
                 ),
                 trailing: ElevatedButton(
                   onPressed: () {
                     // সরাসরি ওই রোগীর প্রোফাইলে নিয়ে যাব
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => DiagnosticPatientView(patient: patient)));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DiagnosticPatientView(patient: patient),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      visualDensity: VisualDensity.compact
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    visualDensity: VisualDensity.compact,
                   ),
                   child: const Text("Process"),
                 ),
@@ -283,24 +386,39 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
             decoration: InputDecoration(
               hintText: "Search by Email",
               prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               filled: true,
               fillColor: Colors.white,
-              suffixIcon: IconButton(icon: const Icon(Icons.arrow_forward), onPressed: _searchPatient),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: _searchPatient,
+              ),
             ),
             onSubmitted: (_) => _searchPatient(),
           ),
           const SizedBox(height: 32),
-          if (_isLoading) const CircularProgressIndicator()
+          if (_isLoading)
+            const CircularProgressIndicator()
           else if (_searchedPatient != null)
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Column(
                 children: [
                   const CircleAvatar(radius: 30, child: Icon(Icons.person)),
                   const SizedBox(height: 16),
-                  Text(_searchedPatient!['full_name'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    _searchedPatient!['full_name'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Text(_searchedPatient!['email']),
                   const SizedBox(height: 24),
                   SizedBox(
@@ -310,7 +428,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
                       icon: const Icon(Icons.person_add),
                       label: const Text("ASSIGN TO CENTER"),
                     ),
-                  )
+                  ),
                 ],
               ),
             )
@@ -319,7 +437,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage> with SingleTick
               onPressed: () => _showRegistrationDialog(),
               icon: const Icon(Icons.app_registration),
               label: const Text("Register New Patient"),
-            )
+            ),
         ],
       ),
     );

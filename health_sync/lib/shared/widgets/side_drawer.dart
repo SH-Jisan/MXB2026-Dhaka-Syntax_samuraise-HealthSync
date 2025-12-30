@@ -28,7 +28,12 @@ class SideDrawer extends ConsumerWidget {
         children: [
           // 1. Header with Gradient & User Info
           Container(
-            padding: const EdgeInsets.only(top: 50, bottom: 24, left: 24, right: 24),
+            padding: const EdgeInsets.only(
+              top: 50,
+              bottom: 24,
+              left: 24,
+              right: 24,
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [AppColors.primary, AppColors.secondary],
@@ -44,9 +49,9 @@ class SideDrawer extends ConsumerWidget {
                   child: Text(
                     firstLetter,
                     style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -91,7 +96,8 @@ class SideDrawer extends ConsumerWidget {
                   icon: Icons.dashboard_outlined,
                   text: "Dashboard",
                   onTap: () => Navigator.pop(context),
-                  isActive: true, // Assuming we are on dashboard if drawer is opened usually
+                  isActive:
+                      true, // Assuming we are on dashboard if drawer is opened usually
                 ),
 
                 _buildDrawerItem(
@@ -103,8 +109,8 @@ class SideDrawer extends ConsumerWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const BloodHomePage())
+                      context,
+                      MaterialPageRoute(builder: (_) => const BloodHomePage()),
                     );
                   },
                 ),
@@ -117,8 +123,8 @@ class SideDrawer extends ConsumerWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const AboutAppPage())
+                      context,
+                      MaterialPageRoute(builder: (_) => const AboutAppPage()),
                     );
                   },
                 ),
@@ -129,30 +135,33 @@ class SideDrawer extends ConsumerWidget {
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withOpacity(0.05) : Colors.transparent,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: SwitchListTile(
                     title: Text(
-                        "Dark Mode",
-                        style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15,
-                            color: Theme.of(context).textTheme.bodyMedium?.color
-                        )
+                      "Dark Mode",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
                     ),
                     secondary: Icon(
-                        isDark ? Icons.dark_mode : Icons.light_mode,
-                        color: isDark ? Colors.amber : Colors.grey.shade600
+                      isDark ? Icons.dark_mode : Icons.light_mode,
+                      color: isDark ? Colors.amber : Colors.grey.shade600,
                     ),
                     value: isDark,
                     onChanged: (val) {
                       ref.read(themeProvider.notifier).toggleTheme();
                     },
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-
               ],
             ),
           ),
@@ -180,15 +189,15 @@ class SideDrawer extends ConsumerWidget {
   }
 
   Widget _buildDrawerItem(
-      BuildContext context, {
-        required IconData icon,
-        required String text,
-        String? subtitle,
-        required VoidCallback onTap,
-        Color? iconColor,
-        Color? textColor,
-        bool isActive = false,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    String? subtitle,
+    required VoidCallback onTap,
+    Color? iconColor,
+    Color? textColor,
+    bool isActive = false,
+  }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -207,14 +216,22 @@ class SideDrawer extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+        color: isActive
+            ? AppColors.primary.withValues(alpha: 0.1)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
         leading: Icon(icon, color: color),
         title: Text(text, style: textStyle),
         subtitle: subtitle != null
-            ? Text(subtitle, style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.grey.shade500))
+            ? Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.white54 : Colors.grey.shade500,
+                ),
+              )
             : null,
         onTap: onTap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

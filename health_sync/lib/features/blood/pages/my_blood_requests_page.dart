@@ -30,24 +30,32 @@ class MyBloodRequestsPage extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.history_edu, size: 60, color: Colors.red.shade300),
+                    child: Icon(
+                      Icons.history_edu,
+                      size: 60,
+                      color: Colors.red.shade300,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     "No Requests Yet",
                     style: GoogleFonts.poppins(
-                      fontSize: 20, 
-                      fontWeight: FontWeight.bold, 
-                      color: isDark ? Colors.white : AppColors.textPrimary
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     "You haven't posted any blood requests.",
-                    style: GoogleFonts.poppins(color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                    style: GoogleFonts.poppins(
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -59,7 +67,9 @@ class MyBloodRequestsPage extends ConsumerWidget {
             itemCount: requests.length,
             itemBuilder: (context, index) {
               final req = requests[index];
-              final acceptors = List<dynamic>.from(req['request_acceptors'] ?? []);
+              final acceptors = List<dynamic>.from(
+                req['request_acceptors'] ?? [],
+              );
               final isCritical = req['urgency'] == 'CRITICAL';
 
               return Container(
@@ -69,40 +79,70 @@ class MyBloodRequestsPage extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.3 : 0.08,
+                      ),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
-                    )
+                    ),
                   ],
-                  border: isCritical 
-                      ? Border.all(color: Colors.red.shade100.withOpacity(isDark ? 0.2 : 1.0), width: 1.5) 
-                      : (isDark ? Border.all(color: Colors.grey.shade800) : null),
+                  border: isCritical
+                      ? Border.all(
+                          color: Colors.red.shade100.withValues(
+                            alpha: isDark ? 0.2 : 1.0,
+                          ),
+                          width: 1.5,
+                        )
+                      : (isDark
+                            ? Border.all(color: Colors.grey.shade800)
+                            : null),
                 ),
                 child: Theme(
-                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  data: Theme.of(
+                    context,
+                  ).copyWith(dividerColor: Colors.transparent),
                   child: ExpansionTile(
-                    tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                     childrenPadding: const EdgeInsets.only(bottom: 16),
                     iconColor: isDark ? Colors.white70 : Colors.black54,
-                    collapsedIconColor: isDark ? Colors.grey.shade500 : Colors.grey,
+                    collapsedIconColor: isDark
+                        ? Colors.grey.shade500
+                        : Colors.grey,
                     title: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: isCritical 
-                                ? [Colors.red.shade400, Colors.red.shade700] 
-                                : [isDark ? AppColors.darkPrimary : AppColors.primary, isDark ? Colors.teal.shade700 : AppColors.secondary],
+                              colors: isCritical
+                                  ? [Colors.red.shade400, Colors.red.shade700]
+                                  : [
+                                      isDark
+                                          ? AppColors.darkPrimary
+                                          : AppColors.primary,
+                                      isDark
+                                          ? Colors.teal.shade700
+                                          : AppColors.secondary,
+                                    ],
                             ),
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: (isCritical ? Colors.red : AppColors.primary).withOpacity(0.3),
+                                color:
+                                    (isCritical
+                                            ? Colors.red
+                                            : AppColors.primary)
+                                        .withValues(alpha: 0.3),
                                 blurRadius: 6,
                                 offset: const Offset(0, 3),
-                              )
-                            ]
+                              ),
+                            ],
                           ),
                           child: Text(
                             req['blood_group'],
@@ -119,21 +159,36 @@ class MyBloodRequestsPage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                req['hospital_name'], 
+                                req['hospital_name'],
                                 style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold, 
-                                  fontSize: 16, 
-                                  color: isDark ? Colors.white : AppColors.textPrimary
-                                )
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  Icon(Icons.access_time, size: 14, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: isDark
+                                        ? Colors.grey.shade400
+                                        : AppColors.textSecondary,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    DateFormat('dd MMM, hh:mm a').format(DateTime.parse(req['created_at'])),
-                                    style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                                    DateFormat(
+                                      'dd MMM, hh:mm a',
+                                    ).format(DateTime.parse(req['created_at'])),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: isDark
+                                          ? Colors.grey.shade400
+                                          : AppColors.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -147,9 +202,13 @@ class MyBloodRequestsPage extends ConsumerWidget {
                       child: Row(
                         children: [
                           Icon(
-                            acceptors.isEmpty ? Icons.hourglass_empty : Icons.check_circle,
+                            acceptors.isEmpty
+                                ? Icons.hourglass_empty
+                                : Icons.check_circle,
                             size: 16,
-                            color: acceptors.isEmpty ? Colors.orange : Colors.green,
+                            color: acceptors.isEmpty
+                                ? Colors.orange
+                                : Colors.green,
                           ),
                           const SizedBox(width: 6),
                           Text(
@@ -157,9 +216,11 @@ class MyBloodRequestsPage extends ConsumerWidget {
                                 ? "Waiting for donors..."
                                 : "${acceptors.length} Donor(s) Accepted",
                             style: GoogleFonts.poppins(
-                                color: acceptors.isEmpty ? Colors.orange.shade700 : Colors.green.shade700,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13
+                              color: acceptors.isEmpty
+                                  ? Colors.orange.shade700
+                                  : Colors.green.shade700,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -172,16 +233,30 @@ class MyBloodRequestsPage extends ConsumerWidget {
                           child: Column(
                             children: [
                               const SizedBox(height: 10),
-                              Icon(Icons.notifications_active_outlined, size: 40, color: Colors.orange.shade300),
+                              Icon(
+                                Icons.notifications_active_outlined,
+                                size: 40,
+                                color: Colors.orange.shade300,
+                              ),
                               const SizedBox(height: 10),
                               Text(
                                 "We have notified nearby donors.",
-                                style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: isDark ? Colors.white : AppColors.textPrimary),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
+                                ),
                               ),
                               Text(
                                 "You will see their details here once they accept.",
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.grey.shade400 : AppColors.textSecondary),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : AppColors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -193,35 +268,68 @@ class MyBloodRequestsPage extends ConsumerWidget {
                           final phone = profile['phone'] ?? '';
 
                           return Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.green.shade900.withOpacity(0.3) : Colors.green.shade50,
+                              color: isDark
+                                  ? Colors.green.shade900.withValues(alpha: 0.3)
+                                  : Colors.green.shade50,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: isDark ? Colors.green.shade800 : Colors.green.shade100),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.green.shade800
+                                    : Colors.green.shade100,
+                              ),
                             ),
                             child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
                               leading: CircleAvatar(
-                                backgroundColor: isDark ? Colors.green.shade800 : Colors.white,
-                                child: Icon(Icons.person, color: isDark ? Colors.green.shade100 : Colors.green.shade700),
+                                backgroundColor: isDark
+                                    ? Colors.green.shade800
+                                    : Colors.white,
+                                child: Icon(
+                                  Icons.person,
+                                  color: isDark
+                                      ? Colors.green.shade100
+                                      : Colors.green.shade700,
+                                ),
                               ),
                               title: Text(
-                                name, 
-                                style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 15, color: isDark ? Colors.white : Colors.black)
+                                name,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: isDark ? Colors.white : Colors.black,
+                                ),
                               ),
                               subtitle: Text(
                                 "Hero Donor",
-                                style: GoogleFonts.poppins(fontSize: 12, color: isDark ? Colors.green.shade200 : Colors.green.shade700),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? Colors.green.shade200
+                                      : Colors.green.shade700,
+                                ),
                               ),
                               trailing: IconButton(
                                 icon: CircleAvatar(
                                   backgroundColor: Colors.green.shade600,
                                   radius: 20,
-                                  child: const Icon(Icons.call, color: Colors.white, size: 20),
+                                  child: const Icon(
+                                    Icons.call,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                                 onPressed: () async {
                                   final url = Uri.parse("tel:$phone");
-                                  if (await canLaunchUrl(url)) await launchUrl(url);
+                                  if (await canLaunchUrl(url))
+                                    await launchUrl(url);
                                 },
                               ),
                             ),
