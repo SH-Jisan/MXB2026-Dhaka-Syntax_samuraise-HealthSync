@@ -8,6 +8,9 @@ class MedicalEvent {
   final List<String> attachmentUrls;
   final DateTime createdAt;
 
+  // 🔥 নতুন ফিল্ড: টেস্ট বা ফাইন্ডিংস লিস্ট
+  final List<String> keyFindings;
+
   MedicalEvent({
     required this.id,
     required this.title,
@@ -17,9 +20,9 @@ class MedicalEvent {
     this.summary,
     required this.attachmentUrls,
     required this.createdAt,
+    required this.keyFindings, // Constructor এ যোগ করা হলো
   });
 
-  // Supabase JSON থেকে অবজেক্ট বানানোর ফ্যাক্টরি মেথড
   factory MedicalEvent.fromJson(Map<String, dynamic> json) {
     return MedicalEvent(
       id: json['id'],
@@ -30,6 +33,9 @@ class MedicalEvent {
       summary: json['summary'],
       attachmentUrls: List<String>.from(json['attachment_urls'] ?? []),
       createdAt: DateTime.parse(json['created_at']),
+
+      // 🔥 ডাটাবেস থেকে key_findings লিস্ট পড়া হচ্ছে
+      keyFindings: List<String>.from(json['key_findings'] ?? []),
     );
   }
 }

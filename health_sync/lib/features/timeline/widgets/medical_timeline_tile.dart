@@ -23,8 +23,7 @@ class MedicalTimelineTile extends StatelessWidget {
 
     final isPrescription = event.eventType == 'PRESCRIPTION';
     final primaryColor = isPrescription ? Colors.purple : AppColors.primary;
-    // ডার্ক মোডের জন্য হালকা শেড ব্যবহার না করে একটু ডার্ক শেড ব্যবহার করা হলো
-    final lightColor = isDark 
+    final lightColor = isDark
         ? (isPrescription ? Colors.purple.withOpacity(0.2) : AppColors.primary.withOpacity(0.2))
         : (isPrescription ? Colors.purple.shade50 : Colors.teal.shade50);
 
@@ -40,19 +39,12 @@ class MedicalTimelineTile extends StatelessWidget {
         height: 40,
         indicator: Container(
           decoration: BoxDecoration(
-            color: lightColor,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: primaryColor,
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: primaryColor.withOpacity(0.2),
-                blurRadius: 6,
-                offset: const Offset(0, 2)
-              )
-            ]
+              color: lightColor,
+              shape: BoxShape.circle,
+              border: Border.all(color: primaryColor, width: 2),
+              boxShadow: [
+                BoxShadow(color: primaryColor.withOpacity(0.2), blurRadius: 6, offset: const Offset(0, 2))
+              ]
           ),
           child: Icon(
             isPrescription ? Icons.medication_outlined : Icons.assignment_outlined,
@@ -78,8 +70,7 @@ class MedicalTimelineTile extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                // 🔥 ফিক্স: ডার্ক মোডে কার্ড কালার থিম থেকে আসবে
-                color: theme.cardTheme.color, 
+                color: theme.cardTheme.color,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -140,7 +131,32 @@ class MedicalTimelineTile extends StatelessWidget {
                       ),
                     ),
                   ],
-                  
+
+                  // 🔥 নতুন: টেস্ট বা ফাইন্ডিংস চিপস আকারে দেখানো
+                  if (event.keyFindings.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: event.keyFindings.map((test) => Chip(
+                        label: Text(
+                            test,
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: isDark ? Colors.white70 : Colors.black87
+                            )
+                        ),
+                        backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300)
+                        ),
+                      )).toList(),
+                    ),
+                  ],
+
                   const SizedBox(height: 12),
                   Divider(height: 1, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
                   const SizedBox(height: 8),
@@ -171,16 +187,15 @@ class MedicalTimelineTile extends StatelessWidget {
   }
 }
 
-// Private helper widget just for the badge
+// Severity Badge Helper (Same as before)
 class _SeverityBadge extends StatelessWidget {
   final String severity;
-
   const _SeverityBadge({required this.severity});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     Color color;
     Color bg;
 

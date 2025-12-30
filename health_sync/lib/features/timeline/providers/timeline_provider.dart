@@ -2,18 +2,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../shared/models/medical_event_model.dart';
 
-// ডাটাবেস থেকে মেডিকেল ইভেন্ট লোড করার প্রোভাইডার
-final timelineProvider = FutureProvider.autoDispose<List<MedicalEvent>>((ref) async {
-  final user = Supabase.instance.client.auth.currentUser;
-  if (user == null) return [];
+// 🔥 আপডেট: .family ব্যবহার করা হয়েছে যাতে patientId পাস করা যায়
+final timelineProvider = FutureProvider.autoDispose.family<List<MedicalEvent>, String?>((ref, patientId) async {
 
-  // ডাটাবেস কুয়েরি
-  final response = await Supabase.instance.client
-      .from('medical_events')
-      .select()
-      .eq('patient_id', user.id) // শুধু নিজের ডাটা
-      .order('event_date', ascending: false); // নতুন তারিখ আগে থাকবে
+  // ১. যদি patientId দেওয়া থাকে, তবে সেই রোগীর ডাটা আনবে (ডাক্তারের জন্য)
+  // ২. যদি না থাকে (null), তবে লগইন করা ইউজারের ডাটা আনবে (সিটিজেনের জন্য)
+  final targetUserId = patientId ?? Supabase.instance.client.auth.currentUser?.id;
 
-  // লিস্ট কনভার্শন
-  return (response as List).map((e) => MedicalEvent.fromJson(e)).toList();
+  if (targetUserId == null) return [];
+
+  try {
+    final response = await Supabase.instance.client
+        .from('medical_events')
+        .select()
+        .eq('patient_id', targetUserId) // 🔥 ডায়নামিক আইডি
+        .order('event_date', ascending: false);
+
+    return (response as List).map((e) => MedicalEvent.fromJson(e)).toList();
+  } catch (e) {
+    throw Exception("Error loading timeline: $e");
+  }
 });

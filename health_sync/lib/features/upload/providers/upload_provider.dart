@@ -17,14 +17,13 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
   UploadController(this._ref) : super(const AsyncData(null));
 
-  // 🔥 UPDATE: patientId অপশনাল প্যারামিটার হিসেবে নেওয়া হচ্ছে
   Future<UploadStatus> uploadAndAnalyze(File file, {String? patientId}) async {
     state = const AsyncLoading();
     try {
       final currentUser = Supabase.instance.client.auth.currentUser;
       if (currentUser == null) throw Exception("User not logged in");
 
-      // ১. যদি patientId বাইরে থেকে আসে (Hospital আপলোড করছে), সেটা ব্যবহার হবে
+      // ১. যদি patientId বাইরে থেকে আসে (Hospital/Doctor আপলোড করছে), সেটা ব্যবহার হবে
       // আর না আসলে নিজের আইডি (User নিজে আপলোড করছে)
       final targetUserId = patientId ?? currentUser.id;
 
@@ -35,7 +34,7 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
 
       final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
       final fileExt = mimeType.split('/').last;
-      // ফাইলনেমে targetUserId ব্যবহার করছি যাতে ফোল্ডার স্ট্রাকচার ঠিক থাকে
+
       final fileName = '$targetUserId/${const Uuid().v4()}.$fileExt';
 
       // ৩. আপলোড (Storage Bucket)
@@ -52,7 +51,7 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
           'process-medical-report',
           body: {
             'patient_id': targetUserId, // যার প্রোফাইলে রিপোর্ট যাবে
-            'uploader_id': currentUser.id, // যে আপলোড করছে (Hospital/User)
+            'uploader_id': currentUser.id, // যে আপলোড করছে
             'imageBase64': fileBase64,
             'mimeType': mimeType,
             'file_url': fileUrl,
@@ -61,10 +60,15 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
           },
         );
 
-        // সব ঠিক থাকলে রিফ্রেশ
-        // যদি নিজের প্রোফাইলে আপলোড হয়, তবেই টাইমলাইন রিফ্রেশ করব
+        // 🔥 FIX: রিফ্রেশ লজিক আপডেট (Family Provider এর জন্য)
+
+        // ১. যার জন্য আপলোড হলো, তার স্পেসিফিক টাইমলাইন রিফ্রেশ করা (Doctor View এর জন্য জরুরি)
+        _ref.refresh(timelineProvider(targetUserId));
+
+        // ২. যদি ইউজার নিজের জন্য আপলোড করে, তবে ডিফল্ট (null) টাইমলাইনও রিফ্রেশ করা
+        // (কারণ Citizen Home Page এ সাধারণত কোনো আইডি ছাড়া কল হয়)
         if (targetUserId == currentUser.id) {
-          _ref.refresh(timelineProvider);
+          _ref.refresh(timelineProvider(null));
         }
 
         state = const AsyncData(null);
