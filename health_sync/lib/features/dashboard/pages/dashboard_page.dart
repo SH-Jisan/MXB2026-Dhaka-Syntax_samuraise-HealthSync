@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/providers/user_profile_provider.dart';
 import 'citizen_home_page.dart';
 import 'doctor_home_page.dart';
@@ -21,13 +22,16 @@ class DashboardPage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Something went wrong!"),
+              Text(
+                AppLocalizations.of(context)?.somethingWentWrong ??
+                    "Something went wrong!",
+              ),
               Text("Error: $err", style: const TextStyle(color: Colors.red)),
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () =>
                     ref.refresh(userProfileProvider), // রিট্রাই বাটন
-                child: const Text("Retry"),
+                child: Text(AppLocalizations.of(context)?.retry ?? "Retry"),
               ),
             ],
           ),
@@ -35,7 +39,13 @@ class DashboardPage extends ConsumerWidget {
       ),
       data: (profile) {
         if (profile == null) {
-          return const Scaffold(body: Center(child: Text("User not found")));
+          return Scaffold(
+            body: Center(
+              child: Text(
+                AppLocalizations.of(context)?.userNotFound ?? "User not found",
+              ),
+            ),
+          );
         }
 
         final role = profile['role'] as String;

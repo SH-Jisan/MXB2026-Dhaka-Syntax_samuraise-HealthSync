@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../core/constants/app_colors.dart';
 import '../../features/blood/pages/blood_home_page.dart';
+import 'language_selector_widget.dart';
 import '../../features/about/about_app_page.dart';
 import '../providers/theme_provider.dart'; // Import Theme Provider
 
@@ -94,7 +96,7 @@ class SideDrawer extends ConsumerWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.dashboard_outlined,
-                  text: "Dashboard",
+                  text: AppLocalizations.of(context)?.dashboard ?? "Dashboard",
                   onTap: () => Navigator.pop(context),
                   isActive:
                       true, // Assuming we are on dashboard if drawer is opened usually
@@ -103,8 +105,10 @@ class SideDrawer extends ConsumerWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.bloodtype_outlined,
-                  text: "Blood Bank",
-                  subtitle: "Find donors & Request blood",
+                  text: AppLocalizations.of(context)?.bloodBank ?? "Blood Bank",
+                  subtitle:
+                      AppLocalizations.of(context)?.bloodBankSubtitle ??
+                      "Find donors & Request blood",
                   iconColor: Colors.red.shade400,
                   onTap: () {
                     Navigator.pop(context);
@@ -118,7 +122,7 @@ class SideDrawer extends ConsumerWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.info_outline,
-                  text: "About App",
+                  text: AppLocalizations.of(context)?.aboutApp ?? "About App",
                   iconColor: Colors.blue.shade400,
                   onTap: () {
                     Navigator.pop(context);
@@ -131,6 +135,14 @@ class SideDrawer extends ConsumerWidget {
 
                 const Divider(),
 
+                const Divider(),
+
+                // 🌐 Language Selector
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: LanguageSelectorWidget(isDropdown: false),
+                ),
+
                 // 🌗 Theme Toggle Switch
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -142,7 +154,7 @@ class SideDrawer extends ConsumerWidget {
                   ),
                   child: SwitchListTile(
                     title: Text(
-                      "Dark Mode",
+                      AppLocalizations.of(context)?.darkMode ?? "Dark Mode",
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 15,
@@ -174,7 +186,7 @@ class SideDrawer extends ConsumerWidget {
             child: _buildDrawerItem(
               context,
               icon: Icons.logout,
-              text: "Logout",
+              text: AppLocalizations.of(context)?.logout ?? "Logout",
               iconColor: AppColors.error,
               textColor: AppColors.error,
               onTap: () async {

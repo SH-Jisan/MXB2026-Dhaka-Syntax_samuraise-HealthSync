@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../providers/my_requests_provider.dart';
 
 class MyBloodRequestsPage extends ConsumerWidget {
@@ -17,10 +18,19 @@ class MyBloodRequestsPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text("My Requests & Donors")),
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)?.myRequestsDonors ??
+              "My Requests & Donors",
+        ),
+      ),
       body: myRequestsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text("Error: $err")),
+        error: (err, stack) => Center(
+          child: Text(
+            "${AppLocalizations.of(context)?.error ?? 'Error'}: $err",
+          ),
+        ),
         data: (requests) {
           if (requests.isEmpty) {
             return Center(
@@ -41,7 +51,8 @@ class MyBloodRequestsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "No Requests Yet",
+                    AppLocalizations.of(context)?.noRequestsYet ??
+                        "No Requests Yet",
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -50,7 +61,8 @@ class MyBloodRequestsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "You haven't posted any blood requests.",
+                    AppLocalizations.of(context)?.noRequestsPosted ??
+                        "You haven't posted any blood requests.",
                     style: GoogleFonts.poppins(
                       color: isDark
                           ? Colors.grey.shade400
@@ -213,8 +225,11 @@ class MyBloodRequestsPage extends ConsumerWidget {
                           const SizedBox(width: 6),
                           Text(
                             acceptors.isEmpty
-                                ? "Waiting for donors..."
-                                : "${acceptors.length} Donor(s) Accepted",
+                                ? (AppLocalizations.of(
+                                        context,
+                                      )?.waitingForDonors ??
+                                      "Waiting for donors...")
+                                : "${acceptors.length} ${AppLocalizations.of(context)?.donorsAccepted ?? "Donor(s) Accepted"}",
                             style: GoogleFonts.poppins(
                               color: acceptors.isEmpty
                                   ? Colors.orange.shade700
@@ -240,7 +255,8 @@ class MyBloodRequestsPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                "We have notified nearby donors.",
+                                AppLocalizations.of(context)?.notifiedDonors ??
+                                    "We have notified nearby donors.",
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w500,
                                   color: isDark
@@ -249,7 +265,8 @@ class MyBloodRequestsPage extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                "You will see their details here once they accept.",
+                                AppLocalizations.of(context)?.willSeeDetails ??
+                                    "You will see their details here once they accept.",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
@@ -308,7 +325,8 @@ class MyBloodRequestsPage extends ConsumerWidget {
                                 ),
                               ),
                               subtitle: Text(
-                                "Hero Donor",
+                                AppLocalizations.of(context)?.heroDonor ??
+                                    "Hero Donor",
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   color: isDark

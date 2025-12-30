@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart'; // কল করার জন্য
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../providers/donor_provider.dart';
 
 class DonorSearchPage extends ConsumerStatefulWidget {
@@ -24,7 +25,12 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Could not launch dialer")),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.couldNotLaunchDialer ??
+                  "Could not launch dialer",
+            ),
+          ),
         );
       }
     }
@@ -42,7 +48,11 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Find Blood Donors")),
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)?.findBloodDonors ?? "Find Blood Donors",
+        ),
+      ),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
@@ -77,7 +87,8 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                             ? AppColors.darkSurface
                             : Colors.white,
                         decoration: InputDecoration(
-                          labelText: "Group",
+                          labelText:
+                              AppLocalizations.of(context)?.group ?? "Group",
                           prefixIcon: const Icon(
                             Icons.bloodtype,
                             color: Colors.red,
@@ -114,7 +125,9 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                       child: TextField(
                         controller: _districtController,
                         decoration: InputDecoration(
-                          labelText: "District (e.g. Dhaka)",
+                          labelText:
+                              AppLocalizations.of(context)?.districtHint ??
+                              "District (e.g. Dhaka)",
                           prefixIcon: const Icon(
                             Icons.location_on_outlined,
                             size: 20,
@@ -162,11 +175,12 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const FittedBox(
+                    child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        "SEARCH DONORS",
-                        style: TextStyle(
+                        AppLocalizations.of(context)?.searchDonors ??
+                            "SEARCH DONORS",
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -185,7 +199,10 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
               error: (err, stack) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text("Error: $err", textAlign: TextAlign.center),
+                  child: Text(
+                    "${AppLocalizations.of(context)?.error ?? 'Error'}: $err",
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
               data: (donors) {
@@ -205,7 +222,8 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            "No donors found",
+                            AppLocalizations.of(context)?.noDonorsFound ??
+                                "No donors found",
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               color: isDark
@@ -216,7 +234,8 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            "Try changing the location or blood group.",
+                            AppLocalizations.of(context)?.tryChangingLocation ??
+                                "Try changing the location or blood group.",
                             style: GoogleFonts.poppins(
                               color: isDark
                                   ? Colors.grey.shade400
@@ -236,7 +255,10 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                   itemBuilder: (context, index) {
                     final donor = donors[index];
                     final profile = donor['profiles'] ?? {};
-                    final name = profile['full_name'] ?? 'Unknown Donor';
+                    final name =
+                        profile['full_name'] ??
+                        AppLocalizations.of(context)?.unknownDonor ??
+                        'Unknown Donor';
                     final lastDate = donor['last_donation_date'];
 
                     return Container(
@@ -320,7 +342,11 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          donor['district'] ?? 'Unknown',
+                                          donor['district'] ??
+                                              AppLocalizations.of(
+                                                context,
+                                              )?.unknown ??
+                                              'Unknown',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -336,7 +362,7 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                                   if (lastDate != null) ...[
                                     const SizedBox(height: 4),
                                     Text(
-                                      "Last donated: $lastDate",
+                                      "${AppLocalizations.of(context)?.lastDonated ?? "Last donated: "}$lastDate",
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: isDark

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/side_drawer.dart';
 import '../../../shared/widgets/ai_doctor_button.dart'; // 🔥 Fix: Shared Widget
+import '../../../l10n/app_localizations.dart';
 
 // পেজ ইম্পোর্ট
 import '../../timeline/pages/medical_timeline_view.dart';
@@ -25,11 +26,7 @@ class _CitizenHomePageState extends State<CitizenHomePage> {
     const ProfilePage(), // Tab 2
   ];
 
-  final List<String> _titles = [
-    "My Medical History",
-    "Health Plan",
-    "My Profile",
-  ];
+  // Titles Removed from state to be dynamic
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +38,7 @@ class _CitizenHomePageState extends State<CitizenHomePage> {
       drawer: const SideDrawer(),
 
       appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
+        title: Text(_getTitle(context, _selectedIndex)),
         centerTitle: false,
         actions: const [
           AiDoctorButton(), // 🔥 Fix: Used Shared Widget
@@ -67,7 +64,7 @@ class _CitizenHomePageState extends State<CitizenHomePage> {
               Icons.history_edu,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            label: 'Timeline',
+            label: AppLocalizations.of(context)?.timeline ?? 'Timeline',
           ),
 
           // 2. Health Plan
@@ -77,7 +74,7 @@ class _CitizenHomePageState extends State<CitizenHomePage> {
               Icons.spa,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            label: 'Health Plan',
+            label: AppLocalizations.of(context)?.healthPlan ?? 'Health Plan',
           ),
 
           // 3. Profile
@@ -87,10 +84,24 @@ class _CitizenHomePageState extends State<CitizenHomePage> {
               Icons.person,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            label: 'Profile',
+            label: AppLocalizations.of(context)?.myProfile ?? 'Profile',
           ),
         ],
       ),
     );
+  }
+
+  String _getTitle(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        return AppLocalizations.of(context)?.myMedicalHistory ??
+            "My Medical History";
+      case 1:
+        return AppLocalizations.of(context)?.healthPlan ?? "Health Plan";
+      case 2:
+        return AppLocalizations.of(context)?.myProfile ?? "My Profile";
+      default:
+        return "";
+    }
   }
 }

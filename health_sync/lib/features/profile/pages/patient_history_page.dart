@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class PatientHistoryPage extends StatefulWidget {
   const PatientHistoryPage({super.key});
@@ -27,21 +28,35 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("My Care History"),
+        title: Text(
+          AppLocalizations.of(context)?.myCareHistory ?? "My Care History",
+        ),
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
           unselectedLabelColor: Colors.grey,
           indicatorColor: AppColors.primary,
           isScrollable: true, // বেশি ট্যাব হওয়ায় স্ক্রলেবল করা হলো
-          tabs: const [
+          tabs: [
             Tab(
-              text: "Appointments",
-              icon: Icon(Icons.calendar_month),
+              text:
+                  AppLocalizations.of(context)?.appointments ?? "Appointments",
+              icon: const Icon(Icons.calendar_month),
             ), // 🔥 New Tab
-            Tab(text: "Prescriptions", icon: Icon(Icons.description_outlined)),
-            Tab(text: "Diagnostic", icon: Icon(Icons.analytics_outlined)),
-            Tab(text: "Hospitals", icon: Icon(Icons.local_hospital_outlined)),
+            Tab(
+              text:
+                  AppLocalizations.of(context)?.prescriptions ??
+                  "Prescriptions",
+              icon: const Icon(Icons.description_outlined),
+            ),
+            Tab(
+              text: AppLocalizations.of(context)?.diagnostic ?? "Diagnostic",
+              icon: const Icon(Icons.analytics_outlined),
+            ),
+            Tab(
+              text: AppLocalizations.of(context)?.hospitals ?? "Hospitals",
+              icon: const Icon(Icons.local_hospital_outlined),
+            ),
           ],
         ),
       ),
@@ -74,7 +89,10 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || (snapshot.data as List).isEmpty) {
-          return _emptyState("No appointments found.");
+          return _emptyState(
+            AppLocalizations.of(context)?.noAppointmentsFound ??
+                "No appointments found.",
+          );
         }
 
         final appointments = snapshot.data as List;
@@ -84,9 +102,20 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           itemCount: appointments.length,
           itemBuilder: (context, index) {
             final apt = appointments[index];
-            final doctor = apt['doctor'] ?? {'full_name': 'Unknown Doctor'};
+            final doctor =
+                apt['doctor'] ??
+                {
+                  'full_name':
+                      AppLocalizations.of(context)?.unknownDoctor ??
+                      'Unknown Doctor',
+                };
             final hospital =
-                apt['hospital'] ?? {'full_name': 'Unknown Hospital'};
+                apt['hospital'] ??
+                {
+                  'full_name':
+                      AppLocalizations.of(context)?.unknownHospital ??
+                      'Unknown Hospital',
+                };
             final date = DateTime.parse(apt['appointment_date']);
 
             final formattedTime = DateFormat('hh:mm a').format(date);
@@ -150,7 +179,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                                 ),
                               ),
                               Text(
-                                doctor['specialty'] ?? 'Specialist',
+                                doctor['specialty'] ??
+                                    AppLocalizations.of(context)?.specialist ??
+                                    'Specialist',
                                 style: const TextStyle(
                                   color: Colors.grey,
                                   fontSize: 13,
@@ -242,7 +273,12 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           return const Center(child: CircularProgressIndicator());
         }
         final list = snapshot.data as List;
-        if (list.isEmpty) return _emptyState("No prescriptions found.");
+        if (list.isEmpty) {
+          return _emptyState(
+            AppLocalizations.of(context)?.noPrescriptionsFound ??
+                "No prescriptions found.",
+          );
+        }
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -264,7 +300,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                   doctor['full_name'],
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text("Date: $date\nRx: ${event['title']}"),
+                subtitle: Text(
+                  "Date: $date\n${AppLocalizations.of(context)?.rx ?? 'Rx:'} ${event['title']}",
+                ),
                 isThreeLine: true,
               ),
             );
@@ -287,7 +325,12 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           return const Center(child: CircularProgressIndicator());
         }
         final list = snapshot.data as List;
-        if (list.isEmpty) return _emptyState("No diagnostic records.");
+        if (list.isEmpty) {
+          return _emptyState(
+            AppLocalizations.of(context)?.noDiagnosticRecords ??
+                "No diagnostic records.",
+          );
+        }
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -313,7 +356,10 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
 
   // 🏥 TAB 4: Hospitals (Same as before)
   Widget _buildHospitalsTab() {
-    return _emptyState("Hospital admission history will appear here.");
+    return _emptyState(
+      AppLocalizations.of(context)?.hospitalAdmissionHistory ??
+          "Hospital admission history will appear here.",
+    );
   }
 
   Widget _emptyState(String text) {

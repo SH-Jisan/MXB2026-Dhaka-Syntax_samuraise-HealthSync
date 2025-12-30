@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../upload/widgets/upload_buttom_sheet.dart';
+import '../../upload/widgets/upload_bottom_sheet.dart';
 
 class DiagnosticPatientView extends StatefulWidget {
   final Map<String, dynamic> patient;

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../timeline/providers/timeline_provider.dart';
-import '../../upload/widgets/upload_buttom_sheet.dart';
+import '../../upload/widgets/upload_bottom_sheet.dart';
 import '../widgets/empty_timeline_view.dart';
 import '../widgets/medical_timeline_tile.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class MedicalTimelineView extends ConsumerWidget {
   final String? patientId;
@@ -13,7 +14,7 @@ class MedicalTimelineView extends ConsumerWidget {
   const MedicalTimelineView({
     super.key,
     this.patientId,
-    this.isEmbedded = false
+    this.isEmbedded = false,
   });
 
   @override
@@ -28,7 +29,10 @@ class MedicalTimelineView extends ConsumerWidget {
     final content = timelineAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(
-        child: Text("Error: $err", style: const TextStyle(color: Colors.red)),
+        child: Text(
+          "${AppLocalizations.of(context)?.error ?? 'Error'}: $err",
+          style: const TextStyle(color: Colors.red),
+        ),
       ),
       data: (events) {
         if (events.isEmpty) {
@@ -49,10 +53,7 @@ class MedicalTimelineView extends ConsumerWidget {
 
     // ১. যদি এমবেডেড হয় (যেমন ডাক্তারের পেজে), তবে শুধু কন্টেন্ট রিটার্ন করো (Scaffold ছাড়া)
     if (isEmbedded) {
-      return Container(
-        color: theme.scaffoldBackgroundColor,
-        child: content,
-      );
+      return Container(color: theme.scaffoldBackgroundColor, child: content);
     }
 
     // ২. যদি আলাদা পেজ হয় (যেমন সিটিজেন ড্যাশবোর্ডে), তবে Scaffold সহ রিটার্ন করো
@@ -67,7 +68,7 @@ class MedicalTimelineView extends ConsumerWidget {
             builder: (_) => const UploadBottomSheet(),
           );
         },
-        label: const Text("Add Report"),
+        label: Text(AppLocalizations.of(context)?.addReport ?? "Add Report"),
         icon: const Icon(Icons.add_a_photo_outlined),
         backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
         foregroundColor: isDark ? Colors.black : Colors.white,

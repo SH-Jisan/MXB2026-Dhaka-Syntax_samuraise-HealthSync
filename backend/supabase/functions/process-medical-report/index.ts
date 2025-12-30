@@ -19,31 +19,31 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
     if (!apiKey || !supabaseUrl || !supabaseServiceKey) {
-          throw new Error('Missing environment variables!')
+      throw new Error('Missing environment variables!')
     }
 
     // 2. Initialize Clients
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     // 🛑 1. DUPLICATE CHECK (Based on Hash) - AI এর আগে চেক করছি খরচ বাঁচাতে
-        if (file_hash) {
-          const { data: duplicates } = await supabase
-            .from('medical_events')
-            .select('id')
-            .eq('patient_id', patient_id)
-            .eq('file_hash', file_hash) // টাইটেল না, হ্যাশ দিয়ে চেক
+    if (file_hash) {
+      const { data: duplicates } = await supabase
+        .from('medical_events')
+        .select('id')
+        .eq('patient_id', patient_id)
+        .eq('file_hash', file_hash) // টাইটেল না, হ্যাশ দিয়ে চেক
 
-          if (duplicates && duplicates.length > 0) {
-            // 🗑️ ডুপ্লিকেট হলে স্টোরেজ থেকে ফাইলটি ডিলিট করে দেওয়া (Clean up)
-            if (file_path) {
-               await supabase.storage.from('reports').remove([file_path])
-            }
-
-            return new Response(JSON.stringify({ error: "Duplicate File" }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 409, // Conflict status code
-            })
-          }
+      if (duplicates && duplicates.length > 0) {
+        // 🗑️ ডুপ্লিকেট হলে স্টোরেজ থেকে ফাইলটি ডিলিট করে দেওয়া (Clean up)
+        if (file_path) {
+          await supabase.storage.from('reports').remove([file_path])
         }
+
+        return new Response(JSON.stringify({ error: "Duplicate File" }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 409, // Conflict status code
+        })
+      }
+    }
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" })
 
@@ -61,7 +61,8 @@ serve(async (req) => {
       "event_type": "REPORT" or "PRESCRIPTION",
       "event_date": "YYYY-MM-DD",
       "severity": "HIGH/MEDIUM/LOW",
-      "summary": "Concise summary.",
+      "summary": "Concise summary in English.",
+      "summary_bn": "সারাংশ (Summary in Bengali).",
       "extracted_text": "Full text content...",
       "key_findings": ["Hb: 10.5 (Low)", "Platelets: Normal"],
       "medicine_safety_check": "Safe/Caution/Danger (Only for prescriptions)"

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+import 'shared/providers/language_provider.dart';
 
 import 'core/constants/app_colors.dart';
 import 'core/constants/app_secrets.dart'; // 🔥 Fix: Added secrets import
@@ -42,6 +45,7 @@ class HealthSyncApp extends ConsumerWidget {
 
     // 🔥 Watch the Router Provider
     final router = ref.watch(appRouterProvider);
+    final currentLocale = ref.watch(languageProvider);
 
     // 🔥 Global Notification Manager (Reactive)
     // Auth State Listen করে নোটিফিকেশন সার্ভিস স্টার্ট/স্টপ করবে
@@ -59,6 +63,14 @@ class HealthSyncApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'HealthSync',
       debugShowCheckedModeBanner: false,
+      locale: currentLocale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
 
       // 🔥 থিম মোড সেট করা (System / Light / Dark)
       themeMode: themeMode,

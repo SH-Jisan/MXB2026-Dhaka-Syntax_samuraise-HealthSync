@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/side_drawer.dart';
 import '../../../shared/widgets/ai_doctor_button.dart'; // 🔥 Fix: Shared Widget
+import '../../../l10n/app_localizations.dart';
 
 // পেজ ইম্পোর্ট
 import '../../timeline/pages/medical_timeline_view.dart';
@@ -30,12 +31,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
   ];
 
   // টাইটেল লিস্ট
-  final List<String> _titles = [
-    "Doctor Panel",
-    "My Medical History",
-    "My Health Plan",
-    "My Profile",
-  ];
+  // Titles removed for dynamic localization
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +43,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
       drawer: const SideDrawer(), // কমন সাইড ড্রয়ার
 
       appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
+        title: Text(_getTitle(context, _selectedIndex)),
         centerTitle: false,
         actions: [
           // 🔥 AI Doctor Button (New)
@@ -83,7 +79,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
               Icons.medical_services,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            label: 'Panel',
+            label: AppLocalizations.of(context)?.panel ?? 'Panel',
           ),
 
           // 2. Personal Timeline
@@ -93,7 +89,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
               Icons.history_edu,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            label: 'Timeline',
+            label: AppLocalizations.of(context)?.timeline ?? 'Timeline',
           ),
 
           // 3. Health Plan (🔥 New)
@@ -103,7 +99,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
               Icons.spa,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            label: 'Plan',
+            label: AppLocalizations.of(context)?.plan ?? 'Plan',
           ),
 
           // 4. Profile
@@ -113,10 +109,26 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
               Icons.person,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            label: 'Profile',
+            label: AppLocalizations.of(context)?.myProfile ?? 'Profile',
           ),
         ],
       ),
     );
+  }
+
+  String _getTitle(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        return AppLocalizations.of(context)?.doctorPanel ?? "Doctor Panel";
+      case 1:
+        return AppLocalizations.of(context)?.myMedicalHistory ??
+            "My Medical History";
+      case 2:
+        return AppLocalizations.of(context)?.myHealthPlan ?? "My Health Plan";
+      case 3:
+        return AppLocalizations.of(context)?.myProfile ?? "My Profile";
+      default:
+        return "";
+    }
   }
 }

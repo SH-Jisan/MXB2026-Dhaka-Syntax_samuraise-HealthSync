@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 class BloodRequestPage extends StatefulWidget {
   const BloodRequestPage({super.key});
@@ -68,8 +70,11 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Form autofilled by AI! Please review."),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.aiAutofillSuccess ??
+                    "Form autofilled by AI! Please review.",
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -77,9 +82,13 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("AI Error: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "${AppLocalizations.of(context)?.aiError ?? 'AI Error: '}$e",
+            ),
+          ),
+        );
       }
     } finally {
       setState(() => _isAnalyzing = false);
@@ -91,7 +100,12 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedBloodGroup == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select Blood Group")),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)?.selectBloodGroupError ??
+                "Please select Blood Group",
+          ),
+        ),
       );
       return;
     }
@@ -132,8 +146,11 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
       // ৩. সাকসেস মেসেজ এবং পেজ বন্ধ করা
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Request Posted! Notifying nearby donors... 📲"),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)?.requestPostedSuccess ??
+                  "Request Posted! Notifying nearby donors... 📲",
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -141,9 +158,13 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error posting request: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "${AppLocalizations.of(context)?.errorPostingRequest ?? 'Error posting request: '}$e",
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -159,7 +180,11 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text("Request Blood")),
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)?.requestBloodTitle ?? "Request Blood",
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -231,7 +256,8 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Quick AI Fill",
+                              AppLocalizations.of(context)?.quickAiFill ??
+                                  "Quick AI Fill",
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                                 color: isDark
@@ -241,7 +267,8 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                               ),
                             ),
                             Text(
-                              "Type or speak your need naturally",
+                              AppLocalizations.of(context)?.aiPrompt ??
+                                  "Type or speak your need naturally",
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: isDark
@@ -263,6 +290,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                       ),
                       decoration: InputDecoration(
                         hintText:
+                            AppLocalizations.of(context)?.aiHint ??
                             "Example: \"Urgent A+ blood needed at Dhaka Medical College for a road accident patient...\"",
                         hintStyle: TextStyle(
                           color: isDark
@@ -323,7 +351,7 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               Padding(
                 padding: const EdgeInsets.only(left: 4, bottom: 8),
                 child: Text(
-                  "Manual Entry",
+                  AppLocalizations.of(context)?.manualEntry ?? "Manual Entry",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -336,12 +364,17 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               ),
 
               // 🩸 Blood Group Dropdown
-              _buildInputLabel("Blood Group", isDark),
+              _buildInputLabel(
+                AppLocalizations.of(context)?.bloodGroup ?? "Blood Group",
+                isDark,
+              ),
               DropdownButtonFormField<String>(
                 // ignore: deprecated_member_use
                 value: _selectedBloodGroup,
                 decoration: _inputDecoration(
-                  hint: "Select Group",
+                  hint:
+                      AppLocalizations.of(context)?.selectGroup ??
+                      "Select Group",
                   icon: Icons.bloodtype,
                   color: Colors.red,
                   isDark: isDark,
@@ -365,28 +398,41 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               const SizedBox(height: 20),
 
               // 🏥 Location
-              _buildInputLabel("Hospital / Location", isDark),
+              _buildInputLabel(
+                AppLocalizations.of(context)?.hospitalLocation ??
+                    "Hospital / Location",
+                isDark,
+              ),
               TextFormField(
                 controller: _locationController,
                 style: GoogleFonts.poppins(
                   color: isDark ? Colors.white : Colors.black,
                 ),
                 decoration: _inputDecoration(
-                  hint: "Enter hospital name & area",
+                  hint:
+                      AppLocalizations.of(context)?.enterHospitalHelper ??
+                      "Enter hospital name & area",
                   icon: Icons.location_on_outlined,
                   isDark: isDark,
                 ),
-                validator: (val) => val!.isEmpty ? "Required" : null,
+                validator: (val) => val!.isEmpty
+                    ? (AppLocalizations.of(context)?.required ?? "Required")
+                    : null,
               ),
               const SizedBox(height: 20),
 
               // 🚨 Urgency
-              _buildInputLabel("Urgency Level", isDark),
+              _buildInputLabel(
+                AppLocalizations.of(context)?.urgencyLevel ?? "Urgency Level",
+                isDark,
+              ),
               DropdownButtonFormField<String>(
                 // ignore: deprecated_member_use
                 value: _urgency,
                 decoration: _inputDecoration(
-                  hint: "Select Urgency",
+                  hint:
+                      AppLocalizations.of(context)?.selectUrgency ??
+                      "Select Urgency",
                   icon: Icons.warning_amber_rounded,
                   color: _urgency == 'CRITICAL' ? Colors.red : Colors.orange,
                   isDark: isDark,
@@ -399,7 +445,11 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                         child: Row(
                           children: [
                             Text(
-                              u,
+                              u == 'CRITICAL'
+                                  ? (AppLocalizations.of(context)?.critical ??
+                                        'CRITICAL')
+                                  : (AppLocalizations.of(context)?.normal ??
+                                        'NORMAL'),
                               style: GoogleFonts.poppins(
                                 color: u == 'CRITICAL'
                                     ? Colors.red
@@ -427,7 +477,11 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               const SizedBox(height: 20),
 
               // 📝 Reason / Note
-              _buildInputLabel("Patient Condition / Note", isDark),
+              _buildInputLabel(
+                AppLocalizations.of(context)?.patientConditionNote ??
+                    "Patient Condition / Note",
+                isDark,
+              ),
               TextFormField(
                 controller: _noteController,
                 maxLines: 4,
@@ -435,11 +489,15 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                   color: isDark ? Colors.white : Colors.black,
                 ),
                 decoration: _inputDecoration(
-                  hint: "Describe the situation...",
+                  hint:
+                      AppLocalizations.of(context)?.describeSituation ??
+                      "Describe the situation...",
                   icon: Icons.note_alt_outlined,
                   isDark: isDark,
                 ).copyWith(alignLabelWithHint: true),
-                validator: (val) => val!.isEmpty ? "Required" : null,
+                validator: (val) => val!.isEmpty
+                    ? (AppLocalizations.of(context)?.required ?? "Required")
+                    : null,
               ),
 
               const SizedBox(height: 40),
@@ -469,7 +527,8 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                           ),
                         )
                       : Text(
-                          "POST BLOOD REQUEST",
+                          AppLocalizations.of(context)?.postBloodRequest ??
+                              "POST BLOOD REQUEST",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

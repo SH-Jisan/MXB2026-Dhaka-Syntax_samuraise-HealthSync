@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../pages/doctor_patient_profile_page.dart';
+import '../../../l10n/app_localizations.dart';
 
 class DoctorWorkTab extends StatefulWidget {
   const DoctorWorkTab({super.key});
@@ -53,19 +54,27 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Add Hospital"),
+        title: Text(
+          AppLocalizations.of(context)?.addHospital ?? "Add Hospital",
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameCtrl,
-              decoration: const InputDecoration(labelText: "Hospital Name"),
+              decoration: InputDecoration(
+                labelText:
+                    AppLocalizations.of(context)?.hospitalName ??
+                    "Hospital Name",
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: timeCtrl,
-              decoration: const InputDecoration(
-                labelText: "Visiting Hours (e.g. 5-9 PM)",
+              decoration: InputDecoration(
+                labelText:
+                    AppLocalizations.of(context)?.visitingHours ??
+                    "Visiting Hours (e.g. 5-9 PM)",
               ),
             ),
           ],
@@ -73,7 +82,7 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)?.cancel ?? "Cancel"),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -89,7 +98,7 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                 }
               }
             },
-            child: const Text("Add"),
+            child: Text(AppLocalizations.of(context)?.add ?? "Add"),
           ),
         ],
       ),
@@ -102,18 +111,23 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Add New Patient"),
+        title: Text(
+          AppLocalizations.of(context)?.addNewPatient ?? "Add New Patient",
+        ),
         content: TextField(
           controller: emailCtrl,
-          decoration: const InputDecoration(
-            labelText: "Patient Email",
-            hintText: "Enter email to search",
+          decoration: InputDecoration(
+            labelText:
+                AppLocalizations.of(context)?.patientEmail ?? "Patient Email",
+            hintText:
+                AppLocalizations.of(context)?.enterEmailSearch ??
+                "Enter email to search",
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)?.cancel ?? "Cancel"),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -133,8 +147,11 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                     if (mounted) {
                       _refreshPatients(); // 🔥 লিস্ট রিফ্রেশ
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Patient Added Successfully!"),
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)?.patientAddedSuccess ??
+                                "Patient Added Successfully!",
+                          ),
                         ),
                       );
                     }
@@ -142,19 +159,31 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                 } else {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Patient not found!")),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)?.userNotFound ??
+                              "Patient not found!",
+                        ),
+                      ),
                     );
                   }
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Already assigned or Error")),
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)?.alreadyAssignedOrError ??
+                            "Already assigned or Error",
+                      ),
+                    ),
                   );
                 }
               }
             },
-            child: const Text("Add Patient"),
+            child: Text(
+              AppLocalizations.of(context)?.addNewPatient ?? "Add Patient",
+            ),
           ),
         ],
       ),
@@ -175,7 +204,8 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Current Chambers",
+                AppLocalizations.of(context)?.currentChambers ??
+                    "Current Chambers",
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -201,9 +231,10 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
 
               final hospitals = snapshot.data as List;
               if (hospitals.isEmpty) {
-                return const Text(
-                  "No hospitals added.",
-                  style: TextStyle(color: Colors.grey),
+                return Text(
+                  AppLocalizations.of(context)?.noHospitalsAdded ??
+                      "No hospitals added.",
+                  style: const TextStyle(color: Colors.grey),
                 );
               }
 
@@ -267,7 +298,8 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Under Treatment",
+                AppLocalizations.of(context)?.underTreatment ??
+                    "Under Treatment",
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -276,7 +308,9 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
               ElevatedButton.icon(
                 onPressed: _searchAndAddPatient,
                 icon: const Icon(Icons.person_add, size: 16),
-                label: const Text("New Patient"),
+                label: Text(
+                  AppLocalizations.of(context)?.newPatient ?? "New Patient",
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
@@ -307,7 +341,10 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                           color: Colors.grey.shade300,
                         ),
                         const SizedBox(height: 8),
-                        const Text("No patients assigned yet."),
+                        Text(
+                          AppLocalizations.of(context)?.noPatientsAssigned ??
+                              "No patients assigned yet.",
+                        ),
                       ],
                     ),
                   ),

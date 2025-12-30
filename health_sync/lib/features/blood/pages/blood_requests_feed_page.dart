@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../providers/blood_feed_provider.dart';
 import 'blood_request_page.dart';
 
@@ -48,7 +49,9 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                     requesterPhone,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: const Text("Tap to call"),
+                  subtitle: Text(
+                    AppLocalizations.of(context)?.tapToCall ?? "Tap to call",
+                  ),
                   onTap: () async {
                     final url = Uri.parse("tel:$requesterPhone");
                     if (await canLaunchUrl(url)) await launchUrl(url);
@@ -62,7 +65,7 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                   Navigator.pop(ctx);
                   ref.invalidate(bloodFeedProvider);
                 },
-                child: const Text("CLOSE"),
+                child: Text(AppLocalizations.of(context)?.close ?? "CLOSE"),
               ),
             ],
           ),
@@ -72,24 +75,35 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
       if (e.code == '23505') {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("You have already accepted this request!"),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.alreadyAccepted ??
+                    "You have accepted this request!",
+              ),
               backgroundColor: Colors.orange,
             ),
           );
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "${AppLocalizations.of(context)?.error ?? 'Error'}: ${e.message}",
+              ),
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Unexpected Error: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "${AppLocalizations.of(context)?.unexpectedError ?? 'Unexpected Error: '}$e",
+            ),
+          ),
+        );
       }
     }
   }
@@ -101,9 +115,13 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          theme.scaffoldBackgroundColor, // 🔥 থিম থেকে ব্যাকগ্রাউন্ড
-      appBar: AppBar(title: const Text("Live Blood Requests")),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)?.liveBloodRequests ??
+              "Live Blood Requests",
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
@@ -111,14 +129,21 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
             MaterialPageRoute(builder: (_) => const BloodRequestPage()),
           );
         },
-        label: const Text("Post Request"),
+
+        label: Text(
+          AppLocalizations.of(context)?.postRequest ?? "Post Request",
+        ),
         icon: const Icon(Icons.add_circle_outline),
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
       body: feedAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text("Error: $err")),
+        error: (err, stack) => Center(
+          child: Text(
+            "${AppLocalizations.of(context)?.error ?? 'Error'}: $err",
+          ),
+        ),
         data: (requests) {
           if (requests.isEmpty) {
             return Center(
@@ -139,7 +164,8 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "No pending requests right now!",
+                    AppLocalizations.of(context)?.noPendingRequests ??
+                        "No pending requests right now!",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       color: isDark ? Colors.white : AppColors.textPrimary,
@@ -148,7 +174,8 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "You are all caught up.",
+                    AppLocalizations.of(context)?.caughtUp ??
+                        "You are all caught up.",
                     style: GoogleFonts.poppins(
                       color: isDark
                           ? Colors.grey.shade400
@@ -273,7 +300,10 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          "CRITICAL URGENCY",
+                                          AppLocalizations.of(
+                                                context,
+                                              )?.criticalUrgency ??
+                                              "CRITICAL URGENCY",
                                           style: TextStyle(
                                             color: Colors.red.shade800,
                                             fontWeight: FontWeight.w800,
@@ -400,7 +430,7 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            "Requested by ${requester['full_name'] ?? 'Unknown'}",
+                            "${AppLocalizations.of(context)?.requestedBy ?? "Requested by "}${requester['full_name'] ?? 'Unknown'}",
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: isDark
@@ -426,7 +456,7 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Donors Found ($acceptedCount/$neededCount)",
+                                "${AppLocalizations.of(context)?.donorsFound ?? "Donors Found"} ($acceptedCount/$neededCount)",
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -492,7 +522,8 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                               size: 20,
                             ),
                             label: Text(
-                              "I CAN DONATE",
+                              AppLocalizations.of(context)?.iCanDonate ??
+                                  "I CAN DONATE",
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,

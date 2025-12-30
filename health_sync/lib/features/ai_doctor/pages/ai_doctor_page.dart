@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../dashboard/pages/doctor_list_page.dart'; // 🔥 Fixed Import
+import '../../dashboard/pages/doctor_list_page.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AiDoctorPage extends ConsumerStatefulWidget {
   const AiDoctorPage({super.key});
@@ -76,9 +77,13 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "${AppLocalizations.of(context)?.error ?? 'Error'}: $e",
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -90,7 +95,12 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("AI Health Assistant")),
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)?.aiHealthAssistant ??
+              "AI Health Assistant",
+        ),
+      ),
       // 🔥 ফিক্স: SingleChildScrollView যোগ করা হয়েছে overflow এড়াতে
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -102,6 +112,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
               maxLines: 3,
               decoration: InputDecoration(
                 hintText:
+                    AppLocalizations.of(context)?.describeSymptomsHint ??
                     "Describe your symptoms (e.g., 'Severe chest pain on left side')...",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -128,7 +139,10 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("CONSULT AI DOCTOR"),
+                    : Text(
+                        AppLocalizations.of(context)?.consultAiDoctor ??
+                            "CONSULT AI DOCTOR",
+                      ),
               ),
             ),
 
@@ -169,9 +183,12 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
               children: [
                 Icon(Icons.medical_services, color: AppColors.primary),
                 const SizedBox(width: 8),
-                const Text(
-                  "AI Diagnosis",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context)?.aiDiagnosis ?? "AI Diagnosis",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const Spacer(),
                 Container(
@@ -197,9 +214,10 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
 
             // 1. Condition
             const SizedBox(height: 8),
-            const Text(
-              "Possible Condition:",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              AppLocalizations.of(context)?.possibleCondition ??
+                  "Possible Condition:",
+              style: const TextStyle(color: Colors.grey),
             ),
             Text(
               condition,
@@ -209,9 +227,10 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
             // 🔥 2. Potential Causes (NEW SECTION)
             if (causes.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text(
-                "Potential Causes (Why?):",
-                style: TextStyle(color: Colors.grey),
+              Text(
+                AppLocalizations.of(context)?.potentialCauses ??
+                    "Potential Causes (Why?):",
+                style: const TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 4),
               // লিস্ট আইটেমগুলো লুপ করে দেখানো
@@ -242,9 +261,10 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
 
             // 3. Specialist
             const SizedBox(height: 12),
-            const Text(
-              "Recommended Specialist:",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              AppLocalizations.of(context)?.recommendedSpecialist ??
+                  "Recommended Specialist:",
+              style: const TextStyle(color: Colors.grey),
             ),
             Text(
               specialty,
@@ -257,9 +277,10 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
 
             // 4. Advice
             const SizedBox(height: 12),
-            const Text(
-              "Immediate Advice:",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              AppLocalizations.of(context)?.immediateAdvice ??
+                  "Immediate Advice:",
+              style: const TextStyle(color: Colors.grey),
             ),
             Text(
               data['advice'] ?? '',
@@ -285,7 +306,10 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
                   );
                 },
                 icon: const Icon(Icons.search),
-                label: Text("FIND $specialty NOW"),
+                label: Text(
+                  AppLocalizations.of(context)?.findSpecialistNow(specialty) ??
+                      "FIND $specialty NOW",
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: const BorderSide(color: AppColors.primary),

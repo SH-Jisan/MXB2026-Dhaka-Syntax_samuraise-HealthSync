@@ -6,6 +6,7 @@ import 'blood_request_page.dart';
 import 'blood_requests_feed_page.dart';
 import 'donor_registration_page.dart';
 import 'my_blood_requests_page.dart';
+import '../../../l10n/app_localizations.dart';
 
 class BloodHomePage extends StatelessWidget {
   const BloodHomePage({super.key});
@@ -18,7 +19,7 @@ class BloodHomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Blood Bank"),
+        title: Text(AppLocalizations.of(context)?.bloodBank ?? "Blood Bank"),
         actions: [
           IconButton(
             onPressed: () {
@@ -31,7 +32,7 @@ class BloodHomePage extends StatelessWidget {
               Icons.history,
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
-            tooltip: "My Requests",
+            tooltip: AppLocalizations.of(context)?.myRequests ?? "My Requests",
           ),
         ],
       ),
@@ -41,7 +42,8 @@ class BloodHomePage extends StatelessWidget {
           children: [
             // Header Text
             Text(
-              "Save a Life Today",
+              AppLocalizations.of(context)?.saveLifeToday ??
+                  "Save a Life Today",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 24,
@@ -53,7 +55,8 @@ class BloodHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "Choose an option below to proceed",
+              AppLocalizations.of(context)?.chooseOption ??
+                  "Choose an option below to proceed",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 14,
@@ -67,8 +70,12 @@ class BloodHomePage extends StatelessWidget {
             // 🚑 Option 1: Request Blood
             _buildOptionCard(
               context,
-              title: "Request for Blood",
-              subtitle: "Find donors nearby instantly",
+              title:
+                  AppLocalizations.of(context)?.requestBlood ??
+                  "Request for Blood",
+              subtitle:
+                  AppLocalizations.of(context)?.findDonorsNearby ??
+                  "Find donors nearby instantly",
               icon: Icons.bloodtype_outlined,
               color: Colors.red.shade600,
               onTap: () => Navigator.push(
@@ -82,8 +89,11 @@ class BloodHomePage extends StatelessWidget {
             // 🤝 Option 2: Become a Donor
             _buildOptionCard(
               context,
-              title: "Become a Donor",
-              subtitle: "Register to save lives",
+              title:
+                  AppLocalizations.of(context)?.becomeDonor ?? "Become a Donor",
+              subtitle:
+                  AppLocalizations.of(context)?.registerToSaveLives ??
+                  "Register to save lives",
               icon: Icons.volunteer_activism_outlined,
               color: Colors.teal.shade600,
               onTap: () => Navigator.push(
@@ -99,8 +109,12 @@ class BloodHomePage extends StatelessWidget {
             // 🔍 Option 3: Find Donors
             _buildOptionCard(
               context,
-              title: "Find Blood Donors",
-              subtitle: "Search by group & location",
+              title:
+                  AppLocalizations.of(context)?.findBloodDonors ??
+                  "Find Blood Donors",
+              subtitle:
+                  AppLocalizations.of(context)?.searchByGroupLocation ??
+                  "Search by group & location",
               icon: Icons.search,
               color: Colors.blue.shade600,
               onTap: () => Navigator.push(
@@ -114,8 +128,12 @@ class BloodHomePage extends StatelessWidget {
             // 🆘 Option 4: Live Requests
             _buildOptionCard(
               context,
-              title: "Live Requests (Feed)",
-              subtitle: "See who needs help right now",
+              title:
+                  AppLocalizations.of(context)?.liveRequestsFeed ??
+                  "Live Requests (Feed)",
+              subtitle:
+                  AppLocalizations.of(context)?.seeWhoNeedsHelp ??
+                  "See who needs help right now",
               icon: Icons.emergency_outlined,
               color: Colors.orange.shade700,
               onTap: () => Navigator.push(
@@ -131,8 +149,12 @@ class BloodHomePage extends StatelessWidget {
             // 🔥 Option 5: My Requests
             _buildOptionCard(
               context,
-              title: "My Requests & History",
-              subtitle: "Track your requests",
+              title:
+                  AppLocalizations.of(context)?.myRequestsHistory ??
+                  "My Requests & History",
+              subtitle:
+                  AppLocalizations.of(context)?.trackYourRequests ??
+                  "Track your requests",
               icon: Icons.history_edu,
               color: Colors.purple.shade600,
               onTap: () => Navigator.push(

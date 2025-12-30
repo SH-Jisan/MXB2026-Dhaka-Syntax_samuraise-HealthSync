@@ -9,6 +9,7 @@ import '../../../shared/providers/user_profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../blood/pages/my_blood_requests_page.dart';
 import 'patient_history_page.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -77,16 +78,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Logout"),
-        content: const Text("Are you sure you want to log out?"),
+        title: Text(AppLocalizations.of(context)?.logout ?? "Logout"),
+        content: Text(
+          AppLocalizations.of(context)?.logoutConfirmation ??
+              "Are you sure you want to log out?",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)?.cancel ?? "Cancel"),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Logout", style: TextStyle(color: Colors.red)),
+            child: Text(
+              AppLocalizations.of(context)?.logout ?? "Logout",
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -112,7 +119,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text("My Profile")),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)?.myProfile ?? "My Profile"),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -200,7 +209,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Padding(
                         padding: const EdgeInsets.only(left: 8, bottom: 12),
                         child: Text(
-                          "My Associated Hospitals",
+                          AppLocalizations.of(context)?.myAssociatedHospitals ??
+                              "My Associated Hospitals",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -212,11 +222,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                     ),
                     if (_assignedHospitals.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          "Not assigned to any hospital yet.",
-                          style: TextStyle(color: Colors.grey),
+                          AppLocalizations.of(context)?.notAssignedToHospital ??
+                              "Not assigned to any hospital yet.",
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       )
                     else
@@ -252,7 +263,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8, bottom: 12),
                       child: Text(
-                        "Personal Information",
+                        AppLocalizations.of(context)?.personalInformation ??
+                            "Personal Information",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -265,13 +277,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                   _buildInfoTile(
                     Icons.phone_outlined,
-                    "Phone Number",
+                    AppLocalizations.of(context)?.phoneNumber ?? "Phone Number",
                     phone,
                     isDark,
                   ),
                   _buildInfoTile(
                     Icons.email_outlined,
-                    "Email Address",
+                    AppLocalizations.of(context)?.emailLabel ?? "Email Address",
                     email,
                     isDark,
                   ),
@@ -284,7 +296,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8, bottom: 12),
                       child: Text(
-                        "Settings & Activity",
+                        AppLocalizations.of(context)?.settingsActivity ??
+                            "Settings & Activity",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -302,6 +315,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       icon: Icons.calendar_month,
                       color: Colors.blue,
                       title:
+                          AppLocalizations.of(context)?.myAppointmentsHistory ??
                           "My Appointments & History", // নাম পরিবর্তন করে স্পেসিফিক করা হলো
                       onTap: () {
                         Navigator.push(
@@ -317,7 +331,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   _buildActionTile(
                     icon: Icons.bloodtype,
                     color: Colors.red,
-                    title: "My Blood Requests",
+                    title:
+                        AppLocalizations.of(context)?.myBloodRequests ??
+                        "My Blood Requests",
                     onTap: () {
                       Navigator.push(
                         context,
@@ -337,7 +353,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     child: ElevatedButton.icon(
                       onPressed: _handleLogout,
                       icon: const Icon(Icons.logout),
-                      label: const Text("LOGOUT"),
+                      label: Text(
+                        AppLocalizations.of(context)?.logout ?? "LOGOUT",
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red.shade50,
                         foregroundColor: Colors.red,

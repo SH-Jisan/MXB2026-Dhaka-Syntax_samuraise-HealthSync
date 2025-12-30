@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 
 import '../providers/auth_provider.dart';
+import '../../../shared/widgets/language_selector_widget.dart';
+import '../../../l10n/app_localizations.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -24,6 +26,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: const [
+          LanguageSelectorWidget(isDropdown: true),
+          SizedBox(width: 16),
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -48,7 +58,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               const SizedBox(height: 24),
               Text(
-                "Welcome Back!",
+                AppLocalizations.of(context)?.loginTitle ?? "Welcome Back!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
@@ -60,7 +70,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Sign in to continue to HealthSync",
+                AppLocalizations.of(context)?.loginSubtitle ??
+                    "Sign in to continue",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -75,18 +86,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: "Email Address",
-                  prefixIcon: Icon(Icons.email_outlined),
+                decoration: InputDecoration(
+                  labelText:
+                      AppLocalizations.of(context)?.emailLabel ??
+                      "Email Address",
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Password",
-                  prefixIcon: Icon(Icons.lock_outline),
+                decoration: InputDecoration(
+                  labelText:
+                      AppLocalizations.of(context)?.passwordLabel ?? "Password",
+                  prefixIcon: const Icon(Icons.lock_outline),
                 ),
               ),
 
@@ -118,7 +132,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text("LOGIN"),
+                    : Text(
+                        AppLocalizations.of(context)?.loginButton ?? "LOGIN",
+                      ),
               ),
 
               const SizedBox(height: 24),
@@ -128,13 +144,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account?",
+                    AppLocalizations.of(context)?.dontHaveAccount ??
+                        "Don't have an account?",
                     style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   ),
                   TextButton(
                     onPressed: () => context.go('/signup'),
                     child: Text(
-                      "Sign Up",
+                      AppLocalizations.of(context)?.signupLink ?? "Sign Up",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: isDark

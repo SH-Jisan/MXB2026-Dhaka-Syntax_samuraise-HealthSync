@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../upload/widgets/upload_buttom_sheet.dart';
+import '../../upload/widgets/upload_bottom_sheet.dart';
 import '../../timeline/pages/medical_timeline_view.dart';
 
 class HospitalOverviewTab extends StatefulWidget {

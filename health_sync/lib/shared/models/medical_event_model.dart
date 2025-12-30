@@ -10,6 +10,7 @@ class MedicalEvent {
 
   // 🔥 নতুন ফিল্ড: টেস্ট বা ফাইন্ডিংস লিস্ট
   final List<String> keyFindings;
+  final Map<String, dynamic>? aiDetails; // 🔥 Future-proof field
 
   MedicalEvent({
     required this.id,
@@ -21,6 +22,7 @@ class MedicalEvent {
     required this.attachmentUrls,
     required this.createdAt,
     required this.keyFindings, // Constructor এ যোগ করা হলো
+    this.aiDetails,
   });
 
   factory MedicalEvent.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class MedicalEvent {
 
       // 🔥 ডাটাবেস থেকে key_findings লিস্ট পড়া হচ্ছে
       keyFindings: List<String>.from(json['key_findings'] ?? []),
+      aiDetails: json['ai_details'],
     );
   }
 }
