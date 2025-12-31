@@ -13,8 +13,7 @@ class AppColors {
   static const textPrimary = Color(0xFF1E293B);
   static const textSecondary = Color(0xFF64748B);
 
-  // Dark Theme Colors - Significantly Lighter Grey
-  // আগে ছিল অনেক ডার্ক, এখন ডার্ক গ্রে (Material Dark Grey Style)
+  // Dark Theme Colors - Premium Dark & Pure White Text
   static const darkBackground = Color(
     0xFF252525,
   ); // Lighter Dark Grey (Not pitch black)
@@ -23,6 +22,6 @@ class AppColors {
   ); // Distinct lighter surface for cards
 
   static const darkPrimary = Color(0xFF80CBC4); // Soft Teal
-  static const darkTextPrimary = Color(0xFFEEEEEE);
-  static const darkTextSecondary = Color(0xFFBDBDBD);
+  static const darkTextPrimary = Color(0xFFFFFFFF); // Pure White
+  static const darkTextSecondary = Color(0xFFB0BEC5); // Light Blue Grey
 }

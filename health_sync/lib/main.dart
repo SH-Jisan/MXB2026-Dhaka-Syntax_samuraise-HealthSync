@@ -164,7 +164,7 @@ class HealthSyncApp extends ConsumerWidget {
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AppColors.darkSurface,
-          hintStyle: TextStyle(color: Colors.grey.shade600),
+          hintStyle: const TextStyle(color: AppColors.darkTextSecondary),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade800),
