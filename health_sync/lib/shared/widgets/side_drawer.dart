@@ -8,6 +8,7 @@ import '../../features/blood/pages/blood_home_page.dart';
 import 'language_selector_widget.dart';
 import '../../features/about/about_app_page.dart';
 import '../providers/theme_provider.dart'; // Import Theme Provider
+import '../../features/auth/providers/auth_provider.dart';
 
 class SideDrawer extends ConsumerWidget {
   const SideDrawer({super.key});

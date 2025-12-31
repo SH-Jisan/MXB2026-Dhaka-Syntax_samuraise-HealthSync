@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // 🔥 Fix: Added missing import
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/providers/user_profile_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import 'citizen_home_page.dart';
 import 'doctor_home_page.dart';
 import 'hospital_home_page.dart';
