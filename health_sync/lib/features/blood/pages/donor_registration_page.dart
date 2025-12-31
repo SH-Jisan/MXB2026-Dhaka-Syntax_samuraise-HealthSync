@@ -156,8 +156,11 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           _isAlreadyDonor ? "Manage Donor Profile" : "Become a Donor",
@@ -171,9 +174,9 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
+              _buildHeader(isDark),
 
-              _buildLabel("Blood Group"),
+              _buildLabel("Blood Group", isDark),
               DropdownButtonFormField<String>(
                 // ignore: deprecated_member_use
                 value: _selectedBloodGroup,
@@ -181,40 +184,58 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
                     .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                     .toList(),
                 onChanged: (v) => setState(() => _selectedBloodGroup = v),
-                decoration: _inputDecoration("Select group", Icons.bloodtype),
+                dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
+                decoration: _inputDecoration(
+                  "Select group",
+                  Icons.bloodtype,
+                  isDark,
+                ),
               ),
               const SizedBox(height: 16),
 
-              _buildLabel("District / City"),
+              _buildLabel("District / City", isDark),
               TextFormField(
                 controller: _districtController,
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                 decoration: _inputDecoration(
                   "Dhaka, Chattogram...",
                   Icons.location_city,
+                  isDark,
                 ),
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 16),
 
-              _buildLabel("Phone"),
+              _buildLabel("Phone", isDark),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: _inputDecoration("017xxxxxxxx", Icons.phone),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                decoration: _inputDecoration(
+                  "017xxxxxxxx",
+                  Icons.phone,
+                  isDark,
+                ),
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 16),
 
-              _buildLabel("Last Donation Date (Optional)"),
+              _buildLabel("Last Donation Date (Optional)", isDark),
               InkWell(
                 onTap: _pickDate,
                 child: InputDecorator(
-                  decoration: _inputDecoration("", Icons.calendar_today),
+                  decoration: _inputDecoration(
+                    "",
+                    Icons.calendar_today,
+                    isDark,
+                  ),
                   child: Text(
                     _lastDonationDate == null
                         ? "Tap to select"
                         : "${_lastDonationDate!.day}/${_lastDonationDate!.month}/${_lastDonationDate!.year}",
-                    style: GoogleFonts.poppins(),
+                    style: GoogleFonts.poppins(
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
               ),
@@ -223,10 +244,16 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
               SwitchListTile(
                 title: Text(
                   "Available for donation",
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
                 ),
-                subtitle: const Text(
+                subtitle: Text(
                   "Turn off if you recently donated or are sick",
+                  style: TextStyle(
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
                 ),
                 value: _availability,
                 onChanged: (v) => setState(() => _availability = v),
@@ -240,16 +267,22 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitOrUpdate,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: isDark
+                        ? AppColors.darkPrimary
+                        : AppColors.primary,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: _isSubmitting
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+                      ? Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: CircularProgressIndicator(
+                            color: isDark ? Colors.black : Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : Text(
                           _isAlreadyDonor
@@ -268,7 +301,7 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark) {
     if (!_isAlreadyDonor) return const SizedBox.shrink();
 
     return Container(
@@ -276,42 +309,75 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _availability ? Colors.green.shade50 : Colors.grey.shade100,
+        color: _availability
+            ? (isDark
+                  ? Colors.green.shade900.withValues(alpha: 0.3)
+                  : Colors.green.shade50)
+            : (isDark
+                  ? Colors.red.shade900.withValues(alpha: 0.3)
+                  : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _availability
+              ? (isDark ? Colors.green.shade700 : Colors.green.shade200)
+              : (isDark ? Colors.red.shade700 : Colors.grey.shade300),
+        ),
       ),
       child: Column(
         children: [
           Icon(
             _availability ? Icons.check_circle : Icons.do_not_disturb_on,
             size: 40,
-            color: _availability ? Colors.green : Colors.grey,
+            color: _availability
+                ? (isDark ? Colors.green.shade300 : Colors.green)
+                : (isDark ? Colors.red.shade300 : Colors.grey),
           ),
           const SizedBox(height: 8),
           Text(
             _availability
                 ? "You are available to donate"
                 : "You are currently unavailable",
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLabel(String text) => Padding(
+  Widget _buildLabel(String text, bool isDark) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
-    child: Text(text, style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+    child: Text(
+      text,
+      style: GoogleFonts.poppins(
+        fontWeight: FontWeight.w500,
+        color: isDark ? Colors.grey.shade300 : AppColors.textSecondary,
+      ),
+    ),
   );
 
-  InputDecoration _inputDecoration(String hint, IconData icon) {
+  InputDecoration _inputDecoration(String hint, IconData icon, bool isDark) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, color: Colors.grey),
+      prefixIcon: Icon(icon, color: isDark ? Colors.grey : Colors.grey),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: isDark ? AppColors.darkSurface : Colors.white,
+      hintStyle: TextStyle(
+        color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+        ),
       ),
     );
   }

@@ -52,6 +52,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
   // 📅 2. অ্যাপয়েন্টমেন্ট বুকিং ফাংশন (NEW FEATURE)
   Future<void> _bookAppointment(Map<String, dynamic> patient) async {
     final hospitalId = Supabase.instance.client.auth.currentUser!.id;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // হসপিটালের ডাক্তারদের লিস্ট আনা
     final doctorsResponse = await Supabase.instance.client
@@ -85,22 +86,29 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setStateDialog) {
           return AlertDialog(
-            title: const Text("Book Appointment"),
+            backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
+            title: Text(
+              "Book Appointment",
+              style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   "Patient: ${patient['full_name']}",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
                 ),
                 const SizedBox(height: 16),
 
                 // Doctor Dropdown
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Select Doctor",
-                    border: OutlineInputBorder(),
+                    labelStyle: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                    border: const OutlineInputBorder(),
                   ),
+                  dropdownColor: isDark ? AppColors.darkSurface : AppColors.surface,
+                  style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
                   items: doctors.map((doc) {
                     final profile = doc['profiles'];
                     return DropdownMenuItem(
@@ -121,9 +129,10 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                     selectedDate == null
                         ? "Select Date"
                         : DateFormat.yMMMd().format(selectedDate!),
+                    style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
                   ),
-                  leading: const Icon(Icons.calendar_today),
-                  tileColor: Colors.grey.shade100,
+                  leading: Icon(Icons.calendar_today, color: isDark ? AppColors.darkPrimary : AppColors.primary),
+                  tileColor: isDark ? AppColors.darkBackground : Colors.grey.shade100,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -133,6 +142,12 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                       initialDate: DateTime.now(),
                       firstDate: DateTime.now(),
                       lastDate: DateTime.now().add(const Duration(days: 30)),
+                      builder: (context, child) {
+                        return Theme(
+                          data: isDark ? ThemeData.dark() : ThemeData.light(),
+                          child: child!,
+                        );
+                      },
                     );
                     if (date != null) setStateDialog(() => selectedDate = date);
                   },
@@ -145,9 +160,10 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                     selectedTime == null
                         ? "Select Time"
                         : selectedTime!.format(context),
+                    style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
                   ),
-                  leading: const Icon(Icons.access_time),
-                  tileColor: Colors.grey.shade100,
+                  leading: Icon(Icons.access_time, color: isDark ? AppColors.darkPrimary : AppColors.primary),
+                  tileColor: isDark ? AppColors.darkBackground : Colors.grey.shade100,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -155,6 +171,12 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                     final time = await showTimePicker(
                       context: context,
                       initialTime: TimeOfDay.now(),
+                       builder: (context, child) {
+                        return Theme(
+                          data: isDark ? ThemeData.dark() : ThemeData.light(),
+                          child: child!,
+                        );
+                      },
                     );
                     if (time != null) setStateDialog(() => selectedTime = time);
                   },
@@ -263,8 +285,10 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
 
   // UI Helpers
   void _showPatientOptions(Map<String, dynamic> patient) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -279,12 +303,13 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  backgroundColor: isDark ? AppColors.darkPrimary.withOpacity(0.2) : AppColors.primary.withOpacity(0.1),
                   child: Text(
                     patient['full_name'][0],
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.primary,
                     ),
                   ),
                 ),
@@ -297,11 +322,12 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                         color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                       ),
                     ),
                     Text(
                       patient['phone'] ?? 'No Phone',
-                      style: GoogleFonts.poppins(color: Colors.grey),
+                      style: GoogleFonts.poppins(color: isDark ? AppColors.darkTextSecondary : Colors.grey),
                     ),
                   ],
                 ),
@@ -312,16 +338,16 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
 
             // 🔥 Book Appointment Option
             ListTile(
-              leading: const Icon(Icons.calendar_month, color: Colors.teal),
-              title: const Text("Book Appointment"),
-              subtitle: const Text("Assign a doctor & schedule visit"),
+              leading: Icon(Icons.calendar_month, color: isDark ? AppColors.darkPrimary : Colors.teal),
+              title: Text("Book Appointment", style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
+              subtitle: Text("Assign a doctor & schedule visit", style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
               onTap: () => _bookAppointment(patient),
             ),
 
             ListTile(
-              leading: const Icon(Icons.upload_file, color: Colors.blue),
-              title: const Text("Upload Report"),
-              subtitle: const Text("Add lab reports or prescriptions"),
+              leading: Icon(Icons.upload_file, color: isDark ? AppColors.darkPrimary : Colors.blue),
+              title: Text("Upload Report", style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
+              subtitle: Text("Add lab reports or prescriptions", style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
               onTap: () {
                 Navigator.pop(context);
                 showModalBottomSheet(
@@ -337,9 +363,9 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.history, color: Colors.purple),
-              title: const Text("View Medical History"),
-              subtitle: const Text("See previous records"),
+              leading: Icon(Icons.history, color: isDark ? AppColors.darkPrimary : Colors.purple),
+              title: Text("View Medical History", style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
+              subtitle: Text("See previous records", style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -370,18 +396,22 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     required TextEditingController controller,
     required VoidCallback onConfirm,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
         title: Text(
           title,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
         ),
         content: TextField(
           controller: controller,
+          style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: const Icon(Icons.search),
+            hintStyle: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+            prefixIcon: Icon(Icons.search, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -393,8 +423,8 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
           ElevatedButton(
             onPressed: onConfirm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+              foregroundColor: isDark ? AppColors.textPrimary : Colors.white,
             ),
             child: const Text("CONFIRM"),
           ),
@@ -403,40 +433,42 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     );
   }
 
-  // Cards (Same as before)
   Widget _buildStatCard(
     String title,
     String value,
     IconData icon,
     Color color,
+    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+            ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 28),
+          Icon(icon, color: isDark ? AppColors.darkPrimary : color, size: 28),
           const SizedBox(height: 12),
           Text(
             value,
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           Text(
             title,
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+            style: GoogleFonts.poppins(fontSize: 12, color: isDark ? AppColors.darkTextSecondary : Colors.grey),
           ),
         ],
       ),
@@ -449,6 +481,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return InkWell(
       onTap: onTap,
@@ -456,25 +489,19 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? AppColors.darkSurface : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-            ),
-          ],
+          border: Border.all(color: isDark ? AppColors.darkSurface : Colors.grey.shade200),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: isDark ? color.withOpacity(0.2) : color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color),
+              child: Icon(icon, color: isDark ? AppColors.darkPrimary : color),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -486,19 +513,20 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: Colors.grey,
+                      color: isDark ? AppColors.darkTextSecondary : Colors.grey,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            Icon(Icons.arrow_forward_ios, size: 16, color: isDark ? AppColors.darkTextSecondary : Colors.grey),
           ],
         ),
       ),
@@ -507,6 +535,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -521,6 +550,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                   "View List",
                   Icons.people,
                   Colors.blue,
+                  isDark,
                 ),
               ),
               const SizedBox(width: 16),
@@ -530,6 +560,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                   "Checking...",
                   Icons.calendar_today,
                   Colors.orange,
+                  isDark,
                 ),
               ),
             ],
@@ -540,6 +571,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -559,6 +591,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                 onConfirm: _searchPatient,
               );
             },
+            isDark: isDark,
           ),
           const SizedBox(height: 16),
 
@@ -577,6 +610,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab> {
                 onConfirm: _assignDoctor,
               );
             },
+            isDark: isDark,
           ),
         ],
       ),

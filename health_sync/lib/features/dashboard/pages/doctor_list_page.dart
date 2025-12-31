@@ -34,15 +34,16 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
     final appDoctorsAsync = ref.watch(
       doctorsBySpecialtyProvider(widget.specialty),
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: Text("${widget.specialty}s"),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: AppColors.primary,
+          labelColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+          unselectedLabelColor: isDark ? Colors.grey.shade400 : Colors.grey,
+          indicatorColor: isDark ? AppColors.darkPrimary : AppColors.primary,
           tabs: const [
             Tab(text: "App Doctors"),
             Tab(text: "From Google"),
@@ -70,8 +71,13 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
                   return Card(
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Colors.teal.shade100,
-                        child: const Icon(Icons.person, color: Colors.teal),
+                        backgroundColor: isDark
+                            ? AppColors.darkPrimary.withValues(alpha: 0.2)
+                            : Colors.teal.shade100,
+                        child: Icon(
+                          Icons.person,
+                          color: isDark ? AppColors.darkPrimary : Colors.teal,
+                        ),
                       ),
                       title: Text(
                         doc['full_name'],
@@ -81,8 +87,10 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
                       trailing: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: isDark
+                              ? AppColors.darkPrimary
+                              : AppColors.primary,
+                          foregroundColor: isDark ? Colors.black : Colors.white,
                         ),
                         child: const Text("Book"),
                       ),
@@ -112,10 +120,15 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
                         leading: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
+                            color: isDark
+                                ? Colors.blue.shade900.withValues(alpha: 0.3)
+                                : Colors.blue.shade50,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.public, color: Colors.blue),
+                          child: Icon(
+                            Icons.public,
+                            color: isDark ? Colors.blue.shade200 : Colors.blue,
+                          ),
                         ),
                         title: Text(
                           doc['title'] ?? 'Unknown Doctor',

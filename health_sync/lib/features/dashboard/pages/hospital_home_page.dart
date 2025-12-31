@@ -25,16 +25,18 @@ class _HospitalHomePageState extends State<HospitalHomePage>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       drawer: const SideDrawer(),
       appBar: AppBar(
         title: const Text("Hospital Dashboard"),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: AppColors.primary,
+          labelColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+          unselectedLabelColor: isDark ? AppColors.darkTextSecondary : Colors.grey,
+          indicatorColor: isDark ? AppColors.darkPrimary : AppColors.primary,
           tabs: const [
             Tab(text: "Overview", icon: Icon(Icons.dashboard)),
             Tab(

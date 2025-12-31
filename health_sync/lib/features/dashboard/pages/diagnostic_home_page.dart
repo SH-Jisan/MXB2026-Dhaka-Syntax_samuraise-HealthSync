@@ -181,16 +181,20 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       drawer: const SideDrawer(),
       appBar: AppBar(
         title: const Text("Diagnostic Dashboard"),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
+          labelColor: isDark ? AppColors.darkPrimary : AppColors.primary,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          unselectedLabelColor: Colors.grey,
+          unselectedLabelColor: isDark ? Colors.grey.shade400 : Colors.grey,
+          indicatorColor: isDark ? AppColors.darkPrimary : AppColors.primary,
           tabs: const [
             Tab(text: "Assigned"),
             Tab(text: "Pending"), // 🔥 NEW TAB
@@ -207,16 +211,16 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildAssignedPatientsTab(), // 1. সব রোগী
-          _buildPendingReportsTab(), // 2. শুধু পেন্ডিং কাজ (🔥 NEW)
-          _buildSearchTab(), // 3. নতুন অ্যাসাইন
+          _buildAssignedPatientsTab(isDark), // 1. সব রোগী
+          _buildPendingReportsTab(isDark), // 2. শুধু পেন্ডিং কাজ (🔥 NEW)
+          _buildSearchTab(isDark), // 3. নতুন অ্যাসাইন
         ],
       ),
     );
   }
 
   // --- TAB 1: ALL ASSIGNED PATIENTS ---
-  Widget _buildAssignedPatientsTab() {
+  Widget _buildAssignedPatientsTab(bool isDark) {
     final diagnosticId = Supabase.instance.client.auth.currentUser!.id;
     return FutureBuilder(
       future: Supabase.instance.client
@@ -253,7 +257,17 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
 
             return Card(
               child: ListTile(
-                leading: CircleAvatar(child: Text(patient['full_name'][0])),
+                leading: CircleAvatar(
+                  backgroundColor: isDark
+                      ? AppColors.darkPrimary.withValues(alpha: 0.2)
+                      : null,
+                  child: Text(
+                    patient['full_name'][0],
+                    style: TextStyle(
+                      color: isDark ? AppColors.darkPrimary : null,
+                    ),
+                  ),
+                ),
                 title: Text(
                   patient['full_name'],
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -275,7 +289,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
   }
 
   // --- 🔥 TAB 2: PENDING REPORTS TAB (NEW) ---
-  Widget _buildPendingReportsTab() {
+  Widget _buildPendingReportsTab(bool isDark) {
     final diagnosticId = Supabase.instance.client.auth.currentUser!.id;
 
     // আমরা 'patient_payments' টেবিল থেকে পেন্ডিং টেস্ট খুঁজব
@@ -327,15 +341,21 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
               margin: const EdgeInsets.only(bottom: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.orange.shade200),
+                side: BorderSide(
+                  color: isDark
+                      ? Colors.orange.shade700.withValues(alpha: 0.5)
+                      : Colors.orange.shade200,
+                ),
               ),
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
-                  backgroundColor: Colors.orange.shade50,
-                  child: const Icon(
+                  backgroundColor: isDark
+                      ? Colors.orange.shade900.withValues(alpha: 0.3)
+                      : Colors.orange.shade50,
+                  child: Icon(
                     Icons.pending_actions,
-                    color: Colors.orange,
+                    color: isDark ? Colors.orange.shade300 : Colors.orange,
                   ),
                 ),
                 title: Text(
@@ -348,8 +368,8 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
                     const SizedBox(height: 4),
                     Text(
                       tests,
-                      style: const TextStyle(
-                        color: Colors.black87,
+                      style: TextStyle(
+                        color: isDark ? Colors.grey.shade300 : Colors.black87,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -370,8 +390,10 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: isDark
+                        ? AppColors.darkPrimary
+                        : AppColors.primary,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     visualDensity: VisualDensity.compact,
                   ),
@@ -386,7 +408,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
   }
 
   // --- TAB 3: SEARCH & ASSIGN ---
-  Widget _buildSearchTab() {
+  Widget _buildSearchTab(bool isDark) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -400,7 +422,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
                 borderRadius: BorderRadius.circular(12),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: isDark ? AppColors.darkSurface : Colors.white,
               suffixIcon: IconButton(
                 icon: const Icon(Icons.arrow_forward),
                 onPressed: _searchPatient,
@@ -415,8 +437,15 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? AppColors.darkSurface : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -437,6 +466,12 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
                       onPressed: _assignPatient,
                       icon: const Icon(Icons.person_add),
                       label: const Text("ASSIGN TO CENTER"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark
+                            ? AppColors.darkPrimary
+                            : AppColors.primary,
+                        foregroundColor: isDark ? Colors.black : Colors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -446,7 +481,12 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
             TextButton.icon(
               onPressed: () => _showRegistrationDialog(),
               icon: const Icon(Icons.app_registration),
-              label: const Text("Register New Patient"),
+              label: Text(
+                "Register New Patient",
+                style: TextStyle(
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                ),
+              ),
             ),
         ],
       ),

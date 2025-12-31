@@ -133,14 +133,14 @@ class _DoctorPatientProfilePageState
   }
 
   // ৩. টেস্ট অ্যাসাইন ডায়ালগ
-  void _showAssignTestDialog() {
+  void _showAssignTestDialog(bool isDark) {
     final notesCtrl = TextEditingController();
     setState(() => _selectedTests.clear());
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -163,13 +163,17 @@ class _DoctorPatientProfilePageState
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  const Text(
+                  Text(
                     "Selected Tests:",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.grey.shade300 : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
 
@@ -180,10 +184,17 @@ class _DoctorPatientProfilePageState
                       ..._selectedTests.map(
                         (test) => Chip(
                           label: Text(test),
-                          backgroundColor: AppColors.primary.withValues(
-                            alpha: 0.1,
+                          backgroundColor: isDark
+                              ? AppColors.darkPrimary.withValues(alpha: 0.2)
+                              : AppColors.primary.withValues(alpha: 0.1),
+                          labelStyle: TextStyle(
+                            color: isDark ? Colors.white : Colors.black,
                           ),
-                          deleteIcon: const Icon(Icons.close, size: 18),
+                          deleteIcon: Icon(
+                            Icons.close,
+                            size: 18,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey,
+                          ),
                           onDeleted: () {
                             setModalState(() {
                               _selectedTests.remove(test);
@@ -192,16 +203,20 @@ class _DoctorPatientProfilePageState
                         ),
                       ),
                       ActionChip(
-                        avatar: const Icon(
+                        avatar: Icon(
                           Icons.add,
                           size: 18,
-                          color: Colors.white,
+                          color: isDark ? Colors.black : Colors.white,
                         ),
-                        label: const Text(
+                        label: Text(
                           "Add Test",
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            color: isDark ? Colors.black : Colors.white,
+                          ),
                         ),
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: isDark
+                            ? AppColors.darkPrimary
+                            : AppColors.primary,
                         onPressed: () {
                           _showTestSelectionDialog(setModalState);
                         },
@@ -286,8 +301,10 @@ class _DoctorPatientProfilePageState
                       icon: const Icon(Icons.send),
                       label: const Text("CONFIRM & ASSIGN"),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: isDark
+                            ? AppColors.darkPrimary
+                            : AppColors.primary,
+                        foregroundColor: isDark ? Colors.black : Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
@@ -304,17 +321,20 @@ class _DoctorPatientProfilePageState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.patient['full_name'] ?? 'Patient Profile'),
       ),
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAssignTestDialog,
+        onPressed: () => _showAssignTestDialog(isDark),
         icon: const Icon(Icons.add_task),
         label: const Text("Assign Test"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+        foregroundColor: isDark ? Colors.black : Colors.white,
       ),
 
       body: Column(
@@ -323,24 +343,37 @@ class _DoctorPatientProfilePageState
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: isDark
+                  ? AppColors.darkSurface
+                  : AppColors.primary.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
+              boxShadow: isDark
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: isDark
+                      ? AppColors.darkPrimary
+                      : AppColors.primary,
                   child: Text(
                     widget.patient['full_name'] != null
                         ? widget.patient['full_name'][0].toUpperCase()
                         : 'P',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
-                      color: Colors.white,
+                      color: isDark ? Colors.black : Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -354,16 +387,25 @@ class _DoctorPatientProfilePageState
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     Text(
                       widget.patient['email'] ?? '',
-                      style: GoogleFonts.poppins(color: Colors.grey.shade700),
+                      style: GoogleFonts.poppins(
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700,
+                      ),
                     ),
                     if (widget.patient['phone'] != null)
                       Text(
                         widget.patient['phone'],
-                        style: GoogleFonts.poppins(color: Colors.grey.shade700),
+                        style: GoogleFonts.poppins(
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade700,
+                        ),
                       ),
                   ],
                 ),
@@ -378,13 +420,17 @@ class _DoctorPatientProfilePageState
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
             child: Row(
               children: [
-                const Icon(Icons.history_edu, color: AppColors.primary),
+                Icon(
+                  Icons.history_edu,
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   "Medical History & Reports",
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
                   ),
                 ),
               ],

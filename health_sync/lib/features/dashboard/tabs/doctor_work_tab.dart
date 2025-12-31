@@ -21,32 +21,41 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
   @override
   void initState() {
     super.initState();
-    // 🔥 ফিক্স: initState এর ভেতর সরাসরি ফাংশন কল করা হয়েছে, setState নয়।
-    _refreshHospitals();
-    _refreshPatients();
+    _hospitalsFuture = _getHospitals();
+    _patientsFuture = _getPatients();
   }
 
-  // ডাটা লোড বা রিফ্রেশ করার ফাংশন
+  Future<List<dynamic>> _getHospitals() async {
+    return await Supabase.instance.client
+        .from('doctor_hospitals')
+        .select()
+        .eq('doctor_id', _doctorId);
+  }
+
+  Future<List<dynamic>> _getPatients() async {
+    return await Supabase.instance.client
+        .from('doctor_patients')
+        .select('patient_id, profiles:patient_id(*)')
+        .eq('doctor_id', _doctorId)
+        .order('assigned_at', ascending: false);
+  }
+
   void _refreshHospitals() {
-    setState(() {
-      _hospitalsFuture = Supabase.instance.client
-          .from('doctor_hospitals')
-          .select()
-          .eq('doctor_id', _doctorId);
-    });
+    if (mounted) {
+      setState(() {
+        _hospitalsFuture = _getHospitals();
+      });
+    }
   }
 
   void _refreshPatients() {
-    setState(() {
-      _patientsFuture = Supabase.instance.client
-          .from('doctor_patients')
-          .select('patient_id, profiles:patient_id(*)')
-          .eq('doctor_id', _doctorId)
-          .order('assigned_at', ascending: false);
-    });
+    if (mounted) {
+      setState(() {
+        _patientsFuture = _getPatients();
+      });
+    }
   }
 
-  // 🏥 Add New Hospital Dialog
   void _addHospital() {
     final nameCtrl = TextEditingController();
     final timeCtrl = TextEditingController();
@@ -74,7 +83,7 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
               decoration: InputDecoration(
                 labelText:
                     AppLocalizations.of(context)?.visitingHours ??
-                    "Visiting Hours (e.g. 5-9 PM)",
+                    "Visiting Hours",
               ),
             ),
           ],
@@ -87,14 +96,18 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
           ElevatedButton(
             onPressed: () async {
               if (nameCtrl.text.isNotEmpty) {
-                await Supabase.instance.client.from('doctor_hospitals').insert({
+                final supabase = Supabase.instance.client;
+                final navigator = Navigator.of(ctx);
+
+                await supabase.from('doctor_hospitals').insert({
                   'doctor_id': _doctorId,
                   'hospital_name': nameCtrl.text,
                   'visiting_hours': timeCtrl.text,
                 });
+
                 if (ctx.mounted) {
-                  Navigator.pop(ctx);
-                  _refreshHospitals(); // 🔥 লিস্ট রিফ্রেশ
+                  navigator.pop();
+                  _refreshHospitals();
                 }
               }
             },
@@ -105,7 +118,6 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
     );
   }
 
-  // 🔍 Search & Add Patient Logic
   void _searchAndAddPatient() {
     final emailCtrl = TextEditingController();
     showDialog(
@@ -120,8 +132,7 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
             labelText:
                 AppLocalizations.of(context)?.patientEmail ?? "Patient Email",
             hintText:
-                AppLocalizations.of(context)?.enterEmailSearch ??
-                "Enter email to search",
+                AppLocalizations.of(context)?.enterEmailSearch ?? "Enter email",
           ),
         ),
         actions: [
@@ -131,39 +142,35 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
           ),
           ElevatedButton(
             onPressed: () async {
+              final supabase = Supabase.instance.client;
+              final l10n = AppLocalizations.of(context);
+              final messenger = ScaffoldMessenger.of(context);
               try {
-                final data = await Supabase.instance.client
+                final data = await supabase
                     .from('profiles')
                     .select('id')
                     .eq('email', emailCtrl.text.trim())
                     .maybeSingle();
 
                 if (data != null) {
-                  await Supabase.instance.client.from('doctor_patients').insert(
-                    {'doctor_id': _doctorId, 'patient_id': data['id']},
-                  );
+                  await supabase.from('doctor_patients').insert({
+                    'doctor_id': _doctorId,
+                    'patient_id': data['id'],
+                  });
                   if (ctx.mounted) {
                     Navigator.pop(ctx);
-                    if (mounted) {
-                      _refreshPatients(); // 🔥 লিস্ট রিফ্রেশ
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(context)?.patientAddedSuccess ??
-                                "Patient Added Successfully!",
-                          ),
-                        ),
-                      );
-                    }
+                    _refreshPatients();
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(l10n?.patientAddedSuccess ?? "Success"),
+                      ),
+                    );
                   }
                 } else {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)?.userNotFound ??
-                              "Patient not found!",
-                        ),
+                        content: Text(l10n?.userNotFound ?? "Not found"),
                       ),
                     );
                   }
@@ -174,16 +181,14 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                     SnackBar(
                       content: Text(
                         AppLocalizations.of(context)?.alreadyAssignedOrError ??
-                            "Already assigned or Error",
+                            "Error",
                       ),
                     ),
                   );
                 }
               }
             },
-            child: Text(
-              AppLocalizations.of(context)?.addNewPatient ?? "Add Patient",
-            ),
+            child: Text(AppLocalizations.of(context)?.addNewPatient ?? "Add"),
           ),
         ],
       ),
@@ -194,198 +199,232 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // --- Section 1: My Hospitals ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)?.currentChambers ??
-                    "Current Chambers",
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+    return RefreshIndicator(
+      onRefresh: () async {
+        _refreshHospitals();
+        _refreshPatients();
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)?.currentChambers ??
+                        "Current Chambers",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _addHospital,
+                    icon: Icon(
+                      Icons.add_circle,
+                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
-              IconButton(
-                onPressed: _addHospital,
-                icon: const Icon(Icons.add_circle, color: AppColors.primary),
-              ),
-            ],
+            ),
           ),
+          SliverToBoxAdapter(
+            child: FutureBuilder(
+              future: _hospitalsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox(
+                    height: 100,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (!snapshot.hasData) return const SizedBox.shrink();
 
-          FutureBuilder(
-            future: _hospitalsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SizedBox(
-                  height: 100,
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              if (!snapshot.hasData) return const SizedBox.shrink();
+                final hospitals = snapshot.data as List;
+                if (hospitals.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      AppLocalizations.of(context)?.noHospitalsAdded ??
+                          "No hospitals",
+                      style: TextStyle(color: isDark ? AppColors.darkTextSecondary: Colors.grey),
+                    ),
+                  );
+                }
 
-              final hospitals = snapshot.data as List;
-              if (hospitals.isEmpty) {
-                return Text(
-                  AppLocalizations.of(context)?.noHospitalsAdded ??
-                      "No hospitals added.",
-                  style: const TextStyle(color: Colors.grey),
-                );
-              }
-
-              return SizedBox(
-                height: 120,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: hospitals.length,
-                  itemBuilder: (context, index) {
-                    final h = hospitals[index];
-                    return Container(
-                      width: 200,
-                      margin: const EdgeInsets.only(right: 12, bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.grey.shade800
-                            : Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.blue.withValues(alpha: 0.3),
+                return SizedBox(
+                  height: 120,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: hospitals.length,
+                    itemBuilder: (context, index) {
+                      final h = hospitals[index];
+                      return Container(
+                        width: 200,
+                        margin: const EdgeInsets.only(right: 12, bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurface
+                              : Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? AppColors.darkSurface : Colors.blue.withOpacity(0.3),
+                          ),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.local_hospital,
-                            color: isDark
-                                ? Colors.white70
-                                : Colors.blue.shade700,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            h['hospital_name'],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            h['visiting_hours'] ?? '',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.local_hospital,
+                              color: isDark
+                                  ? AppColors.darkPrimary
+                                  : Colors.blue.shade700,
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+                            const SizedBox(height: 8),
+                            Text(
+                              h['hospital_name'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              h['visiting_hours'] ?? '',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? AppColors.darkTextSecondary: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
           ),
-
-          const SizedBox(height: 24),
-
-          // --- Section 2: Patients ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)?.underTreatment ??
-                    "Under Treatment",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)?.underTreatment ??
+                        "Under Treatment",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _searchAndAddPatient,
+                    icon: const Icon(Icons.person_add, size: 16),
+                    label: Text(
+                      AppLocalizations.of(context)?.newPatient ?? "New Patient",
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? AppColors.darkPrimary : AppColors.secondary,
+                      foregroundColor: isDark ? AppColors.textPrimary : Colors.white,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton.icon(
-                onPressed: _searchAndAddPatient,
-                icon: const Icon(Icons.person_add, size: 16),
-                label: Text(
-                  AppLocalizations.of(context)?.newPatient ?? "New Patient",
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
-                  foregroundColor: Colors.white,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 12),
-
           FutureBuilder(
             future: _patientsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const SliverToBoxAdapter(
+                  child: Center(child: CircularProgressIndicator()),
+                );
               }
               final list = snapshot.data ?? [];
 
               if (list.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.person_off_outlined,
-                          size: 48,
-                          color: Colors.grey.shade300,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          AppLocalizations.of(context)?.noPatientsAssigned ??
-                              "No patients assigned yet.",
-                        ),
-                      ],
+                return SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.person_off_outlined,
+                            size: 48,
+                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            AppLocalizations.of(context)?.noPatientsAssigned ??
+                                "No patients",
+                             style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
               }
 
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final patient = list[index]['profiles'];
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(12),
-                      leading: CircleAvatar(
-                        child: Text(patient['full_name'][0]),
-                      ),
-                      title: Text(
-                        patient['full_name'],
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text("Phone: ${patient['phone'] ?? 'N/A'}"),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                DoctorPatientProfilePage(patient: patient),
+              return SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final patient = list[index]['profiles'];
+                    return Card(
+                      elevation: isDark ? 0 : 2,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      color: isDark ? AppColors.darkSurface : AppColors.surface,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(12),
+                        leading: CircleAvatar(
+                          backgroundColor: isDark ? AppColors.darkPrimary.withOpacity(0.5) : AppColors.primary.withOpacity(0.1),
+                          foregroundColor: isDark ? AppColors.darkTextPrimary : AppColors.primary,
+                          child: Text(patient['full_name'][0]),
+                        ),
+                        title: Text(
+                          patient['full_name'],
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                           ),
-                        );
-                      },
-                    ),
-                  );
-                },
+                        ),
+                        subtitle: Text(
+                          "Phone: ${patient['phone'] ?? 'N/A'}",
+                          style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  DoctorPatientProfilePage(patient: patient),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }, childCount: list.length),
+                ),
               );
             },
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
     );

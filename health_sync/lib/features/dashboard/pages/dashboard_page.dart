@@ -6,6 +6,7 @@ import 'citizen_home_page.dart';
 import 'doctor_home_page.dart';
 import 'hospital_home_page.dart';
 import 'diagnostic_home_page.dart';
+import '../../../shared/pages/splash_page.dart'; // 🔥 Fix: Added missing import
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -16,7 +17,7 @@ class DashboardPage extends ConsumerWidget {
 
     return profileAsync.when(
       loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+          const SplashPage(), // 🔥 Optimized: Show Splash Instead of simple Indicator
       error: (err, stack) => Scaffold(
         body: Center(
           child: Column(

@@ -295,30 +295,38 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
   @override
   Widget build(BuildContext context) {
     final providerId = Supabase.instance.client.auth.currentUser!.id;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: Text(widget.patient['full_name'])),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createNewOrder, // 🔥 আপডেটেড ফাংশন কল হচ্ছে
         icon: const Icon(Icons.add_task),
         label: const Text("New Test"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+        foregroundColor: isDark ? Colors.black : Colors.white,
       ),
       body: Column(
         children: [
           // Header Info
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.white,
+            color: isDark ? AppColors.darkSurface : Colors.white,
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 25,
+                  backgroundColor: isDark
+                      ? AppColors.darkPrimary
+                      : AppColors.primary,
                   child: Text(
                     widget.patient['full_name'][0],
-                    style: const TextStyle(fontSize: 20),
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: isDark ? Colors.black : Colors.white,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -327,18 +335,26 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                   children: [
                     Text(
                       widget.patient['email'],
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700,
+                      ),
                     ),
                     Text(
                       widget.patient['phone'] ?? "No Phone",
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: isDark ? Colors.grey.shade800 : null),
 
           // Orders List
           Expanded(
@@ -379,8 +395,16 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                         borderRadius: BorderRadius.circular(12),
                         side: BorderSide(
                           color: isPending
-                              ? Colors.orange.shade200
-                              : Colors.green.shade200,
+                              ? (isDark
+                                    ? Colors.orange.shade700.withValues(
+                                        alpha: 0.5,
+                                      )
+                                    : Colors.orange.shade200)
+                              : (isDark
+                                    ? Colors.green.shade700.withValues(
+                                        alpha: 0.5,
+                                      )
+                                    : Colors.green.shade200),
                         ),
                       ),
                       child: Padding(
@@ -394,12 +418,24 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                                 Chip(
                                   label: Text(order['report_status']),
                                   backgroundColor: isPending
-                                      ? Colors.orange.shade100
-                                      : Colors.green.shade100,
+                                      ? (isDark
+                                            ? Colors.orange.shade900.withValues(
+                                                alpha: 0.3,
+                                              )
+                                            : Colors.orange.shade100)
+                                      : (isDark
+                                            ? Colors.green.shade900.withValues(
+                                                alpha: 0.3,
+                                              )
+                                            : Colors.green.shade100),
                                   labelStyle: TextStyle(
                                     color: isPending
-                                        ? Colors.orange.shade900
-                                        : Colors.green.shade900,
+                                        ? (isDark
+                                              ? Colors.orange.shade300
+                                              : Colors.orange.shade900)
+                                        : (isDark
+                                              ? Colors.green.shade300
+                                              : Colors.green.shade900),
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
