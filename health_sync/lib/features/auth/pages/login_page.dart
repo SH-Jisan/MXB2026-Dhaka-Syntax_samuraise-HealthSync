@@ -42,18 +42,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Logo & Title
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isDark
-                      ? AppColors.darkPrimary.withValues(alpha: 0.1)
-                      : AppColors.primary.withValues(alpha: 0.1),
-                ),
-                child: Icon(
-                  Icons.health_and_safety,
-                  size: 64,
-                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
+              Center(
+                child: Image.asset(
+                  'assets/logo/logo.png',
+                  width: 100,
+                  height: 100,
                 ),
               ),
               const SizedBox(height: 24),

@@ -18,30 +18,7 @@ class AboutAppPage extends StatelessWidget {
         child: Column(
           children: [
             // 1. Hero Header
-            Container(
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [
-                          AppColors.darkPrimary.withValues(alpha: 0.2),
-                          AppColors.darkSurface,
-                        ]
-                      : [
-                          AppColors.primary.withValues(alpha: 0.1),
-                          Colors.white,
-                        ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.health_and_safety,
-                size: 80,
-                color: isDark ? AppColors.darkPrimary : AppColors.primary,
-              ),
-            ),
+            Image.asset('assets/logo/logo.png', width: 120, height: 120),
             const SizedBox(height: 16),
             Text(
               "HealthSync Pro",
