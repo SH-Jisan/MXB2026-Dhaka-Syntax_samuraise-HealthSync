@@ -1,0 +1,61 @@
+# Health Sync - AI-Powered Personalized Healthcare Management App
+
+Welcome to the official showcase of Health Sync! In this video, we dive deep into how Health Sync is revolutionizing personal healthcare management by combining the power of AI with seamless user experience.
+
+Health Sync is an all-in-one healthcare solution designed to empower users with personalized health insights, emergency services, and organized medical history tracking. Built using Flutter and Supabase, it provides a fast, secure, and intuitive platform for all your health needs.
+
+---
+
+## 🚀 Key Features:
+
+### 🤖 AI Doctor & Health Assistant
+An intelligent companion for your health journey.
+- **Symptom Triage**: Input your symptoms via text or voice to receive immediate assessment and guidance.
+- **Mental Health Support**: Talk to the AI for stress management and emotional well-being tips.
+- **Personalized Recommendations**: Get health tips and lifestyle advice tailored to your medical profile.
+- **Voice Integration**: Hands-free interaction using built-in speech-to-text capabilities.
+
+### 🩸 Blood Donation & Emergency Network
+A life-saving module that connects donors and recipients within your community.
+- **Real-Time Donor Search**: Find active donors by blood group and proximity.
+- **Request Management**: Post urgent blood requests and track donor responses in real-time.
+- **Hospital Directory**: Quick access to a directory of hospital blood banks.
+
+### 📅 Smart Medical Timeline
+Your complete medical history, organized and analyzed by AI.
+- **Event Categorization**: Automatically separate and view Report Analyses, Prescriptions, and Lab Results.
+- **AI Document Analysis**: Upload medical reports to have AI extract key findings and summarize results.
+- **Severity Indicators**: At-a-glance severity levels (HIGH, MEDIUM, NORMAL) for all medical events.
+
+### 📋 Personalized Health Plans
+Custom-built wellness strategies based on your unique health data.
+- **Tailored Strategies**: Receive health and wellness plans generated specific to your history.
+
+---
+
+## 🛠️ Technology Stack:
+
+- **Frontend Framework**: Flutter (3.10.3+)
+- **State Management**: Riverpod
+- **Database & Auth**: Supabase
+- **Edge Computing**: Supabase Edge Functions (Deno/TypeScript)
+- **Notifications**: Firebase Cloud Messaging (FCM)
+- **Navigation**: GoRouter
+
+---
+
+## 👨‍💻 For Developers:
+If you're interested in building similar AI-integrated applications, this project demonstrates a robust architecture using Flutter and Supabase Edge Functions. 
+
+---
+
+## � Short Description (Quick Version):
+
+Health Sync is an AI-powered healthcare management app built with Flutter and Supabase. It features an intelligent AI Doctor for symptom assessment, a real-time blood donation network, and an AI-driven medical timeline that automatically analyzes your medical reports.
+
+---
+
+## 🔔 Stay Connected:
+Subscribe for more updates!
+
+#HealthSync #AI #Flutter #Supabase #HealthTech #MedicalApp #FlutterDev #AIAssistant
