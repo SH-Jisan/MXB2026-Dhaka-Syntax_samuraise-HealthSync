@@ -23,17 +23,22 @@ class MedicalTimelineTile extends StatelessWidget {
 
     final isPrescription = event.eventType == 'PRESCRIPTION';
     final primaryColor = isPrescription ? Colors.purple : AppColors.primary;
+    final darkPrimaryColor =
+        isPrescription ? Colors.purple.shade300 : AppColors.darkPrimary;
+
     final lightColor = isDark
         ? (isPrescription
-              ? Colors.purple.withValues(alpha: 0.2)
-              : AppColors.primary.withValues(alpha: 0.2))
-        : (isPrescription ? Colors.purple.shade50 : Colors.teal.shade50);
+            ? Colors.purple.withOpacity(0.2)
+            : AppColors.darkPrimary.withOpacity(0.2))
+        : (isPrescription
+            ? Colors.purple.shade50
+            : AppColors.primary.withOpacity(0.1));
 
     return TimelineTile(
       isFirst: false,
       isLast: isLast,
       beforeLineStyle: LineStyle(
-        color: primaryColor.withValues(alpha: 0.3),
+        color: (isDark ? darkPrimaryColor : primaryColor).withOpacity(0.3),
         thickness: 2,
       ),
       indicatorStyle: IndicatorStyle(
@@ -43,10 +48,12 @@ class MedicalTimelineTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: lightColor,
             shape: BoxShape.circle,
-            border: Border.all(color: primaryColor, width: 2),
+            border: Border.all(
+                color: isDark ? darkPrimaryColor : primaryColor, width: 2),
             boxShadow: [
               BoxShadow(
-                color: primaryColor.withValues(alpha: 0.2),
+                color: (isDark ? darkPrimaryColor : primaryColor)
+                    .withOpacity(0.2),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -56,7 +63,7 @@ class MedicalTimelineTile extends StatelessWidget {
             isPrescription
                 ? Icons.medication_outlined
                 : Icons.assignment_outlined,
-            color: primaryColor,
+            color: isDark ? darkPrimaryColor : primaryColor,
             size: 20,
           ),
         ),
@@ -78,17 +85,17 @@ class MedicalTimelineTile extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.cardTheme.color,
+                color: isDark ? AppColors.darkSurface : AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                    color: Colors.black.withOpacity(isDark ? 0.1 : 0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                 ],
                 border: Border.all(
-                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
                 ),
               ),
               child: Column(
@@ -104,7 +111,7 @@ class MedicalTimelineTile extends StatelessWidget {
                             Icons.calendar_today_outlined,
                             size: 14,
                             color: isDark
-                                ? Colors.grey.shade400
+                                ? AppColors.darkTextSecondary
                                 : AppColors.textSecondary,
                           ),
                           const SizedBox(width: 6),
@@ -114,7 +121,7 @@ class MedicalTimelineTile extends StatelessWidget {
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                               color: isDark
-                                  ? Colors.grey.shade400
+                                  ? AppColors.darkTextSecondary
                                   : AppColors.textSecondary,
                             ),
                           ),
@@ -131,7 +138,9 @@ class MedicalTimelineTile extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
                     ),
                   ),
 
@@ -144,7 +153,7 @@ class MedicalTimelineTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         color: isDark
-                            ? Colors.grey.shade300
+                            ? AppColors.darkTextSecondary
                             : Colors.grey.shade600,
                         fontSize: 13,
                         height: 1.5,
@@ -152,7 +161,7 @@ class MedicalTimelineTile extends StatelessWidget {
                     ),
                   ],
 
-                  // 🔥 নতুন: টেস্ট বা ফাইন্ডিংস চিপস আকারে দেখানো
+                  // Key Findings Chips
                   if (event.keyFindings.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Wrap(
@@ -166,12 +175,12 @@ class MedicalTimelineTile extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: isDark
-                                      ? Colors.white70
-                                      : Colors.black87,
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               backgroundColor: isDark
-                                  ? Colors.grey.shade800
+                                  ? AppColors.darkBackground
                                   : Colors.grey.shade100,
                               visualDensity: VisualDensity.compact,
                               padding: EdgeInsets.zero,
@@ -204,7 +213,7 @@ class MedicalTimelineTile extends StatelessWidget {
                         "View Details",
                         style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: primaryColor,
+                          color: isDark ? darkPrimaryColor : primaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -212,7 +221,7 @@ class MedicalTimelineTile extends StatelessWidget {
                       Icon(
                         Icons.arrow_forward_rounded,
                         size: 14,
-                        color: primaryColor,
+                        color: isDark ? darkPrimaryColor : primaryColor,
                       ),
                     ],
                   ),
@@ -226,7 +235,7 @@ class MedicalTimelineTile extends StatelessWidget {
   }
 }
 
-// Severity Badge Helper (Same as before)
+// Severity Badge Helper
 class _SeverityBadge extends StatelessWidget {
   final String severity;
   const _SeverityBadge({required this.severity});
@@ -241,21 +250,16 @@ class _SeverityBadge extends StatelessWidget {
     switch (severity) {
       case 'HIGH':
         color = isDark ? Colors.red.shade300 : Colors.red.shade700;
-        bg = isDark
-            ? Colors.red.shade900.withValues(alpha: 0.3)
-            : Colors.red.shade50;
+        bg = isDark ? Colors.red.withOpacity(0.15) : Colors.red.shade50;
         break;
       case 'MEDIUM':
         color = isDark ? Colors.orange.shade300 : Colors.orange.shade800;
-        bg = isDark
-            ? Colors.orange.shade900.withValues(alpha: 0.3)
-            : Colors.orange.shade50;
+        bg =
+            isDark ? Colors.orange.withOpacity(0.15) : Colors.orange.shade50;
         break;
-      default:
+      default: // LOW
         color = isDark ? Colors.green.shade300 : Colors.green.shade700;
-        bg = isDark
-            ? Colors.green.shade900.withValues(alpha: 0.3)
-            : Colors.green.shade50;
+        bg = isDark ? Colors.green.withOpacity(0.15) : Colors.green.shade50;
     }
 
     return Container(
@@ -263,7 +267,7 @@ class _SeverityBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: bg.withValues(alpha: isDark ? 0.0 : 0.5)),
+        border: Border.all(color: color.withOpacity(0.5)),
       ),
       child: Text(
         severity,

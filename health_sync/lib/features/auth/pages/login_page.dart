@@ -171,12 +171,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             password: _passwordController.text.trim(),
           );
 
-      // 🔥 Manual Redirect Fallback
-      // Router *should* handle this, but explicit navigation ensures
-      // the user isn't stuck if the stream has a race condition.
-      if (mounted) {
-        context.go('/');
-      }
+      // 🔥 Manual Redirect Removed
+      // We now rely solely on AppRouter's refreshListenable to switch to '/'
+      // when the Supabase session becomes active.
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

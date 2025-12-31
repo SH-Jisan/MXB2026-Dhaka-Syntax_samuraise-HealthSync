@@ -1,62 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../pages/doctor_patient_profile_page.dart';
+import '../providers/doctor_work_providers.dart';
 import '../../../l10n/app_localizations.dart';
 
-class DoctorWorkTab extends StatefulWidget {
+class DoctorWorkTab extends ConsumerWidget {
   const DoctorWorkTab({super.key});
 
-  @override
-  State<DoctorWorkTab> createState() => _DoctorWorkTabState();
-}
-
-class _DoctorWorkTabState extends State<DoctorWorkTab> {
-  final String _doctorId = Supabase.instance.client.auth.currentUser!.id;
-
-  late Future<List<dynamic>> _hospitalsFuture;
-  late Future<List<dynamic>> _patientsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _hospitalsFuture = _getHospitals();
-    _patientsFuture = _getPatients();
-  }
-
-  Future<List<dynamic>> _getHospitals() async {
-    return await Supabase.instance.client
-        .from('doctor_hospitals')
-        .select()
-        .eq('doctor_id', _doctorId);
-  }
-
-  Future<List<dynamic>> _getPatients() async {
-    return await Supabase.instance.client
-        .from('doctor_patients')
-        .select('patient_id, profiles:patient_id(*)')
-        .eq('doctor_id', _doctorId)
-        .order('assigned_at', ascending: false);
-  }
-
-  void _refreshHospitals() {
-    if (mounted) {
-      setState(() {
-        _hospitalsFuture = _getHospitals();
-      });
-    }
-  }
-
-  void _refreshPatients() {
-    if (mounted) {
-      setState(() {
-        _patientsFuture = _getPatients();
-      });
-    }
-  }
-
-  void _addHospital() {
+  void _addHospital(BuildContext context, WidgetRef ref, String doctorId) {
     final nameCtrl = TextEditingController();
     final timeCtrl = TextEditingController();
 
@@ -100,15 +54,13 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                 final navigator = Navigator.of(ctx);
 
                 await supabase.from('doctor_hospitals').insert({
-                  'doctor_id': _doctorId,
+                  'doctor_id': doctorId,
                   'hospital_name': nameCtrl.text,
                   'visiting_hours': timeCtrl.text,
                 });
 
-                if (ctx.mounted) {
-                  navigator.pop();
-                  _refreshHospitals();
-                }
+                ref.invalidate(doctorChambersProvider(doctorId));
+                navigator.pop();
               }
             },
             child: Text(AppLocalizations.of(context)?.add ?? "Add"),
@@ -118,7 +70,11 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
     );
   }
 
-  void _searchAndAddPatient() {
+  void _searchAndAddPatient(
+    BuildContext context,
+    WidgetRef ref,
+    String doctorId,
+  ) {
     final emailCtrl = TextEditingController();
     showDialog(
       context: context,
@@ -154,12 +110,12 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
 
                 if (data != null) {
                   await supabase.from('doctor_patients').insert({
-                    'doctor_id': _doctorId,
+                    'doctor_id': doctorId,
                     'patient_id': data['id'],
                   });
+                  ref.invalidate(doctorPatientsProvider(doctorId));
                   if (ctx.mounted) {
                     Navigator.pop(ctx);
-                    _refreshPatients();
                     messenger.showSnackBar(
                       SnackBar(
                         content: Text(l10n?.patientAddedSuccess ?? "Success"),
@@ -167,25 +123,19 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                     );
                   }
                 } else {
-                  if (mounted) {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(l10n?.userNotFound ?? "Not found"),
-                      ),
-                    );
-                  }
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        AppLocalizations.of(context)?.alreadyAssignedOrError ??
-                            "Error",
-                      ),
-                    ),
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(l10n?.userNotFound ?? "Not found")),
                   );
                 }
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context)?.alreadyAssignedOrError ??
+                          "Error",
+                    ),
+                  ),
+                );
               }
             },
             child: Text(AppLocalizations.of(context)?.addNewPatient ?? "Add"),
@@ -196,13 +146,21 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final doctorId = Supabase.instance.client.auth.currentUser!.id;
+
+    final chambersAsync = ref.watch(doctorChambersProvider(doctorId));
+    final patientsAsync = ref.watch(doctorPatientsProvider(doctorId));
 
     return RefreshIndicator(
       onRefresh: () async {
-        _refreshHospitals();
-        _refreshPatients();
+        ref.invalidate(doctorChambersProvider(doctorId));
+        ref.invalidate(doctorPatientsProvider(doctorId));
+        await Future.wait([
+          ref.read(doctorChambersProvider(doctorId).future),
+          ref.read(doctorPatientsProvider(doctorId).future),
+        ]);
       },
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -219,11 +177,13 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
                     ),
                   ),
                   IconButton(
-                    onPressed: _addHospital,
+                    onPressed: () => _addHospital(context, ref, doctorId),
                     icon: Icon(
                       Icons.add_circle,
                       color: isDark ? AppColors.darkPrimary : AppColors.primary,
@@ -234,29 +194,27 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
             ),
           ),
           SliverToBoxAdapter(
-            child: FutureBuilder(
-              future: _hospitalsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SizedBox(
-                    height: 100,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (!snapshot.hasData) return const SizedBox.shrink();
-
-                final hospitals = snapshot.data as List;
+            child: chambersAsync.when(
+              loading: () => const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, stack) => const SizedBox.shrink(),
+              data: (hospitals) {
                 if (hospitals.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       AppLocalizations.of(context)?.noHospitalsAdded ??
                           "No hospitals",
-                      style: TextStyle(color: isDark ? AppColors.darkTextSecondary: Colors.grey),
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : Colors.grey,
+                      ),
                     ),
                   );
                 }
-
                 return SizedBox(
                   height: 120,
                   child: ListView.builder(
@@ -275,7 +233,9 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                               : Colors.blue.shade50,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isDark ? AppColors.darkSurface : Colors.blue.withOpacity(0.3),
+                            color: isDark
+                                ? AppColors.darkSurface
+                                : Colors.blue.withOpacity(0.3),
                           ),
                         ),
                         child: Column(
@@ -293,7 +253,9 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                               h['hospital_name'],
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -302,7 +264,9 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                               h['visiting_hours'] ?? '',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: isDark ? AppColors.darkTextSecondary: Colors.grey,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : Colors.grey,
                               ),
                             ),
                           ],
@@ -326,18 +290,25 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: _searchAndAddPatient,
+                    onPressed: () =>
+                        _searchAndAddPatient(context, ref, doctorId),
                     icon: const Icon(Icons.person_add, size: 16),
                     label: Text(
                       AppLocalizations.of(context)?.newPatient ?? "New Patient",
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? AppColors.darkPrimary : AppColors.secondary,
-                      foregroundColor: isDark ? AppColors.textPrimary : Colors.white,
+                      backgroundColor: isDark
+                          ? AppColors.darkPrimary
+                          : AppColors.secondary,
+                      foregroundColor: isDark
+                          ? AppColors.textPrimary
+                          : Colors.white,
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
@@ -345,16 +316,13 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
               ),
             ),
           ),
-          FutureBuilder(
-            future: _patientsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverToBoxAdapter(
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              final list = snapshot.data ?? [];
-
+          patientsAsync.when(
+            loading: () => const SliverToBoxAdapter(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, stack) =>
+                const SliverToBoxAdapter(child: SizedBox.shrink()),
+            data: (list) {
               if (list.isEmpty) {
                 return SliverToBoxAdapter(
                   child: Center(
@@ -365,13 +333,19 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                           Icon(
                             Icons.person_off_outlined,
                             size: 48,
-                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                            color: isDark
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade300,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             AppLocalizations.of(context)?.noPatientsAssigned ??
                                 "No patients",
-                             style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                            style: TextStyle(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -392,22 +366,38 @@ class _DoctorWorkTabState extends State<DoctorWorkTab> {
                       child: ListTile(
                         contentPadding: const EdgeInsets.all(12),
                         leading: CircleAvatar(
-                          backgroundColor: isDark ? AppColors.darkPrimary.withOpacity(0.5) : AppColors.primary.withOpacity(0.1),
-                          foregroundColor: isDark ? AppColors.darkTextPrimary : AppColors.primary,
+                          backgroundColor: isDark
+                              ? AppColors.darkPrimary.withOpacity(0.5)
+                              : AppColors.primary.withOpacity(0.1),
+                          foregroundColor: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.primary,
                           child: Text(patient['full_name'][0]),
                         ),
                         title: Text(
                           patient['full_name'],
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         subtitle: Text(
                           "Phone: ${patient['phone'] ?? 'N/A'}",
-                          style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                          style: TextStyle(
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
                         ),
-                        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
                         onTap: () {
                           Navigator.push(
                             context,

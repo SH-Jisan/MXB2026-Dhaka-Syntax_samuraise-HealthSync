@@ -22,11 +22,7 @@ class AuthController extends StateNotifier<bool> {
       await Supabase.instance.client.auth.signUp(
         email: email,
         password: password,
-        data: {
-          'full_name': fullName,
-          'phone': phone,
-          'role': role,
-        },
+        data: {'full_name': fullName, 'phone': phone, 'role': role},
       );
     } catch (e) {
       rethrow;
@@ -53,13 +49,10 @@ class AuthController extends StateNotifier<bool> {
   // 🔥 4. Logout Function (Updated)
   // নাম 'signOut' থেকে বদলে 'logout' করা হয়েছে যাতে ProfilePage এর সাথে মিলে যায়
   Future<void> logout() async {
-    state = true; // লোডিং শুরু
     try {
       await Supabase.instance.client.auth.signOut();
     } catch (e) {
       rethrow;
-    } finally {
-      state = false; // লোডিং শেষ
     }
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 
 class PatientHistoryPage extends StatefulWidget {
@@ -19,30 +18,30 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
   @override
   void initState() {
     super.initState();
-    // 🔥 ট্যাব সংখ্যা বাড়িয়ে ৪ করা হলো (Appointments সহ)
     _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)?.myCareHistory ?? "My Care History",
         ),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: AppColors.primary,
-          isScrollable: true, // বেশি ট্যাব হওয়ায় স্ক্রলেবল করা হলো
+          labelColor: theme.colorScheme.primary,
+          unselectedLabelColor: theme.hintColor,
+          indicatorColor: theme.colorScheme.primary,
+          isScrollable: true,
           tabs: [
             Tab(
               text:
                   AppLocalizations.of(context)?.appointments ?? "Appointments",
               icon: const Icon(Icons.calendar_month),
-            ), // 🔥 New Tab
+            ),
             Tab(
               text:
                   AppLocalizations.of(context)?.prescriptions ??
@@ -63,17 +62,17 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildAppointmentsTab(), // 🔥 New Content
-          _buildPrescriptionsTab(),
-          _buildDiagnosticsTab(),
-          _buildHospitalsTab(),
+          _buildAppointmentsTab(theme),
+          _buildPrescriptionsTab(theme),
+          _buildDiagnosticsTab(theme),
+          _buildHospitalsTab(theme),
         ],
       ),
     );
   }
 
-  // 📅 TAB 1: Appointments (Future & Past)
-  Widget _buildAppointmentsTab() {
+  Widget _buildAppointmentsTab(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return FutureBuilder(
       future: Supabase.instance.client
           .from('appointments')
@@ -92,6 +91,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           return _emptyState(
             AppLocalizations.of(context)?.noAppointmentsFound ??
                 "No appointments found.",
+            theme,
           );
         }
 
@@ -122,14 +122,11 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
             final status = apt['status'] ?? 'PENDING';
 
             Color statusColor = status == 'CONFIRMED'
-                ? Colors.green
-                : Colors.orange;
+                ? (isDark ? Colors.green.shade300 : Colors.green.shade700)
+                : (isDark ? Colors.orange.shade300 : Colors.orange.shade800);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -142,25 +139,25 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
+                            color: theme.colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
                             children: [
                               Text(
                                 DateFormat('MMM').format(date).toUpperCase(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
+                                  color: theme.colorScheme.primary,
                                 ),
                               ),
                               Text(
                                 DateFormat('dd').format(date),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
+                                  color: theme.colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -182,23 +179,26 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                                 doctor['specialty'] ??
                                     AppLocalizations.of(context)?.specialist ??
                                     'Specialist',
-                                style: const TextStyle(
-                                  color: Colors.grey,
+                                style: TextStyle(
+                                  color: theme.hintColor,
                                   fontSize: 13,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.access_time,
                                     size: 14,
-                                    color: Colors.grey,
+                                    color: theme.hintColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     formattedTime,
-                                    style: const TextStyle(fontSize: 13),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: theme.hintColor,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -213,10 +213,10 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                       children: [
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.location_on,
                               size: 16,
-                              color: Colors.grey,
+                              color: theme.hintColor,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -234,7 +234,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
+                            color: statusColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: statusColor),
                           ),
@@ -259,8 +259,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
     );
   }
 
-  // 📝 TAB 2: Doctor Visits / Prescriptions (আগের Doctors Tab টি রিনেম করা হয়েছে)
-  Widget _buildPrescriptionsTab() {
+  Widget _buildPrescriptionsTab(ThemeData theme) {
     return FutureBuilder(
       future: Supabase.instance.client
           .from('medical_events')
@@ -277,6 +276,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           return _emptyState(
             AppLocalizations.of(context)?.noPrescriptionsFound ??
                 "No prescriptions found.",
+            theme,
           );
         }
 
@@ -292,9 +292,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
 
             return Card(
               child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.purple,
-                  child: Icon(Icons.description, color: Colors.white),
+                leading: CircleAvatar(
+                  backgroundColor: theme.colorScheme.secondary.withOpacity(0.8),
+                  child: const Icon(Icons.description, color: Colors.white),
                 ),
                 title: Text(
                   doctor['full_name'],
@@ -312,8 +312,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
     );
   }
 
-  // 🧪 TAB 3: Diagnostic (Same as before)
-  Widget _buildDiagnosticsTab() {
+  Widget _buildDiagnosticsTab(ThemeData theme) {
     return FutureBuilder(
       future: Supabase.instance.client
           .from('patient_payments')
@@ -329,6 +328,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           return _emptyState(
             AppLocalizations.of(context)?.noDiagnosticRecords ??
                 "No diagnostic records.",
+            theme,
           );
         }
 
@@ -340,11 +340,14 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
             final center = item['provider'] ?? {'full_name': 'Lab'};
             return Card(
               child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.teal,
-                  child: Icon(Icons.science, color: Colors.white),
+                leading: CircleAvatar(
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.8),
+                  child: const Icon(Icons.science, color: Colors.white),
                 ),
-                title: Text(center['full_name']),
+                title: Text(
+                  center['full_name'],
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Text("Status: ${item['report_status']}"),
               ),
             );
@@ -354,22 +357,26 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
     );
   }
 
-  // 🏥 TAB 4: Hospitals (Same as before)
-  Widget _buildHospitalsTab() {
+  Widget _buildHospitalsTab(ThemeData theme) {
     return _emptyState(
       AppLocalizations.of(context)?.hospitalAdmissionHistory ??
           "Hospital admission history will appear here.",
+      theme,
     );
   }
 
-  Widget _emptyState(String text) {
+  Widget _emptyState(String text, ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history_toggle_off, size: 60, color: Colors.grey.shade300),
+          Icon(
+            Icons.history_toggle_off,
+            size: 60,
+            color: theme.hintColor.withOpacity(0.3),
+          ),
           const SizedBox(height: 16),
-          Text(text, style: const TextStyle(color: Colors.grey)),
+          Text(text, style: TextStyle(color: theme.hintColor)),
         ],
       ),
     );

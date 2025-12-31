@@ -80,8 +80,11 @@ serve(async (req) => {
     const aiData = JSON.parse(cleanedText)
 
     // 5. Duplicate Check (Server Side)
-    const newTitle = aiData['title'] ?? 'Medical Document'
-    const newDate = aiData['event_date'] ?? new Date().toISOString().split('T')[0]
+    const newTitle = aiData['title'] || 'Medical Document'
+    const rawDate = aiData['event_date']
+    const newDate = (rawDate && rawDate.trim() !== "")
+      ? rawDate
+      : new Date().toISOString().split('T')[0]
 
     // 6. Secure Database Insert
     // আমরা uploader_id আলাদা সেভ করছি যাতে বোঝা যায় কে আপলোড করেছে (Hospital/Self)

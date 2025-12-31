@@ -2,79 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../shared/providers/user_profile_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../blood/pages/my_blood_requests_page.dart';
+import '../providers/doctor_hospitals_provider.dart';
+import '../../../shared/providers/user_profile_provider.dart';
 import 'patient_history_page.dart';
 import '../../../l10n/app_localizations.dart';
 
-class ProfilePage extends ConsumerStatefulWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
-  @override
-  ConsumerState<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends ConsumerState<ProfilePage> {
-  bool _isLoading = true;
-  Map<String, dynamic>? _profileData;
-  List<Map<String, dynamic>> _assignedHospitals =
-      []; // 🔥 ডাক্তারের জন্য হসপিটাল লিস্ট
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchProfile();
-  }
-
-  Future<void> _fetchProfile() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      try {
-        final data = await Supabase.instance.client
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .single();
-
-        setState(() {
-          _profileData = data;
-          _isLoading = false;
-        });
-
-        // 🔥 যদি ইউজার ডাক্তার হয়, তবে তার হসপিটাল লিস্ট লোড হবে
-        if (data['role'] == 'DOCTOR') {
-          _fetchDoctorHospitals(user.id);
-        }
-      } catch (e) {
-        debugPrint("Error fetching profile: $e");
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  // 🏥 হসপিটাল লিস্ট আনার ফাংশন
-  Future<void> _fetchDoctorHospitals(String doctorId) async {
-    try {
-      final response = await Supabase.instance.client
-          .from('hospital_doctors')
-          .select('*, hospital:hospital_id(full_name, address, phone)')
-          .eq('doctor_id', doctorId);
-
-      if (mounted) {
-        setState(() {
-          _assignedHospitals = List<Map<String, dynamic>>.from(response);
-        });
-      }
-    } catch (e) {
-      debugPrint("Error fetching hospitals: $e");
-    }
-  }
-
-  Future<void> _handleLogout() async {
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -101,19 +41,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (shouldLogout == true) {
       await ref.read(authStateProvider.notifier).logout();
-      ref.invalidate(userProfileProvider);
-      if (mounted) context.go('/login');
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final user = Supabase.instance.client.auth.currentUser;
-    final email = user?.email ?? 'No Email';
-    final name = _profileData?['full_name'] ?? 'User';
-    final phone = _profileData?['phone'] ?? 'No Phone';
-    final role = _profileData?['role'] ?? 'CITIZEN';
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(userProfileProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -122,251 +55,215 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)?.myProfile ?? "My Profile"),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  // 1. Profile Header (Same as before)
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: isDark ? theme.cardTheme.color : Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.3 : 0.08,
-                          ),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text("Error: $err")),
+        data: (profileData) {
+          if (profileData == null) {
+            return Center(
+              child: Text(
+                AppLocalizations.of(context)?.userNotFound ?? "User not found",
+              ),
+            );
+          }
+
+          final user = Supabase.instance.client.auth.currentUser;
+          final email = user?.email ?? 'No Email';
+          final name = profileData['full_name'] ?? 'User';
+          final phone = profileData['phone'] ?? 'No Phone';
+          final role = profileData['role'] ?? 'CITIZEN';
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // 1. Profile Header
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: isDark ? theme.cardTheme.color : Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.3 : 0.08,
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 48,
-                          backgroundColor:
-                              (isDark
-                                      ? AppColors.darkPrimary
-                                      : AppColors.primary)
-                                  .withValues(alpha: 0.1),
-                          child: Text(
-                            name.isNotEmpty ? name[0].toUpperCase() : "U",
-                            style: GoogleFonts.poppins(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: isDark
-                                  ? AppColors.darkPrimary
-                                  : AppColors.primary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          name,
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 48,
+                        backgroundColor:
+                            (isDark ? AppColors.darkPrimary : AppColors.primary)
+                                .withValues(alpha: 0.1),
+                        child: Text(
+                          name.isNotEmpty ? name[0].toUpperCase() : "U",
                           style: GoogleFonts.poppins(
-                            fontSize: 24,
+                            fontSize: 36,
                             fontWeight: FontWeight.bold,
                             color: isDark
-                                ? Colors.white
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          email,
-                          style: GoogleFonts.poppins(
-                            color: isDark
-                                ? Colors.grey.shade400
-                                : AppColors.textSecondary,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Chip(
-                          label: Text(role),
-                          backgroundColor: isDark
-                              ? Colors.blue.shade900
-                              : Colors.blue.shade50,
-                          labelStyle: TextStyle(
-                            color: isDark
-                                ? Colors.blue.shade200
-                                : Colors.blue.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // 🔥 DOCTOR ONLY: Assigned Hospitals Section
-                  if (role == 'DOCTOR') ...[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8, bottom: 12),
-                        child: Text(
-                          AppLocalizations.of(context)?.myAssociatedHospitals ??
-                              "My Associated Hospitals",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isDark
-                                ? AppColors.darkTextPrimary
-                                : AppColors.textPrimary,
+                                ? AppColors.darkPrimary
+                                : AppColors.primary,
                           ),
                         ),
                       ),
-                    ),
-                    if (_assignedHospitals.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          AppLocalizations.of(context)?.notAssignedToHospital ??
-                              "Not assigned to any hospital yet.",
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      )
-                    else
-                      ..._assignedHospitals.map((item) {
-                        final hospital = item['hospital'];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          child: ListTile(
-                            leading: const Icon(
-                              Icons.local_hospital,
-                              color: Colors.redAccent,
-                            ),
-                            title: Text(
-                              hospital['full_name'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(hospital['address'] ?? 'No address'),
-                            trailing: const Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
-                            ),
-                          ),
-                        );
-                      }),
-                    const SizedBox(height: 24),
-                  ],
-
-                  // 2. Info Section
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8, bottom: 12),
-                      child: Text(
-                        AppLocalizations.of(context)?.personalInformation ??
-                            "Personal Information",
+                      const SizedBox(height: 16),
+                      Text(
+                        name,
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? AppColors.darkTextPrimary
-                              : AppColors.textPrimary,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
                         ),
                       ),
-                    ),
-                  ),
-                  _buildInfoTile(
-                    Icons.phone_outlined,
-                    AppLocalizations.of(context)?.phoneNumber ?? "Phone Number",
-                    phone,
-                    isDark,
-                  ),
-                  _buildInfoTile(
-                    Icons.email_outlined,
-                    AppLocalizations.of(context)?.emailLabel ?? "Email Address",
-                    email,
-                    isDark,
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // 3. Settings & Activity
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8, bottom: 12),
-                      child: Text(
-                        AppLocalizations.of(context)?.settingsActivity ??
-                            "Settings & Activity",
+                      Text(
+                        email,
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
                           color: isDark
-                              ? AppColors.darkTextPrimary
-                              : AppColors.textPrimary,
+                              ? Colors.grey.shade400
+                              : AppColors.textSecondary,
+                          fontSize: 14,
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      Chip(
+                        label: Text(role),
+                        backgroundColor: isDark
+                            ? Colors.blue.shade900
+                            : Colors.blue.shade50,
+                        labelStyle: TextStyle(
+                          color: isDark
+                              ? Colors.blue.shade200
+                              : Colors.blue.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // 🔥 DOCTOR ONLY: Assigned Hospitals Section
+                if (role == 'DOCTOR' && user != null) ...[
+                  _DoctorHospitalsSection(doctorId: user.id),
+                  const SizedBox(height: 24),
+                ],
+
+                // 2. Info Section
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, bottom: 12),
+                    child: Text(
+                      AppLocalizations.of(context)?.personalInformation ??
+                          "Personal Information",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                   ),
+                ),
+                _buildInfoTile(
+                  Icons.phone_outlined,
+                  AppLocalizations.of(context)?.phoneNumber ?? "Phone Number",
+                  phone,
+                  isDark,
+                ),
+                _buildInfoTile(
+                  Icons.email_outlined,
+                  AppLocalizations.of(context)?.emailLabel ?? "Email Address",
+                  email,
+                  isDark,
+                ),
 
-                  // Care History (Patient Only)
-                  if (role == 'CITIZEN')
-                    _buildActionTile(
-                      icon: Icons.calendar_month,
-                      color: Colors.blue,
-                      title:
-                          AppLocalizations.of(context)?.myAppointmentsHistory ??
-                          "My Appointments & History", // নাম পরিবর্তন করে স্পেসিফিক করা হলো
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const PatientHistoryPage(),
-                          ),
-                        );
-                      },
-                      isDark: isDark,
+                const SizedBox(height: 24),
+
+                // 3. Settings & Activity
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, bottom: 12),
+                    child: Text(
+                      AppLocalizations.of(context)?.settingsActivity ??
+                          "Settings & Activity",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
                     ),
+                  ),
+                ),
 
+                if (role == 'CITIZEN')
                   _buildActionTile(
-                    icon: Icons.bloodtype,
-                    color: Colors.red,
+                    icon: Icons.calendar_month,
+                    color: Colors.blue,
                     title:
-                        AppLocalizations.of(context)?.myBloodRequests ??
-                        "My Blood Requests",
+                        AppLocalizations.of(context)?.myAppointmentsHistory ??
+                        "My Appointments & History",
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const MyBloodRequestsPage(),
+                          builder: (_) => const PatientHistoryPage(),
                         ),
                       );
                     },
                     isDark: isDark,
                   ),
 
-                  const SizedBox(height: 32),
+                _buildActionTile(
+                  icon: Icons.bloodtype,
+                  color: Colors.red,
+                  title:
+                      AppLocalizations.of(context)?.myBloodRequests ??
+                      "My Blood Requests",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MyBloodRequestsPage(),
+                      ),
+                    );
+                  },
+                  isDark: isDark,
+                ),
 
-                  // 4. Logout
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _handleLogout,
-                      icon: const Icon(Icons.logout),
-                      label: Text(
-                        AppLocalizations.of(context)?.logout ?? "LOGOUT",
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade50,
-                        foregroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+                const SizedBox(height: 32),
+
+                // 4. Logout
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _handleLogout(context, ref),
+                    icon: const Icon(Icons.logout),
+                    label: Text(
+                      AppLocalizations.of(context)?.logout ?? "LOGOUT",
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade50,
+                      foregroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
+          );
+        },
+      ),
     );
   }
 
@@ -425,6 +322,79 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         onTap: onTap,
       ),
+    );
+  }
+}
+
+class _DoctorHospitalsSection extends ConsumerWidget {
+  final String doctorId;
+  const _DoctorHospitalsSection({required this.doctorId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hospitalsAsync = ref.watch(doctorHospitalsProvider(doctorId));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 12),
+            child: Text(
+              AppLocalizations.of(context)?.myAssociatedHospitals ??
+                  "My Associated Hospitals",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+        hospitalsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Text("Error: $err"),
+          data: (hospitals) {
+            if (hospitals.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  AppLocalizations.of(context)?.notAssignedToHospital ??
+                      "Not assigned yet.",
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              );
+            }
+            return Column(
+              children: hospitals.map((item) {
+                final hospital = item['hospital'];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.local_hospital,
+                      color: Colors.redAccent,
+                    ),
+                    title: Text(
+                      hospital['full_name'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(hospital['address'] ?? 'No address'),
+                    trailing: const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
     );
   }
 }

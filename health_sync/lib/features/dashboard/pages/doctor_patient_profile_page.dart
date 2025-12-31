@@ -185,8 +185,8 @@ class _DoctorPatientProfilePageState
                         (test) => Chip(
                           label: Text(test),
                           backgroundColor: isDark
-                              ? AppColors.darkPrimary.withValues(alpha: 0.2)
-                              : AppColors.primary.withValues(alpha: 0.1),
+                              ? AppColors.darkPrimary.withOpacity(0.2)
+                              : AppColors.primary.withOpacity(0.1),
                           labelStyle: TextStyle(
                             color: isDark ? Colors.white : Colors.black,
                           ),
@@ -325,6 +325,7 @@ class _DoctorPatientProfilePageState
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         title: Text(widget.patient['full_name'] ?? 'Patient Profile'),
       ),
@@ -345,7 +346,7 @@ class _DoctorPatientProfilePageState
             decoration: BoxDecoration(
               color: isDark
                   ? AppColors.darkSurface
-                  : AppColors.primary.withValues(alpha: 0.1),
+                  : AppColors.primary.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
@@ -353,7 +354,7 @@ class _DoctorPatientProfilePageState
               boxShadow: isDark
                   ? [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: Colors.black.withOpacity(0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),

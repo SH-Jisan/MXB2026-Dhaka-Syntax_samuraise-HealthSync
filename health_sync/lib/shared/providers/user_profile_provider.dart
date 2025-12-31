@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,28 +7,36 @@ final authStateChangesProvider = StreamProvider<AuthState>((ref) {
   return Supabase.instance.client.auth.onAuthStateChange;
 });
 
-// 🔥 OPTIMIZED: Only rebuild profile when User ID changes
+// 🔥 OPTIMIZED: Reactive but pulls directly from current session for speed/reliability
 final currentUserIdProvider = Provider<String?>((ref) {
-  final authState = ref.watch(authStateChangesProvider);
-  return authState.value?.session?.user.id;
+  // We watch the stream to trigger rebuilds, but return the current user ID
+  ref.watch(authStateChangesProvider);
+  return Supabase.instance.client.auth.currentUser?.id;
 });
 
 // ২. প্রোফাইল ডাটা প্রোভাইডার (এখন Reactive এবং Optimized)
-final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
-  // 🔥 Reactive But Smart: Only fetches if ID changes
+final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((
+  ref,
+) async {
   final userId = ref.watch(currentUserIdProvider);
 
-  if (userId == null) return null;
+  if (userId == null) {
+    debugPrint("userProfileProvider: No user ID found");
+    return null;
+  }
 
   try {
+    debugPrint("userProfileProvider: Fetching profile for $userId");
     final data = await Supabase.instance.client
         .from('profiles')
         .select()
         .eq('id', userId)
-        .single();
+        .single()
+        .timeout(const Duration(seconds: 15));
 
     return data;
   } catch (e) {
+    debugPrint("userProfileProvider ERROR for $userId: $e");
     return null;
   }
 });

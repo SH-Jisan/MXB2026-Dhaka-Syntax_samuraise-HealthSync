@@ -190,7 +190,7 @@ class SideDrawer extends ConsumerWidget {
               iconColor: AppColors.error,
               textColor: AppColors.error,
               onTap: () async {
-                await Supabase.instance.client.auth.signOut();
+                await ref.read(authStateProvider.notifier).logout();
               },
             ),
           ),

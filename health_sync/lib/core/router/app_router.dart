@@ -11,35 +11,27 @@ import 'go_router_refresh_stream.dart';
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  
   // 🔥 Auth Stream Listen
   final authStream = Supabase.instance.client.auth.onAuthStateChange;
-  
+
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     refreshListenable: GoRouterRefreshStream(authStream),
-    
+
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const DashboardPage(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
-      GoRoute(
-        path: '/signup',
-        builder: (context, state) => const SignupPage(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const DashboardPage()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(path: '/signup', builder: (context, state) => const SignupPage()),
     ],
 
     redirect: (context, state) {
       final session = Supabase.instance.client.auth.currentSession;
-      final isLoggingIn = state.uri.toString() == '/login' || state.uri.toString() == '/signup';
+      final isLoggingIn =
+          state.matchedLocation == '/login' ||
+          state.matchedLocation == '/signup';
 
-      if (session == null && !isLoggingIn) return '/login'; 
+      if (session == null && !isLoggingIn) return '/login';
       if (session != null && isLoggingIn) return '/';
 
       return null;

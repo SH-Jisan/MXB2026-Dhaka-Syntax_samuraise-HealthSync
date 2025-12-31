@@ -7,6 +7,8 @@ class EmptyTimelineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -14,20 +16,22 @@ class EmptyTimelineView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: isDark ? AppColors.darkSurface : AppColors.surface,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
+                if (!isDark)
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
               ],
             ),
             child: Icon(
               Icons.history_edu,
               size: 64,
-              color: AppColors.primary.withValues(alpha: 0.5),
+              color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                  .withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 24),
@@ -36,7 +40,7 @@ class EmptyTimelineView extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -44,7 +48,7 @@ class EmptyTimelineView extends StatelessWidget {
             "Upload your first report to start tracking.",
             style: GoogleFonts.poppins(
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
             ),
           ),
         ],

@@ -208,7 +208,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             backgroundColor: Colors.green,
           ),
         );
-        context.go('/login'); // 🔥 Manual Navigation Restored
       }
     } catch (e) {
       if (mounted) {

@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:intl/intl.dart'; // তারিখ ফরম্যাটের জন্য
+import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/side_drawer.dart';
+import '../providers/diagnostic_work_providers.dart';
 import 'diagnostic_patient_view.dart';
 
-class DiagnosticHomePage extends StatefulWidget {
+class DiagnosticHomePage extends ConsumerStatefulWidget {
   const DiagnosticHomePage({super.key});
 
   @override
-  State<DiagnosticHomePage> createState() => _DiagnosticHomePageState();
+  ConsumerState<DiagnosticHomePage> createState() => _DiagnosticHomePageState();
 }
 
-class _DiagnosticHomePageState extends State<DiagnosticHomePage>
+class _DiagnosticHomePageState extends ConsumerState<DiagnosticHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // সার্চ ও রেজিস্ট্রেশন কন্ট্রোলার
   final _searchController = TextEditingController();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -29,11 +30,8 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
   @override
   void initState() {
     super.initState();
-    // 🔥 UPDATE: ট্যাব সংখ্যা ৩ করা হলো (Assigned, Pending, Search)
     _tabController = TabController(length: 3, vsync: this);
   }
-
-  // ... (Search, Assign, Register লজিকগুলো আগের মতোই থাকবে) ...
 
   Future<void> _searchPatient() async {
     if (_searchController.text.isEmpty) return;
@@ -80,6 +78,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
         'diagnostic_id': diagnosticId,
         'patient_id': _searchedPatient!['id'],
       });
+      ref.invalidate(diagnosticPatientsProvider(diagnosticId));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -87,7 +86,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
             backgroundColor: Colors.green,
           ),
         );
-        _tabController.animateTo(0); // লিস্টে ফিরে যাওয়া
+        _tabController.animateTo(0);
         setState(() {
           _searchedPatient = null;
           _searchController.clear();
@@ -105,7 +104,6 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
   }
 
   Future<void> _registerNewPatient() async {
-    // রেজিস্ট্রেশন লজিক (সংক্ষেপে)
     if (_emailController.text.isEmpty) return;
     Navigator.pop(context);
     setState(() => _isLoading = true);
@@ -183,6 +181,7 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final diagnosticId = Supabase.instance.client.auth.currentUser!.id;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -197,51 +196,38 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
           indicatorColor: isDark ? AppColors.darkPrimary : AppColors.primary,
           tabs: const [
             Tab(text: "Assigned"),
-            Tab(text: "Pending"), // 🔥 NEW TAB
+            Tab(text: "Pending"),
             Tab(text: "Search"),
           ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => setState(() {}),
+            onPressed: () {
+              ref.invalidate(diagnosticPatientsProvider(diagnosticId));
+              ref.invalidate(pendingReportsProvider(diagnosticId));
+            },
           ),
         ],
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildAssignedPatientsTab(isDark), // 1. সব রোগী
-          _buildPendingReportsTab(isDark), // 2. শুধু পেন্ডিং কাজ (🔥 NEW)
-          _buildSearchTab(isDark), // 3. নতুন অ্যাসাইন
+          _buildAssignedPatientsTab(isDark, diagnosticId),
+          _buildPendingReportsTab(isDark, diagnosticId),
+          _buildSearchTab(isDark),
         ],
       ),
     );
   }
 
-  // --- TAB 1: ALL ASSIGNED PATIENTS ---
-  Widget _buildAssignedPatientsTab(bool isDark) {
-    final diagnosticId = Supabase.instance.client.auth.currentUser!.id;
-    return FutureBuilder(
-      future: Supabase.instance.client
-          .from('diagnostic_patients')
-          .select('*, profiles:patient_id(*)')
-          .eq('diagnostic_id', diagnosticId)
-          .order('assigned_at', ascending: false),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              "Error: ${snapshot.error}",
-              style: const TextStyle(color: Colors.red),
-            ),
-          );
-        }
+  Widget _buildAssignedPatientsTab(bool isDark, String diagnosticId) {
+    final patientsAsync = ref.watch(diagnosticPatientsProvider(diagnosticId));
 
-        final list = snapshot.data as List;
+    return patientsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text("Error: $err")),
+      data: (list) {
         if (list.isEmpty) {
           return const Center(
             child: Text("No assigned patients. Go to Search tab."),
@@ -288,25 +274,13 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
     );
   }
 
-  // --- 🔥 TAB 2: PENDING REPORTS TAB (NEW) ---
-  Widget _buildPendingReportsTab(bool isDark) {
-    final diagnosticId = Supabase.instance.client.auth.currentUser!.id;
+  Widget _buildPendingReportsTab(bool isDark, String diagnosticId) {
+    final pendingAsync = ref.watch(pendingReportsProvider(diagnosticId));
 
-    // আমরা 'patient_payments' টেবিল থেকে পেন্ডিং টেস্ট খুঁজব
-    return FutureBuilder(
-      future: Supabase.instance.client
-          .from('patient_payments')
-          .select('*, profiles:patient_id(*)') // পেশেন্ট ডিটেইলস সহ
-          .eq('provider_id', diagnosticId)
-          .eq('report_status', 'PENDING') // 🔍 ফিল্টার: শুধু পেন্ডিং
-          .order('created_at', ascending: false),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final pendingOrders = snapshot.data as List;
-
+    return pendingAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text("Error: $err")),
+      data: (pendingOrders) {
         if (pendingOrders.isEmpty) {
           return Center(
             child: Column(
@@ -381,7 +355,6 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
                 ),
                 trailing: ElevatedButton(
                   onPressed: () {
-                    // সরাসরি ওই রোগীর প্রোফাইলে নিয়ে যাব
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -407,7 +380,6 @@ class _DiagnosticHomePageState extends State<DiagnosticHomePage>
     );
   }
 
-  // --- TAB 3: SEARCH & ASSIGN ---
   Widget _buildSearchTab(bool isDark) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
