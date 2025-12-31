@@ -15,10 +15,14 @@ class AppColors {
 
   // Dark Theme Colors - Significantly Lighter Grey
   // আগে ছিল অনেক ডার্ক, এখন ডার্ক গ্রে (Material Dark Grey Style)
-  static const darkBackground = Color(0xFF252525); // Lighter Dark Grey (Not pitch black)
-  static const darkSurface = Color(0xFF353535);    // Distinct lighter surface for cards
-  
-  static const darkPrimary = Color(0xFF80CBC4);    // Soft Teal
+  static const darkBackground = Color(
+    0xFF252525,
+  ); // Lighter Dark Grey (Not pitch black)
+  static const darkSurface = Color(
+    0xFF353535,
+  ); // Distinct lighter surface for cards
+
+  static const darkPrimary = Color(0xFF80CBC4); // Soft Teal
   static const darkTextPrimary = Color(0xFFEEEEEE);
   static const darkTextSecondary = Color(0xFFBDBDBD);
 }
