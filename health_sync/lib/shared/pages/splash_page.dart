@@ -56,7 +56,7 @@ class _SplashPageState extends State<SplashPage>
               ),
               const SizedBox(height: 8),
               Text(
-                'Your Health, Simplified',
+                'ONE LIFE, ONE RECORD, TOTAL CARE',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: Colors.white70,
