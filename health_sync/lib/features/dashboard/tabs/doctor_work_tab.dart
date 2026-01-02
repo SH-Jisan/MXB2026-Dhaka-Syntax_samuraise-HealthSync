@@ -130,10 +130,7 @@ class DoctorWorkTab extends ConsumerWidget {
               } catch (e) {
                 messenger.showSnackBar(
                   SnackBar(
-                    content: Text(
-                      AppLocalizations.of(context)?.alreadyAssignedOrError ??
-                          "Error",
-                    ),
+                    content: Text(l10n?.alreadyAssignedOrError ?? "Error"),
                   ),
                 );
               }
@@ -235,7 +232,7 @@ class DoctorWorkTab extends ConsumerWidget {
                           border: Border.all(
                             color: isDark
                                 ? AppColors.darkSurface
-                                : Colors.blue.withOpacity(0.3),
+                                : Colors.blue.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
@@ -367,8 +364,8 @@ class DoctorWorkTab extends ConsumerWidget {
                         contentPadding: const EdgeInsets.all(12),
                         leading: CircleAvatar(
                           backgroundColor: isDark
-                              ? AppColors.darkPrimary.withOpacity(0.5)
-                              : AppColors.primary.withOpacity(0.1),
+                              ? AppColors.darkPrimary.withValues(alpha: 0.5)
+                              : AppColors.primary.withValues(alpha: 0.1),
                           foregroundColor: isDark
                               ? AppColors.darkTextPrimary
                               : AppColors.primary,

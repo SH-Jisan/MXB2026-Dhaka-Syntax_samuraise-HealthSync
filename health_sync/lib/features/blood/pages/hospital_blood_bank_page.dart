@@ -1,8 +1,13 @@
+/// File: lib/features/blood/pages/hospital_blood_bank_page.dart
+/// Purpose: Manages hospital's blood inventory stock.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 
+/// Dashboard for hospitals to update and view their blood stock.
 class HospitalBloodBankPage extends StatefulWidget {
   const HospitalBloodBankPage({super.key});
 
@@ -33,11 +38,9 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
     _fetchInventory();
   }
 
-  // ================= FETCH INVENTORY =================
   Future<void> _fetchInventory() async {
     final user = Supabase.instance.client.auth.currentUser;
 
-    // 🔐 User null safe handling
     if (user == null) {
       if (mounted) setState(() => _isLoading = false);
       return;
@@ -51,7 +54,6 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
 
       final Map<String, int> loadedData = {};
 
-      // 🛡️ SAFE: data is already List from typed response logic or just iterate directly
       for (final item in data) {
         final String group = item['blood_group'] as String;
         final int qty = item['quantity'] as int? ?? 0;
@@ -65,7 +67,7 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
         });
       }
     } catch (e, stack) {
-      debugPrint("❌ Error fetching inventory: $e");
+      debugPrint(" Error fetching inventory: $e");
       debugPrintStack(stackTrace: stack);
 
       if (mounted) {
@@ -82,7 +84,6 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
     }
   }
 
-  // ================= UPDATE STOCK (+ / -) =================
   Future<void> _updateStock(String bg, int change) async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
@@ -90,10 +91,8 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
     final previousQty = _inventory[bg] ?? 0;
     final newQty = previousQty + change;
 
-    // ❌ Invalid quantity
     if (newQty < 0 || newQty > _maxStock) return;
 
-    // ⚡ Optimistic UI update
     setState(() => _inventory[bg] = newQty);
 
     try {
@@ -113,7 +112,6 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
         );
       }
     } catch (e) {
-      // 🔄 Rollback on failure
       setState(() => _inventory[bg] = previousQty);
 
       if (mounted) {
@@ -127,7 +125,6 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
     }
   }
 
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,7 +153,6 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          // 🩸 Blood Group Circle
                           Container(
                             width: 52,
                             height: 52,
@@ -175,7 +171,6 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
                           ),
                           const SizedBox(width: 16),
 
-                          // 📊 Stock Info
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +193,6 @@ class _HospitalBloodBankPageState extends State<HospitalBloodBankPage> {
                             ),
                           ),
 
-                          // ➕ / ➖ Actions
                           Row(
                             children: [
                               IconButton(

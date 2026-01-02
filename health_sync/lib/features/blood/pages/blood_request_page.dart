@@ -1,3 +1,7 @@
+/// File: lib/features/blood/pages/blood_request_page.dart
+/// Purpose: Form to post a new blood request, with AI autofill capabilities.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -5,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 
+/// Page for users to create a blood request.
 class BloodRequestPage extends StatefulWidget {
   const BloodRequestPage({super.key});
 
@@ -15,19 +20,16 @@ class BloodRequestPage extends StatefulWidget {
 class _BloodRequestPageState extends State<BloodRequestPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
   final _aiInputController = TextEditingController();
   final _locationController = TextEditingController();
   final _noteController = TextEditingController();
 
-  // Dropdown Values
   String? _selectedBloodGroup;
   String _urgency = 'NORMAL';
 
   bool _isAnalyzing = false;
   bool _isSubmitting = false;
 
-  // 🧠 AI Analysis Function
   Future<void> _analyzeWithAI() async {
     if (_aiInputController.text.isEmpty) return;
 
@@ -95,7 +97,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
     }
   }
 
-  // 💾 Submit to Database & Trigger Notification
   Future<void> _submitRequest() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedBloodGroup == null) {
@@ -114,7 +115,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
     try {
       final user = Supabase.instance.client.auth.currentUser;
 
-      // ১. ডাটাবেসে রিকোয়েস্ট সেভ করা
       await Supabase.instance.client.from('blood_requests').insert({
         'requester_id': user!.id,
         'blood_group': _selectedBloodGroup,
@@ -126,7 +126,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      // 🔥 ২. নোটিফিকেশন ট্রিগার (Fire & Forget)
       Supabase.instance.client.functions
           .invoke(
             'notify-donors',
@@ -137,19 +136,18 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
             },
           )
           .then((response) {
-            debugPrint("🔔 Notification Response: ${response.data}");
+            debugPrint(" Notification Response: ${response.data}");
           })
           .catchError((error) {
-            debugPrint("❌ Notification Failed: $error");
+            debugPrint(" Notification Failed: $error");
           });
 
-      // ৩. সাকসেস মেসেজ এবং পেজ বন্ধ করা
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               AppLocalizations.of(context)?.requestPostedSuccess ??
-                  "Request Posted! Notifying nearby donors... 📲",
+                  "Request Posted! Notifying nearby donors... ",
             ),
             backgroundColor: Colors.green,
           ),
@@ -192,7 +190,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✨ AI SECTION (Enhanced Look)
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -363,14 +360,12 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
                 ),
               ),
 
-              // 🩸 Blood Group Dropdown
               _buildInputLabel(
                 AppLocalizations.of(context)?.bloodGroup ?? "Blood Group",
                 isDark,
               ),
               DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
-                value: _selectedBloodGroup,
+                initialValue: _selectedBloodGroup,
                 decoration: _inputDecoration(
                   hint:
                       AppLocalizations.of(context)?.selectGroup ??
@@ -397,7 +392,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               ),
               const SizedBox(height: 20),
 
-              // 🏥 Location
               _buildInputLabel(
                 AppLocalizations.of(context)?.hospitalLocation ??
                     "Hospital / Location",
@@ -421,14 +415,12 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               ),
               const SizedBox(height: 20),
 
-              // 🚨 Urgency
               _buildInputLabel(
                 AppLocalizations.of(context)?.urgencyLevel ?? "Urgency Level",
                 isDark,
               ),
               DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
-                value: _urgency,
+                initialValue: _urgency,
                 decoration: _inputDecoration(
                   hint:
                       AppLocalizations.of(context)?.selectUrgency ??
@@ -476,7 +468,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
               ),
               const SizedBox(height: 20),
 
-              // 📝 Reason / Note
               _buildInputLabel(
                 AppLocalizations.of(context)?.patientConditionNote ??
                     "Patient Condition / Note",
@@ -502,7 +493,6 @@ class _BloodRequestPageState extends State<BloodRequestPage> {
 
               const SizedBox(height: 40),
 
-              // ✅ Submit Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

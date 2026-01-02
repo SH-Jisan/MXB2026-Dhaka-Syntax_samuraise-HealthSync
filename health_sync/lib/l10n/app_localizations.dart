@@ -701,7 +701,7 @@ abstract class AppLocalizations {
   /// No description provided for @thankYouHero.
   ///
   /// In en, this message translates to:
-  /// **'Thank You, Hero! 🦸‍♂️'**
+  /// **'Thank You, Hero! '**
   String get thankYouHero;
 
   /// No description provided for @acceptedDonationMessage.
@@ -863,7 +863,7 @@ abstract class AppLocalizations {
   /// No description provided for @requestPostedSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Request Posted! Notifying nearby donors... 📲'**
+  /// **'Request Posted! Notifying nearby donors... '**
   String get requestPostedSuccess;
 
   /// No description provided for @errorPostingRequest.

@@ -1,6 +1,11 @@
+/// File: main.dart
+/// Purpose: Entry point of the application. Initializes Firebase, Supabase, and sets up global providers.
+/// Author: HealthSync Team
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -8,12 +13,21 @@ import 'l10n/app_localizations.dart';
 import 'shared/providers/language_provider.dart';
 
 import 'core/constants/app_colors.dart';
-import 'core/constants/app_secrets.dart'; // 🔥 Fix: Added secrets import
-import 'core/router/app_router.dart'; // appRouter এখানে আছে
+import 'core/constants/app_secrets.dart';
+import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
 import 'shared/providers/theme_provider.dart';
-import 'shared/providers/user_profile_provider.dart'; // 🔥 Fix: Added missing import
+import 'shared/providers/user_profile_provider.dart';
 
+/// Background message handler for Firebase Messaging.
+/// This must be a top-level function annotated with @pragma('vm:entry-point').
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint("Handling a background message: ${message.messageId}");
+}
+
+/// Application entry point.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -25,12 +39,9 @@ void main() async {
     ),
   ]);
 
-  // 🔥 GLOBAL AUTH LISTENER (Notification Only)
-  // Routing Logic এখন AppRouter এর দায়িত্বে
-  Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-    // ⚠️ আমরা এখানে নোটিফিকেশন লজিক রাখছি না।
-    // এটা এখন Riverpod Provider এর মাধ্যমে build() মেথডে হ্যান্ডেল হবে।
-  });
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  Supabase.instance.client.auth.onAuthStateChange.listen((data) {});
 
   runApp(const ProviderScope(child: HealthSyncApp()));
 }
@@ -40,15 +51,11 @@ class HealthSyncApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // থিম মোড প্রোভাইডার থেকে নেওয়া
     final themeMode = ref.watch(themeProvider);
 
-    // 🔥 Watch the Router Provider
     final router = ref.watch(appRouterProvider);
     final currentLocale = ref.watch(languageProvider);
 
-    // 🔥 Global Notification Manager (Reactive)
-    // Auth State Listen করে নোটিফিকেশন সার্ভিস স্টার্ট/স্টপ করবে
     ref.listen(authStateChangesProvider, (previous, next) {
       final session = next.value?.session;
       final notifier = ref.read(notificationServiceProvider.notifier);
@@ -72,10 +79,8 @@ class HealthSyncApp extends ConsumerWidget {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
 
-      // 🔥 থিম মোড সেট করা (System / Light / Dark)
       themeMode: themeMode,
 
-      // ☀️ লাইট থিম
       theme: ThemeData(
         brightness: Brightness.light,
         useMaterial3: true,
@@ -141,7 +146,6 @@ class HealthSyncApp extends ConsumerWidget {
         ),
       ),
 
-      // 🌙 ডার্ক থিম
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: true,
@@ -151,7 +155,7 @@ class HealthSyncApp extends ConsumerWidget {
           secondary: AppColors.secondary,
           surface: AppColors.darkSurface,
           error: AppColors.error,
-          // background: AppColors.darkBackground, // Deprecated, handled by surface/scaffoldBackgroundColor
+
           brightness: Brightness.dark,
         ),
         scaffoldBackgroundColor: AppColors.darkBackground,

@@ -1,3 +1,7 @@
+/// File: lib/shared/widgets/side_drawer.dart
+/// Purpose: Navigation drawer for the application.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,9 +11,10 @@ import '../../core/constants/app_colors.dart';
 import '../../features/blood/pages/blood_home_page.dart';
 import 'language_selector_widget.dart';
 import '../../features/about/about_app_page.dart';
-import '../providers/theme_provider.dart'; // Import Theme Provider
+import '../providers/theme_provider.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
+/// Global side drawer for navigation and settings.
 class SideDrawer extends ConsumerWidget {
   const SideDrawer({super.key});
 
@@ -20,7 +25,6 @@ class SideDrawer extends ConsumerWidget {
     final name = user?.userMetadata?['full_name'] ?? "User";
     final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : "U";
 
-    // Watch Theme State
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
 
@@ -29,7 +33,6 @@ class SideDrawer extends ConsumerWidget {
       surfaceTintColor: Colors.transparent,
       child: Column(
         children: [
-          // 1. Header with Gradient & User Info
           Container(
             padding: const EdgeInsets.only(
               top: 50,
@@ -89,7 +92,6 @@ class SideDrawer extends ConsumerWidget {
 
           const SizedBox(height: 16),
 
-          // 2. Menu Items
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -99,8 +101,7 @@ class SideDrawer extends ConsumerWidget {
                   icon: Icons.dashboard_outlined,
                   text: AppLocalizations.of(context)?.dashboard ?? "Dashboard",
                   onTap: () => Navigator.pop(context),
-                  isActive:
-                      true, // Assuming we are on dashboard if drawer is opened usually
+                  isActive: true,
                 ),
 
                 _buildDrawerItem(
@@ -138,13 +139,11 @@ class SideDrawer extends ConsumerWidget {
 
                 const Divider(),
 
-                // 🌐 Language Selector
                 const Padding(
                   padding: EdgeInsets.only(bottom: 12),
                   child: LanguageSelectorWidget(isDropdown: false),
                 ),
 
-                // 🌗 Theme Toggle Switch
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
@@ -181,7 +180,6 @@ class SideDrawer extends ConsumerWidget {
 
           const Divider(height: 1),
 
-          // 3. Logout Section
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: _buildDrawerItem(

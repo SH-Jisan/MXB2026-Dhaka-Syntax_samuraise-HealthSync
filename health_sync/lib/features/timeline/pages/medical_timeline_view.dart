@@ -1,3 +1,7 @@
+/// File: lib/features/timeline/pages/medical_timeline_view.dart
+/// Purpose: Displays the patient's medical timeline (Events, Reports).
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../timeline/providers/timeline_provider.dart';
@@ -7,9 +11,10 @@ import '../widgets/medical_timeline_tile.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 
+/// Timeline view allowing filtering by event type and adding new reports.
 class MedicalTimelineView extends ConsumerWidget {
   final String? patientId;
-  final bool isEmbedded; // 🔥 নতুন ফ্ল্যাগ: এটি অন্য পেজের ভেতরে আছে কিনা
+  final bool isEmbedded;
 
   const MedicalTimelineView({
     super.key,
@@ -19,13 +24,11 @@ class MedicalTimelineView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🔥 আপডেট: প্রোভাইডারে patientId পাস করা হচ্ছে
     final timelineAsync = ref.watch(timelineProvider(patientId));
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // 🔥 মেইন কন্টেন্ট উইজেট (লিস্ট/লোডিং/এরর)
     final content = timelineAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(
@@ -51,12 +54,10 @@ class MedicalTimelineView extends ConsumerWidget {
       },
     );
 
-    // ১. যদি এমবেডেড হয় (যেমন ডাক্তারের পেজে), তবে শুধু কন্টেন্ট রিটার্ন করো (Scaffold ছাড়া)
     if (isEmbedded) {
       return Container(color: theme.scaffoldBackgroundColor, child: content);
     }
 
-    // ২. যদি আলাদা পেজ হয় (যেমন সিটিজেন ড্যাশবোর্ডে), তবে Scaffold সহ রিটার্ন করো
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton.extended(

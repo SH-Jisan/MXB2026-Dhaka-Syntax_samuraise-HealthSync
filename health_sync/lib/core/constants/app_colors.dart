@@ -1,8 +1,12 @@
+/// File: lib/core/constants/app_colors.dart
+/// Purpose: Defines the color palette used throughout the application.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 
+/// Centralized color definitions for Light and Dark themes.
 class AppColors {
-  // Light Theme Colors
-  static const primary = Color(0xFF00796B); // Medical Teal
+  static const primary = Color(0xFF00796B);
   static const secondary = Color(0xFF004D40);
   static const accent = Color(0xFF00BFA5);
 
@@ -13,15 +17,10 @@ class AppColors {
   static const textPrimary = Color(0xFF1E293B);
   static const textSecondary = Color(0xFF64748B);
 
-  // Dark Theme Colors - Premium Dark & Pure White Text
-  static const darkBackground = Color(
-    0xFF252525,
-  ); // Lighter Dark Grey (Not pitch black)
-  static const darkSurface = Color(
-    0xFF353535,
-  ); // Distinct lighter surface for cards
+  static const darkBackground = Color(0xFF252525);
+  static const darkSurface = Color(0xFF353535);
 
-  static const darkPrimary = Color(0xFF80CBC4); // Soft Teal
-  static const darkTextPrimary = Color(0xFFFFFFFF); // Pure White
-  static const darkTextSecondary = Color(0xFFB0BEC5); // Light Blue Grey
+  static const darkPrimary = Color(0xFF80CBC4);
+  static const darkTextPrimary = Color(0xFFFFFFFF);
+  static const darkTextSecondary = Color(0xFFB0BEC5);
 }

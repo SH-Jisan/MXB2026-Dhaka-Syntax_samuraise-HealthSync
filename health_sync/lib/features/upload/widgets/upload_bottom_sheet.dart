@@ -7,9 +7,9 @@ import '../../../core/constants/app_colors.dart';
 import '../providers/upload_provider.dart';
 
 class UploadBottomSheet extends ConsumerStatefulWidget {
-  // 🔥 UPDATE: কার জন্য আপলোড হচ্ছে, সেই আইডি (অপশনাল)
+  
   final String? patientId;
-  final String? patientName; // ইউজারকে দেখানোর জন্য নাম
+  final String? patientName; 
 
   const UploadBottomSheet({super.key, this.patientId, this.patientName});
 
@@ -42,7 +42,7 @@ class _UploadBottomSheetState extends ConsumerState<UploadBottomSheet> {
     int duplicateCount = 0;
 
     for (var file in _selectedFiles) {
-      // 🔥 UPDATE: patientId পাস করা হচ্ছে
+      
       final status = await uploader.uploadAndAnalyze(file, patientId: widget.patientId);
       if(status == UploadStatus.success) successCount++;
       if(status == UploadStatus.duplicate) duplicateCount++;
@@ -77,7 +77,7 @@ class _UploadBottomSheetState extends ConsumerState<UploadBottomSheet> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // টাইটেল ডায়নামিক করা
+    
     final title = widget.patientName != null
         ? "Upload for ${widget.patientName}"
         : "Upload Records";
@@ -92,7 +92,7 @@ class _UploadBottomSheetState extends ConsumerState<UploadBottomSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -117,7 +117,7 @@ class _UploadBottomSheetState extends ConsumerState<UploadBottomSheet> {
           const Divider(),
           const SizedBox(height: 16),
 
-          // File Selection Area
+          
           Expanded(
             child: _selectedFiles.isEmpty
                 ? GestureDetector(

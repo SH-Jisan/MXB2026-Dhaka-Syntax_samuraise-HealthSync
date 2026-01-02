@@ -15,17 +15,17 @@ class DiagnosticPatientView extends StatefulWidget {
 }
 
 class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
-  // টেস্ট লিস্ট রাখার জন্য
+  
   List<Map<String, dynamic>> _availableTests = [];
   bool _isTestsLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchTests(); // পেজ লোড হলেই টেস্ট লিস্ট আনবে
+    _fetchTests(); 
   }
 
-  // 📥 ১. ডাটাবেস থেকে টেস্ট এবং দাম নিয়ে আসা
+  
   Future<void> _fetchTests() async {
     setState(() => _isTestsLoading = true);
     try {
@@ -46,15 +46,15 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
     }
   }
 
-  // 🆕 ২. নতুন অর্ডার তৈরি (Dropdown + Auto Price সহ)
+  
   Future<void> _createNewOrder() async {
-    // সিলেক্ট করা টেস্টগুলো এখানে জমা হবে
+    
     final List<String> selectedTestNames = [];
     double currentTotal = 0;
 
     final amountController = TextEditingController();
 
-    // টেস্ট লোড না হয়ে থাকলে আবার ট্রাই করবে
+    
     if (_availableTests.isEmpty) {
       await _fetchTests();
     }
@@ -63,7 +63,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
     await showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        // ডায়ালগের ভেতর স্টেট চেঞ্জ করার জন্য
+        
         builder: (sbContext, setStateDialog) {
           return AlertDialog(
             title: const Text("New Test Order"),
@@ -73,7 +73,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🔽 Dropdown Menu
+                  
                   _isTestsLoading
                       ? const LinearProgressIndicator()
                       : DropdownButtonFormField<Map<String, dynamic>>(
@@ -111,13 +111,13 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                           onChanged: (selectedTest) {
                             if (selectedTest != null) {
                               setStateDialog(() {
-                                // লিস্টে নাম যোগ করা
+                                
                                 if (!selectedTestNames.contains(
                                   selectedTest['name'],
                                 )) {
                                   selectedTestNames.add(selectedTest['name']);
 
-                                  // 💰 অটোমেটিক প্রাইস যোগ করা
+                                  
                                   currentTotal +=
                                       (selectedTest['base_price'] as num)
                                           .toDouble();
@@ -131,7 +131,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
 
                   const SizedBox(height: 12),
 
-                  // 📋 Selected Tests List (Chips)
+                  
                   if (selectedTestNames.isNotEmpty)
                     Wrap(
                       spacing: 8,
@@ -146,9 +146,9 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                               onDeleted: () {
                                 setStateDialog(() {
                                   selectedTestNames.remove(name);
-                                  // ডিলেট করলে প্রাইস কমানোর লজিকটা একটু জটিল হতে পারে যদি মাল্টিপল সেম দামের টেস্ট থাকে।
-                                  // সিম্পলিসিটির জন্য ইউজারকে ম্যানুয়ালি এডিট করতে দিচ্ছি অথবা পুরো ক্লিয়ার করতে পারে।
-                                  // এখানে আমরা দাম কমাচ্ছি না, ইউজার ম্যানুয়ালি ঠিক করতে পারবে।
+                                  
+                                  
+                                  
                                 });
                               },
                             ),
@@ -158,7 +158,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
 
                   const SizedBox(height: 12),
 
-                  // 💵 Total Amount (Editable)
+                  
                   TextField(
                     controller: amountController,
                     keyboardType: TextInputType.number,
@@ -193,7 +193,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                   }
                   Navigator.pop(dialogContext);
 
-                  // মেইন উইজেটের লোডিং অন করা
+                  
 
                   try {
                     final providerId =
@@ -204,7 +204,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                         .insert({
                           'patient_id': widget.patient['id'],
                           'provider_id': providerId,
-                          'test_names': selectedTestNames, // Array
+                          'test_names': selectedTestNames, 
                           'total_amount':
                               double.tryParse(amountController.text) ?? 0,
                           'paid_amount': 0,
@@ -212,7 +212,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                           'report_status': 'PENDING',
                         });
 
-                    setState(() {}); // UI রিফ্রেশ
+                    setState(() {}); 
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -242,7 +242,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
     );
   }
 
-  // ... (বাকি ফাংশনগুলো যেমন _updatePaymentStatus, _openUploadSheet আগের মতোই থাকবে)
+  
   Future<void> _updatePaymentStatus(String id, String currentStatus) async {
     final newStatus = currentStatus == 'PAID' ? 'DUE' : 'PAID';
     await Supabase.instance.client
@@ -302,7 +302,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: Text(widget.patient['full_name'])),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _createNewOrder, // 🔥 আপডেটেড ফাংশন কল হচ্ছে
+        onPressed: _createNewOrder, 
         icon: const Icon(Icons.add_task),
         label: const Text("New Test"),
         backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
@@ -310,7 +310,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
       ),
       body: Column(
         children: [
-          // Header Info
+          
           Container(
             padding: const EdgeInsets.all(16),
             color: isDark ? AppColors.darkSurface : Colors.white,
@@ -356,7 +356,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
           ),
           Divider(height: 1, color: isDark ? Colors.grey.shade800 : null),
 
-          // Orders List
+          
           Expanded(
             child: FutureBuilder(
               future: Supabase.instance.client
@@ -460,7 +460,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                             ),
                             const SizedBox(height: 8),
 
-                            // Bill & Actions
+                            
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

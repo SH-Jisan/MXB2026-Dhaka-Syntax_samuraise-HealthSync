@@ -1,8 +1,13 @@
+/// File: lib/features/profile/pages/patient_history_page.dart
+/// Purpose: Shows patient's medical history (Appointments, Prescriptions, Diagnostics).
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../l10n/app_localizations.dart';
 
+/// Tabbed view of patient's medical history.
 class PatientHistoryPage extends StatefulWidget {
   const PatientHistoryPage({super.key});
 
@@ -139,7 +144,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -234,7 +241,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.1),
+                            color: statusColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: statusColor),
                           ),
@@ -293,7 +300,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: theme.colorScheme.secondary.withOpacity(0.8),
+                  backgroundColor: theme.colorScheme.secondary.withValues(
+                    alpha: 0.8,
+                  ),
                   child: const Icon(Icons.description, color: Colors.white),
                 ),
                 title: Text(
@@ -341,7 +350,9 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: theme.colorScheme.primary.withOpacity(0.8),
+                  backgroundColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.8,
+                  ),
                   child: const Icon(Icons.science, color: Colors.white),
                 ),
                 title: Text(
@@ -373,7 +384,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           Icon(
             Icons.history_toggle_off,
             size: 60,
-            color: theme.hintColor.withOpacity(0.3),
+            color: theme.hintColor.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(text, style: TextStyle(color: theme.hintColor)),

@@ -1,6 +1,11 @@
+/// File: lib/features/profile/providers/doctor_hospitals_provider.dart
+/// Purpose: Fetches the list of hospitals a doctor is associated with.
+/// Author: HealthSync Team
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Provider to fetch associated hospitals for a given doctor ID.
 final doctorHospitalsProvider = FutureProvider.autoDispose
     .family<List<Map<String, dynamic>>, String>((ref, doctorId) async {
       try {

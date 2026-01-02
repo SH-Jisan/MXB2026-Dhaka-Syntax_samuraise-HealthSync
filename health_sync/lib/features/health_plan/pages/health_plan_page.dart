@@ -15,7 +15,7 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
   bool _isBangla = false;
   Map<String, dynamic>? _healthPlan;
 
-  // AI Function Call
+  
   Future<void> _generateHealthPlan() async {
     setState(() => _isLoading = true);
     _healthPlan = null;
@@ -211,7 +211,7 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Summary Card
+          
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -370,7 +370,7 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
               : accentColor.withValues(alpha: 0.3))
         : (isDark ? Colors.grey.shade800 : Colors.grey.shade100);
 
-    // 🔥 FIX: shade200 এরর ফিক্স করা হয়েছে withOpacity দিয়ে
+    
     final textColor = isWarning
         ? (isDark ? accentColor.withValues(alpha: 0.9) : Colors.orange.shade900)
         : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary);

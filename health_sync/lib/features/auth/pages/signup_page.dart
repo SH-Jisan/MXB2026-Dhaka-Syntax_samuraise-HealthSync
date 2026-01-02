@@ -1,9 +1,14 @@
+/// File: lib/features/auth/pages/signup_page.dart
+/// Purpose: Allows new users to register an account with a specific role.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/auth_provider.dart';
 
+/// Registration screen supporting multiple user roles (Citizen, Doctor, Hospital, Diagnostic).
 class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
 
@@ -14,13 +19,11 @@ class SignupPage extends ConsumerStatefulWidget {
 class _SignupPageState extends ConsumerState<SignupPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Default Role
   String _selectedRole = 'CITIZEN';
 
   final List<String> _roles = ['CITIZEN', 'DOCTOR', 'HOSPITAL', 'DIAGNOSTIC'];
@@ -68,10 +71,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // 1. Role Selection Dropdown
                 DropdownButtonFormField<String>(
-                  // ignore: deprecated_member_use
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: _inputDecoration(
                     "Account Type",
                     Icons.category_outlined,
@@ -89,7 +90,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // 2. Input Fields
                 TextFormField(
                   controller: _nameController,
                   decoration: _inputDecoration(
@@ -131,7 +131,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // 3. Signup Button
                 ElevatedButton(
                   onPressed: isLoading ? null : _handleSignup,
                   style: ElevatedButton.styleFrom(

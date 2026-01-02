@@ -309,7 +309,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get lastDonated => 'সর্বশেষ দান: ';
 
   @override
-  String get thankYouHero => 'ধন্যবাদ, হিরো! 🦸‍♂️';
+  String get thankYouHero => 'ধন্যবাদ, হিরো! ';
 
   @override
   String get acceptedDonationMessage =>
@@ -394,7 +394,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get requestPostedSuccess =>
-      'অনুরোধ পোস্ট করা হয়েছে! রক্তদাতাদের জানানো হচ্ছে... 📲';
+      'অনুরোধ পোস্ট করা হয়েছে! রক্তদাতাদের জানানো হচ্ছে... ';
 
   @override
   String get errorPostingRequest => 'অনুরোধ পোস্ট করতে ত্রুটি: ';

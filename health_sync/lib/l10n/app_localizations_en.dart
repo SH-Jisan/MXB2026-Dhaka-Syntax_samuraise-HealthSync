@@ -309,7 +309,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lastDonated => 'Last donated: ';
 
   @override
-  String get thankYouHero => 'Thank You, Hero! 🦸‍♂️';
+  String get thankYouHero => 'Thank You, Hero! ';
 
   @override
   String get acceptedDonationMessage =>
@@ -393,7 +393,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get requestPostedSuccess =>
-      'Request Posted! Notifying nearby donors... 📲';
+      'Request Posted! Notifying nearby donors... ';
 
   @override
   String get errorPostingRequest => 'Error posting request: ';

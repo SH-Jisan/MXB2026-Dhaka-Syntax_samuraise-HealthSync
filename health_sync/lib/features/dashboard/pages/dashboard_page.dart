@@ -7,7 +7,7 @@ import 'citizen_home_page.dart';
 import 'doctor_home_page.dart';
 import 'hospital_home_page.dart';
 import 'diagnostic_home_page.dart';
-import '../../../shared/pages/splash_page.dart'; // 🔥 Fix: Added missing import
+import '../../../shared/pages/splash_page.dart'; 
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -18,8 +18,8 @@ class DashboardPage extends ConsumerWidget {
 
     return profileAsync.when(
       loading: () {
-        // 🔥 If we are loading but have no User ID, we shouldn't be here (Router should redirect to login)
-        // But as a fallback, we show the splash.
+        
+        
         return const SplashPage();
       },
       error: (err, stack) => Scaffold(
@@ -62,8 +62,8 @@ class DashboardPage extends ConsumerWidget {
       ),
       data: (profile) {
         if (profile == null) {
-          // 🔥 Profile is null even though we have a session.
-          // This could happen right after signup or if DB sync is slow.
+          
+          
           return Scaffold(
             body: Center(
               child: Column(
@@ -89,7 +89,7 @@ class DashboardPage extends ConsumerWidget {
         final role = profile['role'] as String;
         debugPrint("DashboardPage: Landing on $role dashboard");
 
-        // 🔥 ROLE BASED NAVIGATION
+        
         switch (role) {
           case 'DOCTOR':
             return const DoctorHomePage();

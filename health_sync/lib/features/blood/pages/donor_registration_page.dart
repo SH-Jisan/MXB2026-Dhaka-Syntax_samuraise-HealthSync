@@ -1,8 +1,13 @@
+/// File: lib/features/blood/pages/donor_registration_page.dart
+/// Purpose: Registration form for users to become blood donors.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 
+/// Screen for users to register or update their donor profile.
 class DonorRegistrationPage extends StatefulWidget {
   const DonorRegistrationPage({super.key});
 
@@ -13,11 +18,9 @@ class DonorRegistrationPage extends StatefulWidget {
 class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
   final _districtController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  // State
   String? _selectedBloodGroup;
   DateTime? _lastDonationDate;
   bool _availability = true;
@@ -31,7 +34,6 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
     _fetchProfileAndDonor();
   }
 
-  // 🔄 Fetch profile + donor info
   Future<void> _fetchProfileAndDonor() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
@@ -71,7 +73,6 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
     }
   }
 
-  // 💾 Save / Update
   Future<void> _submitOrUpdate() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedBloodGroup == null) {
@@ -87,7 +88,6 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
     setState(() => _isSubmitting = true);
 
     try {
-      // 1️⃣ Update profile (common data)
       await Supabase.instance.client
           .from('profiles')
           .update({
@@ -97,7 +97,6 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
           })
           .eq('id', user.id);
 
-      // 2️⃣ Donor data
       final donorData = {
         'user_id': user.id,
         'availability': _availability,
@@ -120,7 +119,7 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
           content: Text(
             _isAlreadyDonor
                 ? "Profile updated successfully!"
-                : "Welcome to the donor family! 🎉",
+                : "Welcome to the donor family! ",
           ),
           backgroundColor: Colors.green,
         ),
@@ -178,8 +177,7 @@ class _DonorRegistrationPageState extends State<DonorRegistrationPage> {
 
               _buildLabel("Blood Group", isDark),
               DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
-                value: _selectedBloodGroup,
+                initialValue: _selectedBloodGroup,
                 items: const ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
                     .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                     .toList(),

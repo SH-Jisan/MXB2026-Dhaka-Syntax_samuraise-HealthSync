@@ -1,16 +1,16 @@
 class MedicalEvent {
   final String id;
   final String title;
-  final String eventType; // REPORT, PRESCRIPTION
+  final String eventType; 
   final DateTime eventDate;
-  final String severity; // HIGH, MEDIUM, LOW
+  final String severity; 
   final String? summary;
   final List<String> attachmentUrls;
   final DateTime createdAt;
 
-  // 🔥 নতুন ফিল্ড: টেস্ট বা ফাইন্ডিংস লিস্ট
+  
   final List<String> keyFindings;
-  final Map<String, dynamic>? aiDetails; // 🔥 Future-proof field
+  final Map<String, dynamic>? aiDetails; 
 
   MedicalEvent({
     required this.id,
@@ -21,7 +21,7 @@ class MedicalEvent {
     this.summary,
     required this.attachmentUrls,
     required this.createdAt,
-    required this.keyFindings, // Constructor এ যোগ করা হলো
+    required this.keyFindings, 
     this.aiDetails,
   });
 
@@ -36,7 +36,7 @@ class MedicalEvent {
       attachmentUrls: List<String>.from(json['attachment_urls'] ?? []),
       createdAt: DateTime.parse(json['created_at']),
 
-      // 🔥 ডাটাবেস থেকে key_findings লিস্ট পড়া হচ্ছে
+      
       keyFindings: List<String>.from(json['key_findings'] ?? []),
       aiDetails: json['ai_details'],
     );

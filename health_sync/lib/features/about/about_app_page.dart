@@ -17,7 +17,7 @@ class AboutAppPage extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            // 1. Hero Header
+            
             Image.asset('assets/logo/logo.png', width: 120, height: 120),
             const SizedBox(height: 16),
             Text(
@@ -41,8 +41,8 @@ class AboutAppPage extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // 2. How to Use Section
-            _buildSectionHeader("📖  How to use", isDark),
+            
+            _buildSectionHeader("  How to use", isDark),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -85,8 +85,8 @@ class AboutAppPage extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // 3. Tech Stack Section
-            _buildSectionHeader("🛠️  Powered By", isDark),
+            
+            _buildSectionHeader("  Powered By", isDark),
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -128,11 +128,11 @@ class AboutAppPage extends StatelessWidget {
 
             const SizedBox(height: 48),
 
-            // Footer
+            
             Column(
               children: [
                 Text(
-                  "Made with ❤️ for Better Healthcare",
+                  "Made with  for Better Healthcare",
                   style: GoogleFonts.poppins(
                     color: isDark
                         ? Colors.grey.shade400

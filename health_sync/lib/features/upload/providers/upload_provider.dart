@@ -24,11 +24,11 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
       final currentUser = Supabase.instance.client.auth.currentUser;
       if (currentUser == null) throw Exception("User not logged in");
 
-      // ১. যদি patientId বাইরে থেকে আসে (Hospital/Doctor আপলোড করছে), সেটা ব্যবহার হবে
-      // আর না আসলে নিজের আইডি (User নিজে আপলোড করছে)
+      
+      
       final targetUserId = patientId ?? currentUser.id;
 
-      // ২. ফাইল প্রসেসিং
+      
       final fileBytes = await file.readAsBytes();
       final fileBase64 = base64Encode(fileBytes);
       final fileHash = sha256.convert(fileBytes).toString();
@@ -38,7 +38,7 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
 
       final fileName = '$targetUserId/${const Uuid().v4()}.$fileExt';
 
-      // ৩. আপলোড (Storage Bucket)
+      
       await Supabase.instance.client.storage
           .from('reports')
           .upload(
@@ -50,13 +50,13 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
           .from('reports')
           .getPublicUrl(fileName);
 
-      // ৪. ফাংশন কল (Edge Function)
+      
       try {
         await Supabase.instance.client.functions.invoke(
           'process-medical-report',
           body: {
-            'patient_id': targetUserId, // যার প্রোফাইলে রিপোর্ট যাবে
-            'uploader_id': currentUser.id, // যে আপলোড করছে
+            'patient_id': targetUserId, 
+            'uploader_id': currentUser.id, 
             'imageBase64': fileBase64,
             'mimeType': mimeType,
             'file_url': fileUrl,
@@ -65,13 +65,13 @@ class UploadController extends StateNotifier<AsyncValue<void>> {
           },
         );
 
-        // 🔥 FIX: রিফ্রেশ লজিক আপডেট (Family Provider এর জন্য)
+        
 
-        // ১. যার জন্য আপলোড হলো, তার স্পেসিফিক টাইমলাইন রিফ্রেশ করা (Doctor View এর জন্য জরুরি)
+        
         _ref.invalidate(timelineProvider(targetUserId));
 
-        // ২. যদি ইউজার নিজের জন্য আপলোড করে, তবে ডিফল্ট (null) টাইমলাইনও রিফ্রেশ করা
-        // (কারণ Citizen Home Page এ সাধারণত কোনো আইডি ছাড়া কল হয়)
+        
+        
         if (targetUserId == currentUser.id) {
           _ref.invalidate(timelineProvider(null));
         }

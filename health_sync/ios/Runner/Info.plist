@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to capture profile pictures and medical reports.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access to upload profile pictures and medical reports.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need microphone access for speech-to-text features.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We need speech recognition to convert your voice to text.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>sms</string>
+		<string>tel</string>
+		<string>https</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

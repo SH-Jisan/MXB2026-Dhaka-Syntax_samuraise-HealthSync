@@ -1,3 +1,7 @@
+/// File: lib/core/router/app_router.dart
+/// Purpose: Defines the application's navigation routes using GoRouter.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,11 +11,11 @@ import '../../features/auth/pages/signup_page.dart';
 import '../../features/dashboard/pages/dashboard_page.dart';
 import 'go_router_refresh_stream.dart';
 
-// 🔥 Global Key for Navigator
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Provides the GoRouter configuration for the app.
+/// Handles redirection based on authentication state.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // 🔥 Auth Stream Listen
   final authStream = Supabase.instance.client.auth.onAuthStateChange;
 
   return GoRouter(

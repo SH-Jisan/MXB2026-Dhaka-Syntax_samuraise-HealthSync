@@ -1,9 +1,14 @@
+/// File: lib/core/theme/app_theme.dart
+/// Purpose: Configures the application's Light and Dark themes.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 
+/// Manages the application's theme data.
 class AppTheme {
-  // ☀️ লাইট থিম
+  /// Returns the Light Mode theme configuration.
   static ThemeData get lightTheme {
     return ThemeData(
       brightness: Brightness.light,
@@ -67,7 +72,7 @@ class AppTheme {
     );
   }
 
-  // 🌙 ডার্ক থিম
+  /// Returns the Dark Mode theme configuration.
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,

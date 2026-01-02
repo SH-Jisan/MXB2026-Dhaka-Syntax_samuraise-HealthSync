@@ -4,7 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/side_drawer.dart';
 import '../widgets/hospital_overview_tab.dart';
 import '../widgets/hospital_doctors_tab.dart';
-import 'hospital_patients_page.dart'; // 🔥 Import New Page
+import 'hospital_patients_page.dart'; 
 
 class HospitalHomePage extends StatefulWidget {
   const HospitalHomePage({super.key});
@@ -20,7 +20,7 @@ class _HospitalHomePageState extends State<HospitalHomePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this); // 🔥 Changed to 3
+    _tabController = TabController(length: 3, vsync: this); 
   }
 
   @override
@@ -42,7 +42,7 @@ class _HospitalHomePageState extends State<HospitalHomePage>
             Tab(
               text: "Patients",
               icon: Icon(Icons.people_outline),
-            ), // 🔥 New Tab
+            ), 
             Tab(text: "Doctors", icon: Icon(Icons.medical_services)),
           ],
         ),
@@ -57,7 +57,7 @@ class _HospitalHomePageState extends State<HospitalHomePage>
         controller: _tabController,
         children: const [
           HospitalOverviewTab(),
-          HospitalPatientsPage(), // 🔥 New Page Added
+          HospitalPatientsPage(), 
           HospitalDoctorsTab(),
         ],
       ),

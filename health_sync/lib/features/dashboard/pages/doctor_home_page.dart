@@ -1,17 +1,21 @@
+/// File: lib/features/dashboard/pages/doctor_home_page.dart
+/// Purpose: Main dashboard for Doctor users, showing appointments and patient overview.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/side_drawer.dart';
-import '../../../shared/widgets/ai_doctor_button.dart'; // 🔥 Fix: Shared Widget
+import '../../../shared/widgets/ai_doctor_button.dart';
 import '../../../l10n/app_localizations.dart';
 
-// পেজ ইম্পোর্ট
 import '../../timeline/pages/medical_timeline_view.dart';
 import '../../profile/pages/profile_page.dart';
-import '../../health_plan/pages/health_plan_page.dart'; // 🔥 Health Plan Import
-// import 'ai_doctor_page.dart'; // Removed
-import '../tabs/doctor_work_tab.dart'; // আমাদের তৈরি করা ওয়ার্ক ট্যাব
+import '../../health_plan/pages/health_plan_page.dart';
 
+import '../tabs/doctor_work_tab.dart';
+
+/// Dashboard screen for users with 'DOCTOR' role.
 class DoctorHomePage extends StatefulWidget {
   const DoctorHomePage({super.key});
 
@@ -22,16 +26,12 @@ class DoctorHomePage extends StatefulWidget {
 class _DoctorHomePageState extends State<DoctorHomePage> {
   int _selectedIndex = 0;
 
-  // পেজগুলোর লিস্ট (Health Plan সহ)
   final List<Widget> _pages = [
-    const DoctorWorkTab(), // Tab 0: Doctor Panel (রোগীদের লিস্ট)
-    const MedicalTimelineView(), // Tab 1: My Timeline (নিজের হিস্ট্রি)
-    const HealthPlanPage(), // Tab 2: Health Plan (🔥 New)
-    const ProfilePage(), // Tab 3: Profile
+    const DoctorWorkTab(),
+    const MedicalTimelineView(),
+    const HealthPlanPage(),
+    const ProfilePage(),
   ];
-
-  // টাইটেল লিস্ট
-  // Titles removed for dynamic localization
 
   @override
   Widget build(BuildContext context) {
@@ -40,15 +40,14 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      drawer: const SideDrawer(), // কমন সাইড ড্রয়ার
+      drawer: const SideDrawer(),
 
       appBar: AppBar(
         title: Text(_getTitle(context, _selectedIndex)),
         centerTitle: false,
         actions: [
-          // 🔥 AI Doctor Button (New)
-          const AiDoctorButton(), // 🔥 Fix: Used Shared Widget
-          // নোটিফিকেশন বাটন
+          const AiDoctorButton(),
+
           IconButton(
             icon: Icon(
               Icons.notifications_outlined,
@@ -59,7 +58,6 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
         ],
       ),
 
-      // পেজ সুইচ করার সময় স্টেট ধরে রাখার জন্য IndexedStack ব্যবহার করা ভালো
       body: IndexedStack(index: _selectedIndex, children: _pages),
 
       bottomNavigationBar: NavigationBar(
@@ -72,7 +70,6 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
             : AppColors.primary.withValues(alpha: 0.2),
         elevation: 3,
         destinations: [
-          // 1. Doctor Panel (Extra Feature)
           NavigationDestination(
             icon: const Icon(Icons.medical_services_outlined),
             selectedIcon: Icon(
@@ -82,7 +79,6 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
             label: AppLocalizations.of(context)?.panel ?? 'Panel',
           ),
 
-          // 2. Personal Timeline
           NavigationDestination(
             icon: const Icon(Icons.history_edu_outlined),
             selectedIcon: Icon(
@@ -92,7 +88,6 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
             label: AppLocalizations.of(context)?.timeline ?? 'Timeline',
           ),
 
-          // 3. Health Plan (🔥 New)
           NavigationDestination(
             icon: const Icon(Icons.spa_outlined),
             selectedIcon: Icon(
@@ -102,7 +97,6 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
             label: AppLocalizations.of(context)?.plan ?? 'Plan',
           ),
 
-          // 4. Profile
           NavigationDestination(
             icon: const Icon(Icons.person_outline),
             selectedIcon: Icon(

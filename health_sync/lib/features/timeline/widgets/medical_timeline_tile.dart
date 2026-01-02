@@ -1,3 +1,7 @@
+/// File: lib/features/timeline/widgets/medical_timeline_tile.dart
+/// Purpose: Widget to display a single medical event in the timeline.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +10,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../shared/models/medical_event_model.dart';
 import '../../dashboard/pages/medical_event_details_page.dart';
 
+/// A tile in the timeline representing a specific medical event.
 class MedicalTimelineTile extends StatelessWidget {
   final MedicalEvent event;
   final bool isLast;
@@ -23,22 +28,25 @@ class MedicalTimelineTile extends StatelessWidget {
 
     final isPrescription = event.eventType == 'PRESCRIPTION';
     final primaryColor = isPrescription ? Colors.purple : AppColors.primary;
-    final darkPrimaryColor =
-        isPrescription ? Colors.purple.shade300 : AppColors.darkPrimary;
+    final darkPrimaryColor = isPrescription
+        ? Colors.purple.shade300
+        : AppColors.darkPrimary;
 
     final lightColor = isDark
         ? (isPrescription
-            ? Colors.purple.withOpacity(0.2)
-            : AppColors.darkPrimary.withOpacity(0.2))
+              ? Colors.purple.withValues(alpha: 0.2)
+              : AppColors.darkPrimary.withValues(alpha: 0.2))
         : (isPrescription
-            ? Colors.purple.shade50
-            : AppColors.primary.withOpacity(0.1));
+              ? Colors.purple.shade50
+              : AppColors.primary.withValues(alpha: 0.1));
 
     return TimelineTile(
       isFirst: false,
       isLast: isLast,
       beforeLineStyle: LineStyle(
-        color: (isDark ? darkPrimaryColor : primaryColor).withOpacity(0.3),
+        color: (isDark ? darkPrimaryColor : primaryColor).withValues(
+          alpha: 0.3,
+        ),
         thickness: 2,
       ),
       indicatorStyle: IndicatorStyle(
@@ -49,11 +57,14 @@ class MedicalTimelineTile extends StatelessWidget {
             color: lightColor,
             shape: BoxShape.circle,
             border: Border.all(
-                color: isDark ? darkPrimaryColor : primaryColor, width: 2),
+              color: isDark ? darkPrimaryColor : primaryColor,
+              width: 2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: (isDark ? darkPrimaryColor : primaryColor)
-                    .withOpacity(0.2),
+                color: (isDark ? darkPrimaryColor : primaryColor).withValues(
+                  alpha: 0.2,
+                ),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -89,7 +100,7 @@ class MedicalTimelineTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.1 : 0.05),
+                    color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -101,7 +112,6 @@ class MedicalTimelineTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date + Severity Badge
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -132,7 +142,6 @@ class MedicalTimelineTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  // Title
                   Text(
                     event.title,
                     style: GoogleFonts.poppins(
@@ -144,7 +153,6 @@ class MedicalTimelineTile extends StatelessWidget {
                     ),
                   ),
 
-                  // Summary
                   if (event.summary != null) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -161,7 +169,6 @@ class MedicalTimelineTile extends StatelessWidget {
                     ),
                   ],
 
-                  // Key Findings Chips
                   if (event.keyFindings.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Wrap(
@@ -205,7 +212,6 @@ class MedicalTimelineTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // View Details Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -235,7 +241,6 @@ class MedicalTimelineTile extends StatelessWidget {
   }
 }
 
-// Severity Badge Helper
 class _SeverityBadge extends StatelessWidget {
   final String severity;
   const _SeverityBadge({required this.severity});
@@ -250,16 +255,19 @@ class _SeverityBadge extends StatelessWidget {
     switch (severity) {
       case 'HIGH':
         color = isDark ? Colors.red.shade300 : Colors.red.shade700;
-        bg = isDark ? Colors.red.withOpacity(0.15) : Colors.red.shade50;
+        bg = isDark ? Colors.red.withValues(alpha: 0.15) : Colors.red.shade50;
         break;
       case 'MEDIUM':
         color = isDark ? Colors.orange.shade300 : Colors.orange.shade800;
-        bg =
-            isDark ? Colors.orange.withOpacity(0.15) : Colors.orange.shade50;
+        bg = isDark
+            ? Colors.orange.withValues(alpha: 0.15)
+            : Colors.orange.shade50;
         break;
-      default: // LOW
+      default:
         color = isDark ? Colors.green.shade300 : Colors.green.shade700;
-        bg = isDark ? Colors.green.withOpacity(0.15) : Colors.green.shade50;
+        bg = isDark
+            ? Colors.green.withValues(alpha: 0.15)
+            : Colors.green.shade50;
     }
 
     return Container(
@@ -267,7 +275,7 @@ class _SeverityBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
         severity,

@@ -1,3 +1,7 @@
+/// File: lib/features/dashboard/widgets/hospital_doctors_tab.dart
+/// Purpose: Tab to manage doctors assigned to a hospital.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -5,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/hospital_work_providers.dart';
 
+/// List of doctors associated with the current hospital.
 class HospitalDoctorsTab extends ConsumerStatefulWidget {
   const HospitalDoctorsTab({super.key});
 

@@ -1,3 +1,7 @@
+/// File: lib/features/dashboard/widgets/hospital_overview_tab.dart
+/// Purpose: Overview tab for Hospital dashboard (Stats, Quick Actions).
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +10,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../upload/widgets/upload_bottom_sheet.dart';
 import '../../timeline/pages/medical_timeline_view.dart';
 
+/// Main view for hospital staff to manage patients and appointments.
 class HospitalOverviewTab extends StatefulWidget {
   const HospitalOverviewTab({super.key});
 
@@ -21,7 +26,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
   final _patientEmailController = TextEditingController();
   final _doctorEmailController = TextEditingController();
 
-  // 🏥 1. পেশেন্ট সার্চ এবং অ্যাকশন
   Future<void> _searchPatient() async {
     if (_patientEmailController.text.isEmpty) return;
 
@@ -37,8 +41,8 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
       if (!mounted) return;
 
       if (data != null) {
-        Navigator.pop(context); // আগের ডায়ালগ বন্ধ
-        _showPatientOptions(data); // অপশন মেনু ওপেন
+        Navigator.pop(context);
+        _showPatientOptions(data);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -53,12 +57,10 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
     } finally {}
   }
 
-  // 📅 2. অ্যাপয়েন্টমেন্ট বুকিং ফাংশন (NEW FEATURE)
   Future<void> _bookAppointment(Map<String, dynamic> patient) async {
     final hospitalId = Supabase.instance.client.auth.currentUser!.id;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // হসপিটালের ডাক্তারদের লিস্ট আনা
     final doctorsResponse = await Supabase.instance.client
         .from('hospital_doctors')
         .select('doctor_id, profiles:doctor_id(full_name, specialty)')
@@ -113,7 +115,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
                 ),
                 const SizedBox(height: 16),
 
-                // Doctor Dropdown
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: "Select Doctor",
@@ -146,7 +147,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
                 ),
                 const SizedBox(height: 12),
 
-                // Date Picker
                 ListTile(
                   title: Text(
                     selectedDate == null
@@ -186,7 +186,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
                 ),
                 const SizedBox(height: 8),
 
-                // Time Picker
                 ListTile(
                   title: Text(
                     selectedTime == null
@@ -237,7 +236,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
                     return;
                   }
 
-                  // ফাইনাল ডেটটাইম তৈরি করা
                   final finalDateTime = DateTime(
                     selectedDate!.year,
                     selectedDate!.month,
@@ -257,7 +255,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
 
                     if (context.mounted) {
                       Navigator.pop(ctx);
-                      Navigator.pop(context); // মেইন শিট বন্ধ
+                      Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Appointment Booked Successfully!"),
@@ -278,7 +276,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
     );
   }
 
-  // 🩺 3. ডাক্তার অ্যাসাইন করা (আগের মতোই)
   Future<void> _assignDoctor() async {
     if (_doctorEmailController.text.isEmpty) return;
 
@@ -324,7 +321,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
     } finally {}
   }
 
-  // UI Helpers
   void _showPatientOptions(Map<String, dynamic> patient) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
@@ -339,14 +335,13 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Patient Info Header
             Row(
               children: [
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: isDark
-                      ? AppColors.darkPrimary.withOpacity(0.2)
-                      : AppColors.primary.withOpacity(0.1),
+                      ? AppColors.darkPrimary.withValues(alpha: 0.2)
+                      : AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
                     patient['full_name'][0],
                     style: TextStyle(
@@ -387,7 +382,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
             const SizedBox(height: 24),
             const Divider(),
 
-            // 🔥 Book Appointment Option
             ListTile(
               leading: Icon(
                 Icons.calendar_month,
@@ -565,7 +559,10 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           if (!isDark)
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+            ),
         ],
       ),
       child: Column(
@@ -618,7 +615,9 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? color.withOpacity(0.2) : color.withOpacity(0.1),
+                color: isDark
+                    ? color.withValues(alpha: 0.2)
+                    : color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: isDark ? AppColors.darkPrimary : color),
@@ -668,7 +667,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Stats Row
           Row(
             children: [
               Expanded(
@@ -703,7 +701,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
           ),
           const SizedBox(height: 16),
 
-          // Manage Patient (Book Appointment Inside)
           _buildActionCard(
             title: "Manage Patient / Appointment",
             subtitle: "Search patient, Book Appointment, Upload Reports",
@@ -722,7 +719,6 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
           ),
           const SizedBox(height: 16),
 
-          // Add Doctor
           _buildActionCard(
             title: "Assign New Doctor",
             subtitle: "Add a doctor to this hospital",

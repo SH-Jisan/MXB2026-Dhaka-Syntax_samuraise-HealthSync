@@ -1,3 +1,7 @@
+/// File: lib/features/auth/pages/login_page.dart
+/// Purpose: Handles user authentication via Email/Password.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../../../shared/widgets/language_selector_widget.dart';
 import '../../../l10n/app_localizations.dart';
 
+/// Screen for existing users to sign in.
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
@@ -41,7 +46,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Logo & Title
               Center(
                 child: Image.asset(
                   'assets/logo/logo.png',
@@ -75,7 +79,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               const SizedBox(height: 40),
 
-              // Inputs
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -97,7 +100,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
               ),
 
-              // Forgot Password (Placeholder)
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -107,7 +109,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               const SizedBox(height: 16),
 
-              // Action Button
               ElevatedButton(
                 onPressed: isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
@@ -132,7 +133,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
               const SizedBox(height: 24),
 
-              // Sign Up Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -170,17 +170,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
-
-      // 🔥 Manual Redirect Removed
-      // We now rely solely on AppRouter's refreshListenable to switch to '/'
-      // when the Supabase session becomes active.
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              "Login Failed: ${e.toString().split('\n').first}",
-            ), // Simpler error
+            content: Text("Login Failed: ${e.toString().split('\n').first}"),
             backgroundColor: AppColors.error,
           ),
         );

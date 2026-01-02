@@ -1,3 +1,7 @@
+/// File: lib/features/blood/pages/my_blood_requests_page.dart
+/// Purpose: Shows the user's history of blood requests and accepted donors.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +11,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../providers/my_requests_provider.dart';
 
+/// Screen displaying list of blood requests made by the current user.
 class MyBloodRequestsPage extends ConsumerWidget {
   const MyBloodRequestsPage({super.key});
 

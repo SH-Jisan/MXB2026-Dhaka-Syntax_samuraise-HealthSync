@@ -1,9 +1,14 @@
+/// File: lib/shared/widgets/language_selector_widget.dart
+/// Purpose: Widget/Dropdown to switch application language (English/Bangla).
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/language_provider.dart';
 import '../../l10n/app_localizations.dart';
 
+/// Widget that allows users to change the app's locale.
 class LanguageSelectorWidget extends ConsumerWidget {
   final bool isDropdown;
 
@@ -40,7 +45,6 @@ class LanguageSelectorWidget extends ConsumerWidget {
       );
     }
 
-    // Toggle Button Style (For Drawer)
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(

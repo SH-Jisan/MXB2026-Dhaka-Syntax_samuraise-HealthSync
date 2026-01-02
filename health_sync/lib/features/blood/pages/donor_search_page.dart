@@ -1,11 +1,16 @@
+/// File: lib/features/blood/pages/donor_search_page.dart
+/// Purpose: Interface for searching blood donors by group and location.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart'; // কল করার জন্য
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../providers/donor_provider.dart';
 
+/// Screen to find donors based on blood group and district.
 class DonorSearchPage extends ConsumerStatefulWidget {
   const DonorSearchPage({super.key});
 
@@ -17,7 +22,6 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
   String? _selectedBloodGroup;
   final _districtController = TextEditingController();
 
-  // 📞 কল করার ফাংশন
   void _callDonor(String phone) async {
     final Uri url = Uri.parse("tel:$phone");
     if (await canLaunchUrl(url)) {
@@ -56,7 +60,6 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
-          // 🔍 SEARCH FILTERS SECTION
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
             decoration: BoxDecoration(
@@ -76,12 +79,10 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Blood Group Dropdown
                     SizedBox(
                       width: 110,
                       child: DropdownButtonFormField<String>(
-                        // ignore: deprecated_member_use
-                        value: _selectedBloodGroup,
+                        initialValue: _selectedBloodGroup,
                         isExpanded: true,
                         dropdownColor: isDark
                             ? AppColors.darkSurface
@@ -120,7 +121,6 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                     ),
                     const SizedBox(width: 12),
 
-                    // District Search
                     Expanded(
                       child: TextField(
                         controller: _districtController,
@@ -192,7 +192,6 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
             ),
           ),
 
-          // 📋 RESULTS LIST
           Expanded(
             child: donorsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -278,7 +277,6 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                         padding: const EdgeInsets.all(16),
                         child: Row(
                           children: [
-                            // Blood Group Badge
                             Container(
                               height: 50,
                               width: 50,
@@ -302,7 +300,7 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                                 ],
                               ),
                               child: Text(
-                                donor['blood_group'],
+                                profile['blood_group'] ?? '?',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -312,7 +310,6 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                             ),
                             const SizedBox(width: 16),
 
-                            // Info
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +339,7 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          donor['district'] ??
+                                          profile['district'] ??
                                               AppLocalizations.of(
                                                 context,
                                               )?.unknown ??
@@ -376,11 +373,10 @@ class _DonorSearchPageState extends ConsumerState<DonorSearchPage> {
                               ),
                             ),
 
-                            // Call Button
                             Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: () => _callDonor(donor['phone']),
+                                onTap: () => _callDonor(profile['phone'] ?? ''),
                                 borderRadius: BorderRadius.circular(50),
                                 child: Ink(
                                   padding: const EdgeInsets.all(12),

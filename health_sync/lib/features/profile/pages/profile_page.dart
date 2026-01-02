@@ -1,3 +1,7 @@
+/// File: lib/features/profile/pages/profile_page.dart
+/// Purpose: Displays user profile, stats, and settings.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +15,7 @@ import '../../../shared/providers/user_profile_provider.dart';
 import 'patient_history_page.dart';
 import '../../../l10n/app_localizations.dart';
 
+/// User profile screen showing personal details, role-specific stats, and settings.
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
@@ -77,7 +82,6 @@ class ProfilePage extends ConsumerWidget {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // 1. Profile Header
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -147,13 +151,11 @@ class ProfilePage extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
-                // 🔥 DOCTOR ONLY: Assigned Hospitals Section
                 if (role == 'DOCTOR' && user != null) ...[
                   _DoctorHospitalsSection(doctorId: user.id),
                   const SizedBox(height: 24),
                 ],
 
-                // 2. Info Section
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
@@ -186,7 +188,6 @@ class ProfilePage extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
-                // 3. Settings & Activity
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
@@ -242,7 +243,6 @@ class ProfilePage extends ConsumerWidget {
 
                 const SizedBox(height: 32),
 
-                // 4. Logout
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(

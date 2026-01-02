@@ -1,3 +1,8 @@
+/// File: lib/core/constants/app_secrets.dart
+/// Purpose: Stores API keys and configuration secrets.
+/// Author: HealthSync Team
+
+/// Holds sensitive configuration data.
 class AppSecrets {
   static const String supabaseUrl = 'https://tyceawrbxbksrbmatyxr.supabase.co';
   static const String supabaseAnonKey =

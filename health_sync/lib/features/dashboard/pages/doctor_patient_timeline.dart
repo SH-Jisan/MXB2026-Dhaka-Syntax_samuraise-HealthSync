@@ -25,7 +25,7 @@ class DoctorPatientTimelinePage extends StatelessWidget {
         future: Supabase.instance.client
             .from('medical_events')
             .select()
-            .eq('patient_id', patientProfile['id']) // স্পেসিফিক রোগীর ডাটা
+            .eq('patient_id', patientProfile['id']) 
             .order('event_date', ascending: false),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

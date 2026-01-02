@@ -1,3 +1,7 @@
+/// File: lib/features/blood/pages/blood_home_page.dart
+/// Purpose: Main landing page for the Blood Bank feature, offering quick access to requests, donors, and history.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -8,6 +12,7 @@ import 'donor_registration_page.dart';
 import 'my_blood_requests_page.dart';
 import '../../../l10n/app_localizations.dart';
 
+/// Hub for all blood-related actions (Request, Donate, Search, Feed).
 class BloodHomePage extends StatelessWidget {
   const BloodHomePage({super.key});
 
@@ -40,7 +45,6 @@ class BloodHomePage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           children: [
-            // Header Text
             Text(
               AppLocalizations.of(context)?.saveLifeToday ??
                   "Save a Life Today",
@@ -67,7 +71,6 @@ class BloodHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // 🚑 Option 1: Request Blood
             _buildOptionCard(
               context,
               title:
@@ -86,7 +89,6 @@ class BloodHomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // 🤝 Option 2: Become a Donor
             _buildOptionCard(
               context,
               title:
@@ -106,7 +108,6 @@ class BloodHomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // 🔍 Option 3: Find Donors
             _buildOptionCard(
               context,
               title:
@@ -125,7 +126,6 @@ class BloodHomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // 🆘 Option 4: Live Requests
             _buildOptionCard(
               context,
               title:
@@ -146,7 +146,6 @@ class BloodHomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // 🔥 Option 5: My Requests
             _buildOptionCard(
               context,
               title:

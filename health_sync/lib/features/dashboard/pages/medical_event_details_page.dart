@@ -25,7 +25,7 @@ class MedicalEventDetailsPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              // TODO: Implement share logic
+              
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -47,12 +47,12 @@ class MedicalEventDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Image / File Preview
+            
             _buildAttachmentPreview(context, isDark),
 
             const SizedBox(height: 24),
 
-            // 2. Title & Header Info
+            
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -123,7 +123,7 @@ class MedicalEventDetailsPage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // 3. AI Summary Section
+            
             if (event.summary != null) ...[
               Padding(
                 padding: const EdgeInsets.only(left: 4, bottom: 12),
@@ -263,7 +263,7 @@ class MedicalEventDetailsPage extends StatelessWidget {
       );
     }
 
-    // Showing first attachment
+    
     return GestureDetector(
       onTap: () {
         _showFullScreenImage(context, event.attachmentUrls.first);

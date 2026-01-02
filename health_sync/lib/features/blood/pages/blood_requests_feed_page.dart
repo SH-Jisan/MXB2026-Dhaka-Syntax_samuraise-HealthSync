@@ -1,3 +1,7 @@
+/// File: lib/features/blood/pages/blood_requests_feed_page.dart
+/// Purpose: Displays a real-time feed of blood requests that users can accept.
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../providers/blood_feed_provider.dart';
 import 'blood_request_page.dart';
 
+/// Feed of active blood requests.
 class BloodRequestsFeedPage extends ConsumerStatefulWidget {
   const BloodRequestsFeedPage({super.key});
 
@@ -32,7 +37,7 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text("Thank You, Hero! 🦸‍♂️"),
+            title: const Text("Thank You, Hero! "),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -206,7 +211,6 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  // 🔥 কার্ড কালার থিম অনুযায়ী সেট করা
                   color: isCritical
                       ? (isDark
                             ? Colors.red.shade900.withValues(alpha: 0.2)
@@ -238,7 +242,6 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header: Blood Group & Urgency
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -344,7 +347,6 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
 
                       const SizedBox(height: 16),
 
-                      // Hospital Name
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -377,7 +379,6 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            // নোট সেকশনের ব্যাকগ্রাউন্ড ডার্ক মোডে মানানসই করা হলো
                             color: isCritical
                                 ? (isDark ? Colors.black26 : Colors.white)
                                 : (isDark
@@ -414,7 +415,6 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                       ],
                       const SizedBox(height: 12),
 
-                      // Requester Info
                       Row(
                         children: [
                           CircleAvatar(
@@ -447,11 +447,9 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                         child: Divider(height: 1),
                       ),
 
-                      // Actions & Progress
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Progress Bar
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -493,7 +491,6 @@ class _BloodRequestsFeedPageState extends ConsumerState<BloodRequestsFeedPage> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Donate Button
                           ElevatedButton.icon(
                             onPressed: () => _acceptRequest(
                               req['id'],

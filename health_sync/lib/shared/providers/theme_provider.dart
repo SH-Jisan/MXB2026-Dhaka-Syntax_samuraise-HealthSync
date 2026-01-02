@@ -1,8 +1,12 @@
+/// File: lib/shared/providers/theme_provider.dart
+/// Purpose: Manages the application's theme mode (Light/Dark).
+/// Author: HealthSync Team
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 🌗 Theme Mode Provider
+/// Provider containing the current [ThemeMode].
 final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
   return ThemeNotifier();
 });
@@ -12,14 +16,12 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
     _loadTheme();
   }
 
-  // লোড করা সেভ করা থিম
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
     final isDark = prefs.getBool('isDarkMode') ?? false;
     state = isDark ? ThemeMode.dark : ThemeMode.light;
   }
 
-  // থিম টগল করা
   Future<void> toggleTheme() async {
     final prefs = await SharedPreferences.getInstance();
     if (state == ThemeMode.light) {

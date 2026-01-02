@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart'; // Google Maps এর জন্য
+import 'package:url_launcher/url_launcher.dart'; 
 import '../../../core/constants/app_colors.dart';
 import '../providers/doctor_provider.dart';
 
 class DoctorListPage extends ConsumerStatefulWidget {
   final String specialty;
-  final List<dynamic> internetDoctors; // 🔥 ইন্টারনেট রেজাল্ট রিসিভ করবে
+  final List<dynamic> internetDoctors; 
 
   const DoctorListPage({
     super.key,
@@ -30,7 +30,7 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
 
   @override
   Widget build(BuildContext context) {
-    // লোকাল ডাক্তার খোঁজার প্রোভাইডার
+    
     final appDoctorsAsync = ref.watch(
       doctorsBySpecialtyProvider(widget.specialty),
     );
@@ -53,7 +53,7 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          // 🏠 TAB 1: Local App Doctors
+          
           appDoctorsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) => Center(child: Text("Error: $err")),
@@ -101,7 +101,7 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
             },
           ),
 
-          // 🌐 TAB 2: Internet Search Results
+          
           widget.internetDoctors.isEmpty
               ? _buildEmptyState("No results found on Google.")
               : ListView.builder(
@@ -166,7 +166,7 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
                         ),
                         trailing: const Icon(Icons.map, color: Colors.green),
                         onTap: () async {
-                          // Google Maps এ ওপেন হবে
+                          
                           final query = Uri.encodeComponent(
                             "${doc['title']} ${doc['address'] ?? ""}",
                           );

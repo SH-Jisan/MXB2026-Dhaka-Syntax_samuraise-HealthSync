@@ -27,12 +27,11 @@ class _DoctorPatientProfilePageState
     _fetchAvailableTests();
   }
 
-  // ১. টেস্ট লিস্ট লোড (Fix: 'name' কলাম ব্যবহার করা হচ্ছে)
   Future<void> _fetchAvailableTests() async {
     try {
       final response = await Supabase.instance.client
           .from('available_tests')
-          .select('name') // 🔥 FIX: test_name -> name
+          .select('name')
           .order('name');
 
       if (mounted) {
@@ -47,7 +46,6 @@ class _DoctorPatientProfilePageState
     }
   }
 
-  // ২. টেস্ট সিলেকশন ডায়ালগ
   void _showTestSelectionDialog(StateSetter updateModalState) {
     showDialog(
       context: context,
@@ -132,7 +130,6 @@ class _DoctorPatientProfilePageState
     );
   }
 
-  // ৩. টেস্ট অ্যাসাইন ডায়ালগ
   void _showAssignTestDialog(bool isDark) {
     final notesCtrl = TextEditingController();
     setState(() => _selectedTests.clear());
@@ -185,8 +182,8 @@ class _DoctorPatientProfilePageState
                         (test) => Chip(
                           label: Text(test),
                           backgroundColor: isDark
-                              ? AppColors.darkPrimary.withOpacity(0.2)
-                              : AppColors.primary.withOpacity(0.1),
+                              ? AppColors.darkPrimary.withValues(alpha: 0.2)
+                              : AppColors.primary.withValues(alpha: 0.1),
                           labelStyle: TextStyle(
                             color: isDark ? Colors.white : Colors.black,
                           ),
@@ -285,7 +282,6 @@ class _DoctorPatientProfilePageState
                               ),
                             );
 
-                            // 🔥 টাইমলাইন রিফ্রেশ
                             ref.invalidate(
                               timelineProvider(widget.patient['id']),
                             );
@@ -340,13 +336,12 @@ class _DoctorPatientProfilePageState
 
       body: Column(
         children: [
-          // Patient Header
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: isDark
                   ? AppColors.darkSurface
-                  : AppColors.primary.withOpacity(0.1),
+                  : AppColors.primary.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
@@ -354,7 +349,7 @@ class _DoctorPatientProfilePageState
               boxShadow: isDark
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -416,7 +411,6 @@ class _DoctorPatientProfilePageState
 
           const SizedBox(height: 10),
 
-          // Timeline Label
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
             child: Row(
@@ -438,7 +432,6 @@ class _DoctorPatientProfilePageState
             ),
           ),
 
-          // 🔥 Timeline View (এটি Red Screen ফিক্স করবে)
           Expanded(
             child: MedicalTimelineView(
               patientId: widget.patient['id'],

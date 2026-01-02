@@ -1,20 +1,21 @@
-import 'package:flutter/foundation.dart'; // For debugPrint
+/// File: lib/shared/providers/user_profile_provider.dart
+/// Purpose: Fetches and caches the current user's profile data.
+/// Author: HealthSync Team
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// ১. Auth State শোনার জন্য Stream Provider
+/// Stream of auth state changes from Supabase.
 final authStateChangesProvider = StreamProvider<AuthState>((ref) {
   return Supabase.instance.client.auth.onAuthStateChange;
 });
 
-// 🔥 OPTIMIZED: Reactive but pulls directly from current session for speed/reliability
 final currentUserIdProvider = Provider<String?>((ref) {
-  // We watch the stream to trigger rebuilds, but return the current user ID
   ref.watch(authStateChangesProvider);
   return Supabase.instance.client.auth.currentUser?.id;
 });
 
-// ২. প্রোফাইল ডাটা প্রোভাইডার (এখন Reactive এবং Optimized)
 final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((
   ref,
 ) async {

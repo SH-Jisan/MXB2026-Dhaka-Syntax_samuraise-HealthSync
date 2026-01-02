@@ -18,7 +18,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
   bool _isListening = false;
   final _textController = TextEditingController();
 
-  // রেজাল্ট রাখার ভেরিয়েবল
+  
   Map<String, dynamic>? _aiResult;
   bool _isLoading = false;
 
@@ -33,7 +33,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
     if (mounted) setState(() {});
   }
 
-  // 🎤 ভয়েস লিসেনিং শুরু/বন্ধ
+  
   void _listen() async {
     if (!_isListening) {
       bool available = await _stt.initialize();
@@ -53,7 +53,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
     }
   }
 
-  // 🧠 সার্ভারে পাঠানো
+  
   Future<void> _consultAI() async {
     if (_textController.text.isEmpty) return;
 
@@ -70,7 +70,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
 
       if (response.status == 200) {
         setState(() {
-          _aiResult = response.data; // JSON ডাটা
+          _aiResult = response.data; 
         });
       } else {
         throw Exception("Failed to analyze");
@@ -101,12 +101,12 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
               "AI Health Assistant",
         ),
       ),
-      // 🔥 ফিক্স: SingleChildScrollView যোগ করা হয়েছে overflow এড়াতে
+      
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // 1. ইনপুট সেকশন
+            
             TextField(
               controller: _textController,
               maxLines: 3,
@@ -148,7 +148,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
 
             const SizedBox(height: 24),
 
-            // 2. রেজাল্ট সেকশন (কার্ড)
+            
             if (_aiResult != null) ...[_buildResultCard()],
           ],
         ),
@@ -162,7 +162,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
     final urgency = data['urgency'] ?? 'LOW';
     final condition = data['condition'] ?? 'Unknown';
 
-    // 🔥 নতুন: কারণগুলো লিস্ট আকারে নেওয়া
+    
     final causes = List<String>.from(data['potential_causes'] ?? []);
 
     Color color = urgency == 'HIGH'
@@ -178,7 +178,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            
             Row(
               children: [
                 Icon(Icons.medical_services, color: AppColors.primary),
@@ -212,7 +212,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
             ),
             const Divider(),
 
-            // 1. Condition
+            
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context)?.possibleCondition ??
@@ -224,7 +224,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
-            // 🔥 2. Potential Causes (NEW SECTION)
+            
             if (causes.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
@@ -233,7 +233,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
                 style: const TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 4),
-              // লিস্ট আইটেমগুলো লুপ করে দেখানো
+              
               ...causes.map(
                 (cause) => Padding(
                   padding: const EdgeInsets.only(left: 8.0, bottom: 2.0),
@@ -259,7 +259,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
               ),
             ],
 
-            // 3. Specialist
+            
             const SizedBox(height: 12),
             Text(
               AppLocalizations.of(context)?.recommendedSpecialist ??
@@ -275,7 +275,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
               ),
             ),
 
-            // 4. Advice
+            
             const SizedBox(height: 12),
             Text(
               AppLocalizations.of(context)?.immediateAdvice ??
@@ -289,7 +289,7 @@ class _AiDoctorPageState extends ConsumerState<AiDoctorPage> {
 
             const SizedBox(height: 20),
 
-            // 5. Button
+            
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
