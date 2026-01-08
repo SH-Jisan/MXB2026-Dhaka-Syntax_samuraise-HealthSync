@@ -1,6 +1,7 @@
 /// File: lib/features/profile/pages/patient_history_page.dart
 /// Purpose: Shows patient's medical history (Appointments, Prescriptions, Diagnostics).
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

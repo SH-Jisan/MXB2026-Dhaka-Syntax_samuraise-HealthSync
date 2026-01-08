@@ -1,6 +1,7 @@
 /// File: lib/core/router/app_router.dart
 /// Purpose: Defines the application's navigation routes using GoRouter.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

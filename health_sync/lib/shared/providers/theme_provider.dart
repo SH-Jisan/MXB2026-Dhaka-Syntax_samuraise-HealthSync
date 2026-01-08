@@ -1,6 +1,7 @@
 /// File: lib/shared/providers/theme_provider.dart
 /// Purpose: Manages the application's theme mode (Light/Dark).
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

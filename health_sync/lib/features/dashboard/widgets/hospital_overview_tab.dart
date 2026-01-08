@@ -1,6 +1,7 @@
 /// File: lib/features/dashboard/widgets/hospital_overview_tab.dart
 /// Purpose: Overview tab for Hospital dashboard (Stats, Quick Actions).
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

@@ -1,6 +1,7 @@
 /// File: lib/features/blood/pages/blood_home_page.dart
 /// Purpose: Main landing page for the Blood Bank feature, offering quick access to requests, donors, and history.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

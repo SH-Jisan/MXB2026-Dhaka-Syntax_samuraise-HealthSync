@@ -1,6 +1,7 @@
 /// File: lib/features/auth/pages/signup_page.dart
 /// Purpose: Allows new users to register an account with a specific role.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

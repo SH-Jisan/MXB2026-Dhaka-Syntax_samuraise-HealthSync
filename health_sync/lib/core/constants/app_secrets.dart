@@ -1,6 +1,7 @@
 /// File: lib/core/constants/app_secrets.dart
 /// Purpose: Stores API keys and configuration secrets.
 /// Author: HealthSync Team
+library;
 
 /// Holds sensitive configuration data.
 class AppSecrets {

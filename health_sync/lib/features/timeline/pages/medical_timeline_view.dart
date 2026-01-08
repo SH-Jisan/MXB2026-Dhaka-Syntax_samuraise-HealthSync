@@ -1,6 +1,7 @@
 /// File: lib/features/timeline/pages/medical_timeline_view.dart
 /// Purpose: Displays the patient's medical timeline (Events, Reports).
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

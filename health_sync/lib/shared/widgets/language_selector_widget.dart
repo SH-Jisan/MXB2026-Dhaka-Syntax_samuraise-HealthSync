@@ -1,6 +1,7 @@
 /// File: lib/shared/widgets/language_selector_widget.dart
 /// Purpose: Widget/Dropdown to switch application language (English/Bangla).
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,6 +1,7 @@
 /// File: lib/features/blood/pages/donor_registration_page.dart
 /// Purpose: Registration form for users to become blood donors.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

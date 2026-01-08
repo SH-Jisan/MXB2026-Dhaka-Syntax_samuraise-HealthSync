@@ -1,6 +1,7 @@
 /// File: lib/features/timeline/widgets/empty_timeline_view.dart
 /// Purpose: Placeholder widget displayed when no medical history exists.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

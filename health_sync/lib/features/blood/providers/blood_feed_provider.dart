@@ -1,6 +1,7 @@
 /// File: lib/features/blood/providers/blood_feed_provider.dart
 /// Purpose: Fetches live blood requests for the feed.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

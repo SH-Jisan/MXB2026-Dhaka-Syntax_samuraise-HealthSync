@@ -1,6 +1,7 @@
 /// File: lib/features/dashboard/widgets/hospital_doctors_tab.dart
 /// Purpose: Tab to manage doctors assigned to a hospital.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

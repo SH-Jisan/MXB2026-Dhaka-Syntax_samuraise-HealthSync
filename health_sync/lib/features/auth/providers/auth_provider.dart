@@ -1,6 +1,7 @@
 /// File: lib/features/auth/providers/auth_provider.dart
 /// Purpose: Manages authentication state and business logic (Login, Signup, Logout).
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

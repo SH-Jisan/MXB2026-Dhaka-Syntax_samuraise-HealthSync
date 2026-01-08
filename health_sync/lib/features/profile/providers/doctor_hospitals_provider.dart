@@ -1,6 +1,7 @@
 /// File: lib/features/profile/providers/doctor_hospitals_provider.dart
 /// Purpose: Fetches the list of hospitals a doctor is associated with.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

@@ -1,6 +1,7 @@
 /// File: lib/core/constants/app_colors.dart
 /// Purpose: Defines the color palette used throughout the application.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 

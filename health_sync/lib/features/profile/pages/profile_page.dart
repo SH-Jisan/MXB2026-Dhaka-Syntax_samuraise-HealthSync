@@ -1,6 +1,7 @@
 /// File: lib/features/profile/pages/profile_page.dart
 /// Purpose: Displays user profile, stats, and settings.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

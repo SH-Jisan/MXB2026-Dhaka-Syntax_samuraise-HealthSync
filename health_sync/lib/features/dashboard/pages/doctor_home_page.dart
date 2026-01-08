@@ -1,6 +1,7 @@
 /// File: lib/features/dashboard/pages/doctor_home_page.dart
 /// Purpose: Main dashboard for Doctor users, showing appointments and patient overview.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 

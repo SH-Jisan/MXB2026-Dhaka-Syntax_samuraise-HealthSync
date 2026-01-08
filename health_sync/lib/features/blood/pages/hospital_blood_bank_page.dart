@@ -1,6 +1,7 @@
 /// File: lib/features/blood/pages/hospital_blood_bank_page.dart
 /// Purpose: Manages hospital's blood inventory stock.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

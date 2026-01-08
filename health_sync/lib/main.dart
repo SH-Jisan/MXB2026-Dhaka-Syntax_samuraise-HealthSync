@@ -1,6 +1,7 @@
 /// File: main.dart
 /// Purpose: Entry point of the application. Initializes Firebase, Supabase, and sets up global providers.
 /// Author: HealthSync Team
+library;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

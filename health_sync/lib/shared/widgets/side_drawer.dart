@@ -1,6 +1,7 @@
 /// File: lib/shared/widgets/side_drawer.dart
 /// Purpose: Navigation drawer for the application.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

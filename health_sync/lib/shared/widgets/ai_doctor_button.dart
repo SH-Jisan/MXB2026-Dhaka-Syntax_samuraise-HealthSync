@@ -1,6 +1,7 @@
 /// File: lib/shared/widgets/ai_doctor_button.dart
 /// Purpose: Floating button or icon to access the AI Health Assistant.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import '../../features/ai_doctor/pages/ai_doctor_page.dart';

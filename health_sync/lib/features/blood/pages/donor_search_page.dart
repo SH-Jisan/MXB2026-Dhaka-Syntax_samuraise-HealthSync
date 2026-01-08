@@ -1,6 +1,7 @@
 /// File: lib/features/blood/pages/donor_search_page.dart
 /// Purpose: Interface for searching blood donors by group and location.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,6 +1,7 @@
 /// File: lib/core/router/go_router_refresh_stream.dart
 /// Purpose: Converts a Stream into a Listenable for GoRouter refresh logic.
 /// Author: HealthSync Team
+library;
 
 import 'dart:async';
 import 'package:flutter/material.dart';

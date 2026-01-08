@@ -1,6 +1,7 @@
 /// File: lib/shared/providers/user_profile_provider.dart
 /// Purpose: Fetches and caches the current user's profile data.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,6 +1,7 @@
 /// File: lib/features/timeline/widgets/medical_timeline_tile.dart
 /// Purpose: Widget to display a single medical event in the timeline.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

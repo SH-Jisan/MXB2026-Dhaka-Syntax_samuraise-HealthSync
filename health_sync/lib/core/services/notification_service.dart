@@ -1,6 +1,7 @@
 /// File: lib/core/services/notification_service.dart
 /// Purpose: Manages Firebase Cloud Messaging (FCM) and notification permissions.
 /// Author: HealthSync Team
+library;
 
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,6 +1,7 @@
 /// File: lib/features/dashboard/pages/citizen_home_page.dart
 /// Purpose: Main dashboard for Citizen users, showing timeline, stats, and quick actions.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 

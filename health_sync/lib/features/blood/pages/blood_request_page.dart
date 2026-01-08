@@ -1,6 +1,7 @@
 /// File: lib/features/blood/pages/blood_request_page.dart
 /// Purpose: Form to post a new blood request, with AI autofill capabilities.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

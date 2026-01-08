@@ -1,6 +1,7 @@
 /// File: lib/features/blood/providers/donor_provider.dart
 /// Purpose: Logic for searching and filtering blood donors.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

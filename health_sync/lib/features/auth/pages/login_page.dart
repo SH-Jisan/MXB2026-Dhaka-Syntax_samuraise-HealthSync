@@ -1,6 +1,7 @@
 /// File: lib/features/auth/pages/login_page.dart
 /// Purpose: Handles user authentication via Email/Password.
 /// Author: HealthSync Team
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
