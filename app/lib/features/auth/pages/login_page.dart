@@ -9,8 +9,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 
 import '../providers/auth_provider.dart';
-import '../../../shared/widgets/language_selector_widget.dart';
 import '../../../l10n/app_localizations.dart';
+
+import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../widgets/shared_auth_layout.dart';
 
 /// Screen for existing users to sign in.
 class LoginPage extends ConsumerStatefulWidget {
@@ -29,135 +32,166 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final isLoading = ref.watch(authStateProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: const [
-          LanguageSelectorWidget(isDropdown: true),
-          SizedBox(width: 16),
-        ],
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Image.asset(
-                  'assets/logo/logo.png',
-                  width: 100,
-                  height: 100,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context)?.loginTitle ?? "Welcome Back!",
-                textAlign: TextAlign.center,
+    return SharedAuthLayout(
+      title: l10n?.loginTitle ?? "Welcome Back!",
+      subtitle: l10n?.loginSubtitle ?? "Sign in to access your health records",
+      formContent: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Email Input
+          _buildInputLabel("Email Address"),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: _inputDecoration(
+              hint: "Enter your email",
+              icon: PhosphorIconsRegular.envelope,
+              isDark: isDark,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Password Input
+          _buildInputLabel("Password"),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: true,
+            decoration: _inputDecoration(
+              hint: "Enter your password",
+              icon: PhosphorIconsRegular.lock,
+              isDark: isDark,
+            ),
+          ),
+
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {},
+              child: Text(
+                "Forgot Password?",
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color:
-                      theme.textTheme.displayMedium?.color ??
-                      (isDark ? Colors.white : AppColors.textPrimary),
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.of(context)?.loginSubtitle ??
-                    "Sign in to continue",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color:
-                      theme.textTheme.bodyMedium?.color ??
-                      (isDark ? Colors.grey.shade400 : AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(height: 40),
+            ),
+          ),
+          const SizedBox(height: 24),
 
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText:
-                      AppLocalizations.of(context)?.emailLabel ??
-                      "Email Address",
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText:
-                      AppLocalizations.of(context)?.passwordLabel ?? "Password",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                ),
-              ),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text("Forgot Password?"),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              ElevatedButton(
-                onPressed: isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isDark
-                      ? AppColors.darkPrimary
-                      : AppColors.primary,
-                  foregroundColor: isDark ? Colors.black : Colors.white,
-                ),
-                child: isLoading
-                    ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: isDark ? Colors.black : Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(
-                        AppLocalizations.of(context)?.loginButton ?? "LOGIN",
-                      ),
-              ),
-
-              const SizedBox(height: 24),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)?.dontHaveAccount ??
-                        "Don't have an account?",
-                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          // Login Button
+          ElevatedButton(
+            onPressed: isLoading ? null : _handleLogin,
+            style:
+                ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  TextButton(
-                    onPressed: () => context.go('/signup'),
-                    child: Text(
-                      AppLocalizations.of(context)?.signupLink ?? "Sign Up",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? AppColors.darkPrimary
-                            : AppColors.primary,
+                ).copyWith(
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.disabled))
+                      return Colors.grey;
+                    return isDark ? AppColors.darkPrimary : AppColors.primary;
+                  }),
+                ),
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
+              // Hack to apply gradient if needed, but solid color is fine for now as per plan
+              // Plan said Gradient background, let's stick to simple primary for consistency or use decorating container
+              child: isLoading
+                  ? SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : Text(
+                      l10n?.loginButton ?? "LOGIN",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 1,
                       ),
                     ),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Footer
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n?.dontHaveAccount ?? "Don't have an account?",
+                style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+              ),
+              TextButton(
+                onPressed: () => context.go('/signup'),
+                child: Text(
+                  l10n?.signupLink ?? "Sign Up",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.darkPrimary : AppColors.primary,
                   ),
-                ],
+                ),
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textSecondary,
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+    required bool isDark,
+  }) {
+    return InputDecoration(
+      filled: true,
+      fillColor: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF8FAFC),
+      hintText: hint,
+      prefixIcon: Icon(icon, color: AppColors.textSecondary),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.darkPrimary : AppColors.primary,
+          width: 2,
         ),
       ),
     );

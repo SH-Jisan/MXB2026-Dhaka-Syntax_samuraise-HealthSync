@@ -1,19 +1,24 @@
 /// File: lib/shared/widgets/side_drawer.dart
-/// Purpose: Navigation drawer for the application.
+/// Purpose: Navigation drawer for the application, matching web sidebar design.
 /// Author: HealthSync Team
 library;
 
+import 'dart:ui'; // For BackdropFilter
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../../core/constants/app_colors.dart';
-import '../../features/blood/pages/blood_home_page.dart';
-import 'language_selector_widget.dart';
 import '../../features/about/about_app_page.dart';
-import '../providers/theme_provider.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../../features/blood/pages/blood_home_page.dart';
+import '../providers/theme_provider.dart';
+import 'language_selector_widget.dart';
 
 /// Global side drawer for navigation and settings.
 class SideDrawer extends ConsumerWidget {
@@ -21,233 +26,415 @@ class SideDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final user = Supabase.instance.client.auth.currentUser;
     final email = user?.email ?? "Guest";
     final name = user?.userMetadata?['full_name'] ?? "User";
+    final role = user?.userMetadata?['role'] ?? "CITIZEN";
     final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : "U";
 
-    final themeMode = ref.watch(themeProvider);
-    final isDark = themeMode == ThemeMode.dark;
+    // Menu Item Definition
+    // Using a list of maps to easily render items. In a real app, strict typing or classes are better.
+    final List<Map<String, dynamic>> menuItems = [
+      {
+        'key': 'dashboard',
+        'icon': PhosphorIconsRegular.squaresFour,
+        'label': AppLocalizations.of(context)?.dashboard ?? "Dashboard",
+        'onTap': () => context
+            .pop(), // Closes drawer, assumes we are on dashboard or shell handles nav
+      },
+      if (role == 'CITIZEN' || role == 'DOCTOR')
+        {
+          'key': 'prescriptions',
+          'icon': PhosphorIconsRegular.prescription,
+          'label': "Prescriptions", // Missing l10n key for now
+          'onTap': () {
+            context.pop();
+            // TODO: Navigate to Prescriptions Page when created
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Prescriptions feature coming soon!"),
+              ),
+            );
+          },
+        },
+      {
+        'key': 'blood',
+        'icon': PhosphorIconsFill.drop, // Fill for color emphasis
+        'iconColor': Colors.redAccent,
+        'label': AppLocalizations.of(context)?.bloodBank ?? "Blood Bank",
+        'onTap': () {
+          context.pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BloodHomePage()),
+          );
+        },
+      },
+      {
+        'key': 'doctors',
+        'icon': PhosphorIconsRegular.firstAid,
+        'label': "Doctors", // Missing l10n
+        'onTap': () {
+          context.pop();
+          // TODO: Navigate to Doctors Page
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Doctors feature coming soon!")),
+          );
+        },
+      },
+      {
+        'key': 'profile',
+        'icon': PhosphorIconsRegular.user,
+        'label': AppLocalizations.of(context)?.myProfile ?? "Profile",
+        'onTap': () {
+          context.pop();
+          // In dashboard this is usually an index change, here we just close for now or nav
+          // For now, assuming profile is part of home tabs, so closing drawer is fine if we were external
+          // But if we want to "Go to Profile", we might need to change the dashboard index.
+          // However, to keep it simple as per request:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Access Profile from Bottom Bar")),
+          );
+        },
+      },
+      {
+        'key': 'about',
+        'icon': PhosphorIconsRegular.info,
+        'iconColor': Colors.blueAccent,
+        'label': AppLocalizations.of(context)?.aboutApp ?? "About App",
+        'onTap': () {
+          context.pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AboutAppPage()),
+          );
+        },
+      },
+    ];
 
     return Drawer(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      surfaceTintColor: Colors.transparent,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(
-              top: 50,
-              bottom: 24,
-              left: 24,
-              right: 24,
-            ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.secondary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      backgroundColor: Colors.transparent, // Transparent for blur effect
+      elevation: 0,
+      width:
+          MediaQuery.of(context).size.width *
+          0.85, // Slightly wider like web mobile
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(0),
+          bottomRight: Radius.circular(0),
+        ), // Flutter drawer is usually rectangular
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            color: isDark
+                ? const Color(0xFF1E293B).withValues(alpha: 0.95)
+                : Colors.white.withValues(alpha: 0.95),
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // --- Header ---
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "WELCOME BACK", // Localize me
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.white54
+                                : Colors.grey.shade500,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF00796B),
+                                Color(0xFF004D40),
+                              ], // Primary -> Secondary
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(
+                                  0xFF00796B,
+                                ).withValues(alpha: 0.3),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  firstLetter,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      name,
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      email,
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                        fontSize: 12,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // --- Navigation ---
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        ...menuItems.map((item) {
+                          // Define active logic (simplified)
+                          bool isActive =
+                              item['key'] ==
+                              'dashboard'; // Default active for now as we don't track route perfectly here
+
+                          return _buildNavItem(
+                            context,
+                            icon: item['icon'],
+                            label: item['label'],
+                            onTap: item['onTap'],
+                            isActive: isActive,
+                            iconColor: item['iconColor'],
+                            isDark: isDark,
+                          );
+                        }),
+
+                        // Notifications Link
+                        _buildNavItem(
+                          context,
+                          icon: PhosphorIconsBold.bell,
+                          label: "Notifications", // Localize me
+                          onTap: () {
+                            context.pop();
+                            // TODO Nav to notifications
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Notifications coming soon!"),
+                              ),
+                            );
+                          },
+                          isDark: isDark,
+                        ),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Divider(height: 1),
+                        ),
+
+                        // Settings Group (Theme + Language)
+                        Row(
+                          children: [
+                            // Theme Toggle
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => ref
+                                    .read(themeProvider.notifier)
+                                    .toggleTheme(),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white12
+                                          : Colors.black12,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    isDark
+                                        ? PhosphorIconsFill.moon
+                                        : PhosphorIconsRegular.sun,
+                                    color: isDark
+                                        ? Colors.amber
+                                        : Colors.grey.shade700,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // Language
+                            Expanded(
+                              flex: 2,
+                              child: LanguageSelectorWidget(
+                                isDropdown: true,
+                                contentColor: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF1F2937),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // --- Footer ---
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: InkWell(
+                      onTap: () async {
+                        await ref.read(authStateProvider.notifier).logout();
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              PhosphorIconsRegular.signOut,
+                              color: AppColors.error,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              AppLocalizations.of(context)?.logout ?? "Logout",
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    firstLetter,
-                    style: GoogleFonts.poppins(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        email,
-                        style: GoogleFonts.poppins(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
-
-          const SizedBox(height: 16),
-
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.dashboard_outlined,
-                  text: AppLocalizations.of(context)?.dashboard ?? "Dashboard",
-                  onTap: () => Navigator.pop(context),
-                  isActive: true,
-                ),
-
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.bloodtype_outlined,
-                  text: AppLocalizations.of(context)?.bloodBank ?? "Blood Bank",
-                  subtitle:
-                      AppLocalizations.of(context)?.bloodBankSubtitle ??
-                      "Find donors & Request blood",
-                  iconColor: Colors.red.shade400,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const BloodHomePage()),
-                    );
-                  },
-                ),
-
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.info_outline,
-                  text: AppLocalizations.of(context)?.aboutApp ?? "About App",
-                  iconColor: Colors.blue.shade400,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AboutAppPage()),
-                    );
-                  },
-                ),
-
-                const Divider(),
-
-                const Divider(),
-
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: LanguageSelectorWidget(isDropdown: false),
-                ),
-
-                Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: SwitchListTile(
-                    title: Text(
-                      AppLocalizations.of(context)?.darkMode ?? "Dark Mode",
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                    secondary: Icon(
-                      isDark ? Icons.dark_mode : Icons.light_mode,
-                      color: isDark ? Colors.amber : Colors.grey.shade600,
-                    ),
-                    value: isDark,
-                    onChanged: (val) {
-                      ref.read(themeProvider.notifier).toggleTheme();
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 1),
-
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _buildDrawerItem(
-              context,
-              icon: Icons.logout,
-              text: AppLocalizations.of(context)?.logout ?? "Logout",
-              iconColor: AppColors.error,
-              textColor: AppColors.error,
-              onTap: () async {
-                await ref.read(authStateProvider.notifier).logout();
-              },
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildDrawerItem(
+  Widget _buildNavItem(
     BuildContext context, {
     required IconData icon,
-    required String text,
-    String? subtitle,
+    required String label,
     required VoidCallback onTap,
-    Color? iconColor,
-    Color? textColor,
     bool isActive = false,
+    Color? iconColor,
+    required bool isDark,
   }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final color = isActive
-        ? AppColors.primary
-        : (iconColor ?? (isDark ? Colors.white70 : Colors.grey.shade600));
-
-    final textStyle = GoogleFonts.poppins(
-      color: isActive
-          ? AppColors.primary
-          : (textColor ?? theme.textTheme.bodyMedium?.color),
-      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-      fontSize: 15,
-    );
+    final activeColor = AppColors.primary;
+    // Fix: Make inactive color darker in light mode for better contrast against white background
+    final inactiveColor = isDark ? Colors.white70 : const Color(0xFF1F2937);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.primary.withValues(alpha: 0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: color),
-        title: Text(text, style: textStyle),
-        subtitle: subtitle != null
-            ? Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark ? Colors.white54 : Colors.grey.shade500,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: isActive
+                  ? (isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : AppColors.primary.withValues(
+                            alpha: 0.1,
+                          )) // Increased alpha for visibility
+                  : Colors.transparent,
+            ),
+            child: Row(
+              children: [
+                // Icon
+                Icon(
+                  icon,
+                  color: isActive ? activeColor : (iconColor ?? inactiveColor),
+                  size: 24,
                 ),
-              )
-            : null,
-        onTap: onTap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                const SizedBox(width: 14),
+                // Label
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                      color: isActive ? activeColor : inactiveColor,
+                    ),
+                  ),
+                ),
+                // Active Indicator (Pill style on Right)
+                if (isActive)
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: activeColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

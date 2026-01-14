@@ -9,6 +9,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/auth_provider.dart';
 
+import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../widgets/shared_auth_layout.dart';
+
 /// Registration screen supporting multiple user roles (Citizen, Doctor, Hospital, Diagnostic).
 class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
@@ -35,151 +39,211 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text("Create Account")),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "Get Started",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        theme.textTheme.displayMedium?.color ??
-                        (isDark ? Colors.white : AppColors.textPrimary),
+    return SharedAuthLayout(
+      title: "Create Account",
+      subtitle: "Join HealthSync today",
+      formContent: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Account Type Dropdown
+            _buildInputLabel("Account Type"),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: _selectedRole,
+              decoration: _inputDecoration(
+                hint: "Select Account Type",
+                icon: PhosphorIconsRegular.users,
+                isDark: isDark,
+              ),
+              dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
+              icon: Icon(
+                PhosphorIconsRegular.caretDown,
+                color: AppColors.textSecondary,
+              ),
+              items: _roles.map((role) {
+                return DropdownMenuItem(
+                  value: role,
+                  child: Text(
+                    role == 'CITIZEN' ? 'Normal User (Citizen)' : role,
+                    style: GoogleFonts.inter(
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Create a new account to access HealthSync",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color:
-                        theme.textTheme.bodyMedium?.color ??
-                        (isDark
-                            ? Colors.grey.shade400
-                            : AppColors.textSecondary),
-                  ),
-                ),
-                const SizedBox(height: 32),
+                );
+              }).toList(),
+              onChanged: (val) => setState(() => _selectedRole = val!),
+            ),
+            const SizedBox(height: 20),
 
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedRole,
-                  decoration: _inputDecoration(
-                    "Account Type",
-                    Icons.category_outlined,
-                  ),
-                  dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
-                  items: _roles.map((role) {
-                    return DropdownMenuItem(
-                      value: role,
-                      child: Text(
-                        role == 'CITIZEN' ? 'Normal User (Citizen)' : role,
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedRole = val!),
-                ),
-                const SizedBox(height: 16),
+            // Name Input
+            _buildInputLabel("Full Name / Hospital Name"),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _nameController,
+              decoration: _inputDecoration(
+                hint: "Enter full name",
+                icon: PhosphorIconsRegular.user,
+                isDark: isDark,
+              ),
+              validator: (v) => v!.isEmpty ? "Name is required" : null,
+            ),
+            const SizedBox(height: 20),
 
-                TextFormField(
-                  controller: _nameController,
-                  decoration: _inputDecoration(
-                    "Full Name / Hospital Name",
-                    Icons.person_outline,
-                  ),
-                  validator: (v) => v!.isEmpty ? "Name is required" : null,
-                ),
-                const SizedBox(height: 16),
+            // Phone Input
+            _buildInputLabel("Phone Number"),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: _inputDecoration(
+                hint: "Enter phone number",
+                icon: PhosphorIconsRegular.phone,
+                isDark: isDark,
+              ),
+              validator: (v) => v!.isEmpty ? "Phone is required" : null,
+            ),
+            const SizedBox(height: 20),
 
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: _inputDecoration(
-                    "Phone Number",
-                    Icons.phone_outlined,
-                  ),
-                  validator: (v) => v!.isEmpty ? "Phone is required" : null,
-                ),
-                const SizedBox(height: 16),
+            // Email Input
+            _buildInputLabel("Email Address"),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: _inputDecoration(
+                hint: "Enter email address",
+                icon: PhosphorIconsRegular.envelope,
+                isDark: isDark,
+              ),
+              validator: (v) => v!.contains("@") ? null : "Invalid Email",
+            ),
+            const SizedBox(height: 20),
 
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: _inputDecoration(
-                    "Email Address",
-                    Icons.email_outlined,
-                  ),
-                  validator: (v) => v!.contains("@") ? null : "Invalid Email",
-                ),
-                const SizedBox(height: 16),
+            // Password Input
+            _buildInputLabel("Password"),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: _inputDecoration(
+                hint: "Create a password",
+                icon: PhosphorIconsRegular.lock,
+                isDark: isDark,
+              ),
+              validator: (v) => v!.length < 6 ? "Min 6 chars required" : null,
+            ),
+            const SizedBox(height: 32),
 
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: _inputDecoration("Password", Icons.lock_outline),
-                  validator: (v) =>
-                      v!.length < 6 ? "Min 6 chars required" : null,
-                ),
-                const SizedBox(height: 32),
-
-                ElevatedButton(
-                  onPressed: isLoading ? null : _handleSignup,
-                  style: ElevatedButton.styleFrom(
+            // Submit Button
+            ElevatedButton(
+              onPressed: isLoading ? null : _handleSignup,
+              style:
+                  ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: isDark
                         ? AppColors.darkPrimary
                         : AppColors.primary,
-                    foregroundColor: isDark ? Colors.black : Colors.white,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ).copyWith(
+                    backgroundColor: MaterialStateProperty.resolveWith((
+                      states,
+                    ) {
+                      if (states.contains(MaterialState.disabled))
+                        return Colors.grey;
+                      return isDark ? AppColors.darkPrimary : AppColors.primary;
+                    }),
                   ),
-                  child: isLoading
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: isDark ? Colors.black : Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text("CREATE ACCOUNT"),
+              child: isLoading
+                  ? SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      "CREATE ACCOUNT",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Footer
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Already have an account?",
+                  style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                 ),
-
-                const SizedBox(height: 16),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already have an account?",
-                      style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
+                TextButton(
+                  onPressed: () => context.go('/login'),
+                  child: Text(
+                    "Log In",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
                     ),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: Text(
-                        "Log In",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? AppColors.darkPrimary
-                              : AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textSecondary,
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+    required bool isDark,
+  }) {
+    return InputDecoration(
+      filled: true,
+      fillColor: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF8FAFC),
+      hintText: hint,
+      prefixIcon: Icon(icon, color: AppColors.textSecondary),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.darkPrimary : AppColors.primary,
+          width: 2,
         ),
       ),
     );
@@ -219,9 +283,5 @@ class _SignupPageState extends ConsumerState<SignupPage> {
         );
       }
     }
-  }
-
-  InputDecoration _inputDecoration(String label, IconData icon) {
-    return InputDecoration(labelText: label, prefixIcon: Icon(icon));
   }
 }

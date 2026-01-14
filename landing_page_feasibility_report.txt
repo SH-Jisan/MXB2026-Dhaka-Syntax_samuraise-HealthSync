@@ -1,0 +1,57 @@
+# Porting Web Landing Page to Mobile App: Feasibility & Plan
+
+**Verdict:** ✅ **YES**, the landing page can be exactly replicated in the mobile app.
+
+Flutter is extremely capable of handling the animations and layouts present in your React website. Below is the detailed breakdown of how we can achieve this.
+
+## 1. Feature Mapping
+
+| Web Element (React) | Mobile Element (Flutter) | Implementation Strategy |
+| :--- | :--- | :--- |
+| **Floating Logo Animation** | `Stack` + `AnimatedPositioned` / `Hero` widget | Use a `Stack` to overlay the logo. Animate its `top`, `left`, and `size` properties using `AnimatedContainer` or a custom `AnimationController`. |
+| **Hero Section** | `Column` + `RichText` | The text hierarchy (Title, Subtitle, Description) maps directly to a `Column` of `Text` widgets. The "Background Abstract Layer" can be a `CustomPaint` or an `Image` asset. |
+| **Features Grid** | `SliverGrid` or `Wrap` | Use a `GridView` or `Wrap` widget to display the feature cards. |
+| **Icons** (`phosphor-react`) | `phosphor_flutter` package | Direct replacement. The package `phosphor_flutter` provides the exact same icon set. |
+| **Animations** (`framer-motion`) | `flutter_animate` package | `flutter_animate` allows chaining animations (fade, slide, scale) very similar to Framer Motion syntax. |
+
+## 2. Detailed Implementation Plan
+
+### 2.1. Routing Changes
+*   **Current State**: App redirects unauthenticated users to `/login`.
+*   **Required Change**: Update `app_router.dart` to make `/landing` the default public route.
+    *   If `session == null` -> Go to `/landing` (instead of `/login`).
+    *   On Landing Page, "Get Started" button -> Go to `/login` or `/signup`.
+
+### 2.2. Component Breakdown
+We will create a new feature folder: `lib/features/landing`.
+
+*   **`landing_page.dart`**: The main scaffold.
+    *   **Structure**: A `Stack` containing the "Floating Logo" and a `SingleChildScrollView` for the content (Hero, Features, Footer).
+    *   **Logic**: A boolean state `isAnimationComplete` to control when the logo moves and when the content fades in.
+
+*   **`hero_section.dart`**:
+    *   Displays the "One Life, One Record" text.
+    *   "Get Started" button navigates to Login.
+
+*   **`features_section.dart`**:
+    *   A grid of cards (Icon + Title + Desc).
+    *   Use `Staggered Animation` to reveal them one by one as the user scrolls (using `visibility_detector` or simple delay).
+
+### 2.3. Animation Logic (The "Cool" Factor)
+The web versions uses a complex "Center to Top-Left" logo animation.
+*   **Flutter Approach**:
+    1.  Start with a full-screen white container with the Logo in the center.
+    2.  After 1 second, animate the Logo to the top-left (AppBar position).
+    3.  Fade in the rest of the content (`Hero`, `Features`) simultaneously.
+    4.  This creates a seamless "Splash Screen to Landing Page" transition.
+
+## 3. Effort Estimate
+*   **Complexity**: Medium (mainly due to getting the animations to feel "exact").
+*   **Time**: ~3-5 hours to build, style, and polish the animations to match the website exactly.
+
+## 4. Next Steps
+If you want to proceed, I can:
+1.  Add the `phosphor_flutter` and `flutter_animate` dependencies.
+2.  Create the `lib/features/landing` directory.
+3.  Implement the animated Landing Page.
+4.  Update the Router to show this page first.

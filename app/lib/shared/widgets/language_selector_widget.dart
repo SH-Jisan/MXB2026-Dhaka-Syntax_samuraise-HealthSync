@@ -12,29 +12,65 @@ import '../../l10n/app_localizations.dart';
 /// Widget that allows users to change the app's locale.
 class LanguageSelectorWidget extends ConsumerWidget {
   final bool isDropdown;
+  final Color? contentColor;
 
-  const LanguageSelectorWidget({super.key, this.isDropdown = false});
+  const LanguageSelectorWidget({
+    super.key,
+    this.isDropdown = false,
+    this.contentColor,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.watch(languageProvider);
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    // Default to white if not provided (for backward compatibility with AuthLayout),
+    // or arguably should default to theme color.
+    // Given existing usage was hardcoded white, let's default to null and handle logic.
+    final effectiveColor = contentColor ?? Colors.white;
 
     if (isDropdown) {
       return DropdownButtonHideUnderline(
         child: DropdownButton<Locale>(
           value: currentLocale,
-          icon: const Icon(Icons.language, color: Colors.white),
-          dropdownColor: Colors.blueGrey.shade900,
-          style: GoogleFonts.poppins(color: Colors.white),
+          icon: Icon(Icons.language, color: effectiveColor),
+          dropdownColor: theme
+              .cardColor, // Changed from hardcoded blueGrey to theme card color for better adaptive look
+          style: GoogleFonts.poppins(color: effectiveColor),
+          selectedItemBuilder: (BuildContext context) {
+            return [const Locale('en'), const Locale('bn')].map<Widget>((
+              Locale item,
+            ) {
+              return Center(
+                child: Text(
+                  item.languageCode == 'en'
+                      ? (l10n?.english ?? 'English')
+                      : (l10n?.bangla ?? 'Bangla'),
+                  style: GoogleFonts.poppins(color: effectiveColor),
+                ),
+              );
+            }).toList();
+          },
           items: [
             DropdownMenuItem(
               value: const Locale('en'),
-              child: Text(l10n?.english ?? 'English'),
+              child: Text(
+                l10n?.english ?? 'English',
+                style: GoogleFonts.poppins(
+                  color: theme.textTheme.bodyMedium?.color,
+                ), // Dropdown menu items should track theme text color
+              ),
             ),
             DropdownMenuItem(
               value: const Locale('bn'),
-              child: Text(l10n?.bangla ?? 'Bangla'),
+              child: Text(
+                l10n?.bangla ?? 'Bangla',
+                style: GoogleFonts.poppins(
+                  color: theme.textTheme.bodyMedium?.color,
+                ),
+              ),
             ),
           ],
           onChanged: (Locale? newLocale) {
