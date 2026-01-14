@@ -1,0 +1,112 @@
+CITIZEN FEATURES ANALYSIS & WEB vs APP COMPARISON
+=====================================================
+
+1. CITIZEN-FACING FEATURES ON WEBSITE
+-------------------------------------
+
+A. Dashboard (Home)
+   Purpose: Central hub for patient health data.
+   Location: `web/src/pages/dashboard/CitizenHome.tsx`
+   Components:
+     - Timeline View (`web/src/features/timeline/TimelineView.tsx`)
+     - Health Plan View (`web/src/features/health-plan/HealthPlanView.tsx`)
+     - AI Doctor Widget (`web/src/features/ai-doctor/AIDoctor.tsx`)
+     - Add Report Button (Floating Action Button)
+
+B. Medical Timeline
+   Purpose: View historical medical events (Reports, Vaccinations, Surgeries).
+   Location: `web/src/features/timeline/TimelineView.tsx`
+   Backend: 
+     - Table: `medical_events`
+     - Query: `select(*).eq('patient_id', uid).in('event_type', ['REPORT', 'VACCINATION', 'SURGERY', 'GENERIC'])`
+     - Notes: Filters out 'PRESCRIPTION' and 'TEST_ORDER'.
+
+C. AI Doctor (Symptom Triage)
+   Purpose: Analyze symptoms and suggest potential conditions/specialists.
+   Location: `web/src/features/ai-doctor/AIDoctor.tsx`
+   Backend:
+     - Edge Function: `triage-symptoms`
+     - Input: `{ symptoms, location }`
+   Interactions:
+     - Navigates to `/doctors` with pre-filled specialty search.
+
+D. Report Upload
+   Purpose: Upload medical documents for analysis.
+   Location: `web/src/features/upload/UploadModal.tsx`
+   Backend:
+     - Storage: `reports` bucket (`{userId}/{timestamp}.ext`)
+     - Edge Function: `process-medical-report` (Analyzes content via AI)
+   Workflow:
+     1. Client hashes file.
+     2. Client uploads to Storage.
+     3. Client calls Edge Function with file metadata + Base64.
+
+E. Blood Bank Module
+   Purpose: Manage blood donations and requests.
+   Location: `web/src/features/blood/BloodHome.tsx` & sub-features.
+   Sub-features:
+     1. Request Blood (`/blood/request`)
+     2. Blood Feed (`/blood/feed`)
+     3. My Requests (`/blood/my-requests`)
+     4. Register as Donor (`/blood/register`)
+     5. Search Donors (`/blood/search`)
+
+F. Appointments & Prescriptions
+   Purpose: Manage doctor visits and medications.
+   Location: 
+     - `web/src/features/appointments/PatientAppointments.tsx`
+     - `web/src/features/patient/PatientPrescriptions.tsx`
+   Backend: Standard Supabase interactions (assumed table: `appointments`, `prescriptions`).
+
+G. Profile & Settings
+   Purpose: Manage user details.
+   Location: `web/src/features/profile/ProfilePage.tsx`
+
+
+
+2. MOBILE APP ANALYSIS & COMPARISON
+-----------------------------------
+
+A. Dashboard (Home)
+   Status: PARTIALLY IMPLEMENTED
+   - Timeline: Implemented (`MedicalTimelineView`).
+   - Health Plan: Implemented (`HealthPlanPage`).
+   - AI Doctor: Implemented (`AiDoctorButton`).
+   - Report Upload: MISSING UI. Logic exists (`upload_provider.dart`), but no "Add Report" button on home screen.
+
+B. Medical Timeline
+   Status: PARTIALLY IMPLEMENTED
+   - Filtering: MISSING. App fetches ALL events (`timeline_provider.dart`). Web filters by specific types ('REPORT', 'SURGERY', etc).
+   - Display: Implemented.
+
+C. AI Doctor
+   Status: IMPLEMENTED
+   - Uses `triage-symptoms` Edge Function.
+   - Redirects to `DoctorListPage` (see below).
+
+D. Report Upload
+   Status: LOGIC ONLY
+   - Provider `upload_provider.dart` matches Web logic (Hash -> Upload -> Edge Function).
+   - UI: Missing integration in Dashboard.
+
+E. Blood Bank Module
+   Status: FULLY IMPLEMENTED
+   - All 5 sub-features present in `features/blood/pages`.
+
+F. Appointments & Prescriptions
+   Status: MISSING / DISCONNECTED
+   - Appointments (Find Doctors): Page exists (`DoctorListPage.dart`) but side drawer link shows "Coming Soon" snackbar.
+   - Prescriptions: MISSING entirely. Side drawer link shows "Coming Soon".
+
+G. Notifications
+   Status: MISSING
+   - Side drawer link shows "Coming Soon".
+
+3. GAP SUMMARY & ACTION PLAN
+----------------------------
+1. [UI] Add "Add Report" Floating Action Button to `CitizenHomePage`.
+2. [LOGIC] Update `timeline_provider.dart` to filter event types matching Web.
+3. [NAV] Connect "Doctors" side drawer item to `DoctorListPage`.
+4. [NEW] Create `PrescriptionsPage` and connect to Side Drawer.
+5. [NEW] Create `NotificationsPage` and connect to Side Drawer.
+

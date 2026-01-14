@@ -2,24 +2,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../shared/models/medical_event_model.dart';
 
+final timelineProvider = FutureProvider.autoDispose
+    .family<List<MedicalEvent>, String?>((ref, patientId) async {
+      final targetUserId =
+          patientId ?? Supabase.instance.client.auth.currentUser?.id;
 
-final timelineProvider = FutureProvider.autoDispose.family<List<MedicalEvent>, String?>((ref, patientId) async {
+      if (targetUserId == null) return [];
 
-  
-  
-  final targetUserId = patientId ?? Supabase.instance.client.auth.currentUser?.id;
+      try {
+        final response = await Supabase.instance.client
+            .from('medical_events')
+            .select()
+            .eq('patient_id', targetUserId)
+            .filter('event_type', 'in', [
+              'REPORT',
+              'VACCINATION',
+              'SURGERY',
+              'GENERIC',
+            ]) // Match Web Filter
+            .order('event_date', ascending: false);
 
-  if (targetUserId == null) return [];
-
-  try {
-    final response = await Supabase.instance.client
-        .from('medical_events')
-        .select()
-        .eq('patient_id', targetUserId) 
-        .order('event_date', ascending: false);
-
-    return (response as List).map((e) => MedicalEvent.fromJson(e)).toList();
-  } catch (e) {
-    throw Exception("Error loading timeline: $e");
-  }
-});
+        return (response as List).map((e) => MedicalEvent.fromJson(e)).toList();
+      } catch (e) {
+        throw Exception("Error loading timeline: $e");
+      }
+    });

@@ -17,6 +17,9 @@ import '../../core/constants/app_colors.dart';
 import '../../features/about/about_app_page.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/blood/pages/blood_home_page.dart';
+import '../../features/dashboard/pages/notifications_page.dart'; // Import NotificationsPage
+import '../../features/dashboard/pages/prescriptions_page.dart'; // Import PrescriptionsPage
+import '../../features/dashboard/pages/doctor_list_page.dart'; // Import DoctorListPage
 import '../providers/theme_provider.dart';
 import 'language_selector_widget.dart';
 
@@ -52,11 +55,9 @@ class SideDrawer extends ConsumerWidget {
           'label': "Prescriptions", // Missing l10n key for now
           'onTap': () {
             context.pop();
-            // TODO: Navigate to Prescriptions Page when created
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Prescriptions feature coming soon!"),
-              ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PrescriptionsPage()),
             );
           },
         },
@@ -79,9 +80,11 @@ class SideDrawer extends ConsumerWidget {
         'label': "Doctors", // Missing l10n
         'onTap': () {
           context.pop();
-          // TODO: Navigate to Doctors Page
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Doctors feature coming soon!")),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const DoctorListPage(specialty: 'All'),
+            ),
           );
         },
       },
@@ -257,13 +260,13 @@ class SideDrawer extends ConsumerWidget {
                         _buildNavItem(
                           context,
                           icon: PhosphorIconsBold.bell,
-                          label: "Notifications", // Localize me
+                          label: "Notifications", // Localize me safely
                           onTap: () {
                             context.pop();
-                            // TODO Nav to notifications
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Notifications coming soon!"),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotificationsPage(),
                               ),
                             );
                           },
