@@ -1,18 +1,13 @@
-/// File: lib/features/dashboard/pages/citizen_home_page.dart
-/// Purpose: Main dashboard for Citizen users, showing timeline, stats, and quick actions.
-/// Author: HealthSync Team
-library;
-
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/side_drawer.dart';
-import '../../../shared/widgets/ai_doctor_button.dart';
 import '../../../l10n/app_localizations.dart';
 
 import '../../timeline/pages/medical_timeline_view.dart';
 import '../../profile/pages/profile_page.dart';
 import '../../health_plan/pages/health_plan_page.dart';
+import '../../ai_doctor/pages/ai_doctor_page.dart';
 import '../../upload/providers/upload_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +27,7 @@ class _CitizenHomePageState extends ConsumerState<CitizenHomePage> {
   final List<Widget> _pages = [
     const MedicalTimelineView(),
     const HealthPlanPage(),
+    const AiDoctorPage(),
     const ProfilePage(),
   ];
 
@@ -47,7 +43,6 @@ class _CitizenHomePageState extends ConsumerState<CitizenHomePage> {
       appBar: AppBar(
         title: Text(_getTitle(context, _selectedIndex)),
         centerTitle: false,
-        actions: const [AiDoctorButton()],
       ),
 
       body: IndexedStack(index: _selectedIndex, children: _pages),
@@ -58,8 +53,8 @@ class _CitizenHomePageState extends ConsumerState<CitizenHomePage> {
             setState(() => _selectedIndex = index),
         backgroundColor: isDark ? theme.cardTheme.color : Colors.white,
         indicatorColor: isDark
-            ? AppColors.darkPrimary.withValues(alpha: 0.3)
-            : AppColors.primary.withValues(alpha: 0.2),
+            ? AppColors.darkPrimary.withOpacity(0.3)
+            : AppColors.primary.withOpacity(0.2),
         elevation: 3,
         destinations: [
           NavigationDestination(
@@ -78,6 +73,15 @@ class _CitizenHomePageState extends ConsumerState<CitizenHomePage> {
               color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
             label: AppLocalizations.of(context)?.healthPlan ?? 'Health Plan',
+          ),
+
+          NavigationDestination(
+            icon: const Icon(Icons.support_agent_outlined),
+            selectedIcon: Icon(
+              Icons.support_agent,
+              color: isDark ? AppColors.darkPrimary : AppColors.primary,
+            ),
+            label: 'AI Health',
           ),
 
           NavigationDestination(
@@ -177,6 +181,8 @@ class _CitizenHomePageState extends ConsumerState<CitizenHomePage> {
       case 1:
         return AppLocalizations.of(context)?.healthPlan ?? "Health Plan";
       case 2:
+        return "AI Health Assistant";
+      case 3:
         return AppLocalizations.of(context)?.myProfile ?? "My Profile";
       default:
         return "";
