@@ -1,4 +1,6 @@
+// @ts-ignore
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai"
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -14,6 +16,7 @@ serve(async (req) => {
     // 1. ইনপুট ডাটা গ্রহণ
     const { history, language } = await req.json()
 
+    // @ts-ignore
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
       throw new Error('Missing GEMINI_API_KEY')
@@ -22,11 +25,10 @@ serve(async (req) => {
     // 2. AI Client Initialize (SDK ব্যবহার করে)
     const genAI = new GoogleGenerativeAI(apiKey)
 
-    // 🔥 মডেল সিলেকশন: 'gemini-1.5-flash' দ্রুত এবং দক্ষ।
-    // যদি আপনার একাউন্টে এটি না চলে তবে 'gemini-pro' ব্যবহার করতে পারেন।
+    // 🔥 Model Selection: 'gemini-1.5-flash' is faster and more reliable.
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" })
 
-    // 3. ভাষা নির্বাচন
+    // 3. Language Selection
     const isBangla = language === 'bangla'
     const langInstruction = isBangla
       ? "Provide the response strictly in BENGALI language."
@@ -44,13 +46,14 @@ serve(async (req) => {
     1. Analyze the 'severity', 'event_type', and 'summary' of the provided events.
     2. Create a routine including Diet, Exercise, and Precautions based on these conditions.
     3. ${langInstruction}
+    4. Ensure 'diet', 'exercise', and 'precautions' are SIMPLE STRINGS (semicolon or newline separated if needed). Do NOT use nested arrays or objects.
 
     Output JSON format (Strictly JSON, no Markdown):
     {
       "summary": "Short analysis of current health status based on history",
-      "diet": "Specific food advice (what to eat and what to avoid)",
-      "exercise": "Safe exercises suitable for their condition",
-      "precautions": "Critical warnings or lifestyle changes"
+      "diet": "Specific food advice (what to eat and what to avoid) as a single string",
+      "exercise": "Safe exercises suitable for their condition as a single string",
+      "precautions": "Critical warnings or lifestyle changes as a single string"
     }
     `
 

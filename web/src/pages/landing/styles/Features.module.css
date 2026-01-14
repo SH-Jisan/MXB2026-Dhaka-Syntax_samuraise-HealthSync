@@ -1,0 +1,110 @@
+.section {
+    padding: 80px 20px;
+    background-color: var(--background);
+    /* Updated from whitesmoke */
+    padding: 100px 5%;
+    background-color: var(--surface);
+    position: relative;
+}
+
+.titleContainer {
+    max-width: 800px;
+    margin: 0 auto 70px;
+    text-align: center;
+}
+
+.title {
+    font-size: 2.8rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.underline {
+    width: 60px;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    margin: 0 auto;
+    border-radius: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    padding: 50px 40px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    border: 1px solid var(--border);
+    height: 100%;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary-light);
+}
+
+.iconBox {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-light);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    color: var(--primary-dark);
+    font-size: 1.8rem;
+    transition: all 0.3s ease;
+}
+
+.card:hover .iconBox {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.cardTitle {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.cardDesc {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+@media(max-width: 768px) {
+    .section {
+        padding: 70px 20px;
+    }
+
+    .title {
+        font-size: 2.2rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .card {
+        padding: 40px 30px;
+    }
+}

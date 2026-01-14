@@ -1,0 +1,51 @@
+.container {
+    width: 100%;
+    min-height: 100vh;
+    background-color: white;
+    background-color: white;
+    position: relative;
+}
+
+/* Floating Logo Styling */
+.floatingLogo {
+    cursor: pointer;
+    object-fit: contain;
+}
+
+/* Navbar Wrapper Animation */
+.navbarWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    transform: translateY(-100%);
+    transition: transform 1.5s ease-in-out;
+    /* Match Logo duration (1.5s) */
+    visibility: hidden;
+}
+
+.navbarVisible {
+    transform: translateY(0);
+    visibility: visible;
+}
+
+/* Content Animation */
+.contentWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--navbar-height);
+    opacity: 0;
+    transform: translateY(40px);
+    /* Start lower */
+    transition:
+        opacity 1.5s ease-out 0.2s,
+        transform 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+    /* Sync with navbar and logo */
+}
+
+.contentVisible {
+    opacity: 1;
+    transform: translateY(0);
+}

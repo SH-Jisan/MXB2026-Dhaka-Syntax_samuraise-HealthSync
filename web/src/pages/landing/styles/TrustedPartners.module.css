@@ -1,0 +1,36 @@
+.section {
+    padding: 60px 20px;
+    background-color: var(--surface);
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.title {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    font-weight: 500;
+}
+
+.grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 40px;
+    opacity: 0.8;
+}
+
+.partner {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.3s ease;
+    cursor: default;
+}
+
+.partner:hover {
+    color: var(--primary);
+}

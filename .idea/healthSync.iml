@@ -6,9 +6,9 @@
       <excludeFolder url="file://$MODULE_DIR$/app/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/app/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/app/build" />
-      <excludeFolder url="file://$MODULE_DIR$/health_sync/.dart_tool" />
-      <excludeFolder url="file://$MODULE_DIR$/health_sync/.pub" />
-      <excludeFolder url="file://$MODULE_DIR$/health_sync/build" />
+      <excludeFolder url="file://$MODULE_DIR$/app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/app/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
