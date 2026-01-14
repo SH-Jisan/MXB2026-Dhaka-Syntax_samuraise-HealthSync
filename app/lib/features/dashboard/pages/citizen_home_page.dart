@@ -96,6 +96,7 @@ class _CitizenHomePageState extends ConsumerState<CitizenHomePage> {
       ),
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton.extended(
+              heroTag: 'add_report_fab',
               onPressed: () => _handleUpload(context, ref),
               icon: const Icon(Icons.add),
               label: Text(

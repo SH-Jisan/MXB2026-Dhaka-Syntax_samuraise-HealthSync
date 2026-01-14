@@ -13,7 +13,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../blood/pages/my_blood_requests_page.dart';
 import '../providers/doctor_hospitals_provider.dart';
 import '../../../shared/providers/user_profile_provider.dart';
-import 'patient_history_page.dart';
+
 import '../../../l10n/app_localizations.dart';
 
 /// User profile screen showing personal details, role-specific stats, and settings.
@@ -206,24 +206,6 @@ class ProfilePage extends ConsumerWidget {
                     ),
                   ),
                 ),
-
-                if (role == 'CITIZEN')
-                  _buildActionTile(
-                    icon: Icons.calendar_month,
-                    color: Colors.blue,
-                    title:
-                        AppLocalizations.of(context)?.myAppointmentsHistory ??
-                        "My Appointments & History",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PatientHistoryPage(),
-                        ),
-                      );
-                    },
-                    isDark: isDark,
-                  ),
 
                 _buildActionTile(
                   icon: Icons.bloodtype,

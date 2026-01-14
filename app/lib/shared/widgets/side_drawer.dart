@@ -20,6 +20,7 @@ import '../../features/blood/pages/blood_home_page.dart';
 import '../../features/dashboard/pages/notifications_page.dart'; // Import NotificationsPage
 import '../../features/dashboard/pages/prescriptions_page.dart'; // Import PrescriptionsPage
 import '../../features/dashboard/pages/doctor_list_page.dart'; // Import DoctorListPage
+import '../../features/profile/pages/patient_history_page.dart'; // Import PatientHistoryPage
 import '../providers/theme_provider.dart';
 import 'language_selector_widget.dart';
 
@@ -88,6 +89,22 @@ class SideDrawer extends ConsumerWidget {
           );
         },
       },
+      if (role == 'CITIZEN') ...[
+        {
+          'key': 'appointments',
+          'icon': PhosphorIconsRegular.calendarCheck,
+          'label': "My Appointments", // Missing l10n
+          'onTap': () {
+            context.pop();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const PatientHistoryPage(),
+              ), // Reuse History Page for now
+            );
+          },
+        },
+      ],
       {
         'key': 'profile',
         'icon': PhosphorIconsRegular.user,

@@ -24,7 +24,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -49,30 +49,15 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
               icon: const Icon(Icons.calendar_month),
             ),
             Tab(
-              text:
-                  AppLocalizations.of(context)?.prescriptions ??
-                  "Prescriptions",
-              icon: const Icon(Icons.description_outlined),
-            ),
-            Tab(
               text: AppLocalizations.of(context)?.diagnostic ?? "Diagnostic",
               icon: const Icon(Icons.analytics_outlined),
-            ),
-            Tab(
-              text: AppLocalizations.of(context)?.hospitals ?? "Hospitals",
-              icon: const Icon(Icons.local_hospital_outlined),
             ),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildAppointmentsTab(theme),
-          _buildPrescriptionsTab(theme),
-          _buildDiagnosticsTab(theme),
-          _buildHospitalsTab(theme),
-        ],
+        children: [_buildAppointmentsTab(theme), _buildDiagnosticsTab(theme)],
       ),
     );
   }
@@ -267,61 +252,6 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
     );
   }
 
-  Widget _buildPrescriptionsTab(ThemeData theme) {
-    return FutureBuilder(
-      future: Supabase.instance.client
-          .from('medical_events')
-          .select('*, uploader:uploader_id(full_name, specialty)')
-          .eq('patient_id', userId)
-          .eq('event_type', 'PRESCRIPTION')
-          .order('event_date', ascending: false),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final list = snapshot.data as List;
-        if (list.isEmpty) {
-          return _emptyState(
-            AppLocalizations.of(context)?.noPrescriptionsFound ??
-                "No prescriptions found.",
-            theme,
-          );
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: list.length,
-          itemBuilder: (context, index) {
-            final event = list[index];
-            final doctor = event['uploader'] ?? {'full_name': 'Doctor'};
-            final date = DateFormat.yMMMd().format(
-              DateTime.parse(event['event_date']),
-            );
-
-            return Card(
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: theme.colorScheme.secondary.withValues(
-                    alpha: 0.8,
-                  ),
-                  child: const Icon(Icons.description, color: Colors.white),
-                ),
-                title: Text(
-                  doctor['full_name'],
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  "Date: $date\n${AppLocalizations.of(context)?.rx ?? 'Rx:'} ${event['title']}",
-                ),
-                isThreeLine: true,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   Widget _buildDiagnosticsTab(ThemeData theme) {
     return FutureBuilder(
       future: Supabase.instance.client
@@ -366,14 +296,6 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
           },
         );
       },
-    );
-  }
-
-  Widget _buildHospitalsTab(ThemeData theme) {
-    return _emptyState(
-      AppLocalizations.of(context)?.hospitalAdmissionHistory ??
-          "Hospital admission history will appear here.",
-      theme,
     );
   }
 
