@@ -1,6 +1,14 @@
+/// File: lib/features/about/about_app_page.dart
+/// Purpose: Main About App menu screen.
+/// Author: HealthSync Team
+library;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../core/constants/app_colors.dart';
+import 'pages/about_details_page.dart';
+import 'pages/developers_page.dart';
 
 class AboutAppPage extends StatelessWidget {
   const AboutAppPage({super.key});
@@ -9,146 +17,101 @@ class AboutAppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? const Color(0xFF121212)
+        : const Color(0xFFF5F7FA);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text("About HealthSync")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        title: Text(
+          "About HealthSync",
+          style: GoogleFonts.manrope(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black87),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         child: Column(
           children: [
-            
-            Image.asset('assets/logo/logo.png', width: 120, height: 120),
+            // App Branding
+            const SizedBox(height: 20),
+            Container(
+              width: 100,
+              height: 100,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Image.asset('assets/logo/logo.png', fit: BoxFit.contain),
+            ),
             const SizedBox(height: 16),
             Text(
               "HealthSync Pro",
-              style: GoogleFonts.poppins(
-                fontSize: 28,
+              style: GoogleFonts.manrope(
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
             Text(
               "Version 1.0.0",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
+              style: GoogleFonts.manrope(fontSize: 14, color: Colors.grey),
             ),
-            const SizedBox(height: 40),
-
-            
-            _buildSectionHeader("  How to use", isDark),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: isDark ? Border.all(color: Colors.grey.shade800) : null,
-              ),
-              child: Column(
-                children: [
-                  _buildStepRow(
-                    "1",
-                    "Upload medical reports or prescriptions to maintain history.",
-                    isDark,
-                  ),
-                  _buildStepRow(
-                    "2",
-                    "AI analyzes reports and creates a timeline automatically.",
-                    isDark,
-                  ),
-                  _buildStepRow(
-                    "3",
-                    "Consult AI Doctor for instant symptom checking.",
-                    isDark,
-                  ),
-                  _buildStepRow(
-                    "4",
-                    "Use Blood Bank to find donors or request blood.",
-                    isDark,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            
-            _buildSectionHeader("  Powered By", isDark),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 2.5,
-              children: [
-                _buildTechCard(
-                  Icons.code,
-                  "Flutter",
-                  "UI Framework",
-                  Colors.blue,
-                  isDark,
-                ),
-                _buildTechCard(
-                  Icons.storage_rounded,
-                  "Supabase",
-                  "Backend DB",
-                  Colors.green,
-                  isDark,
-                ),
-                _buildTechCard(
-                  Icons.psychology,
-                  "Gemini AI",
-                  "Intelligence",
-                  Colors.purple,
-                  isDark,
-                ),
-                _buildTechCard(
-                  Icons.search,
-                  "Serper API",
-                  "Doc Search",
-                  Colors.orange,
-                  isDark,
-                ),
-              ],
-            ),
-
             const SizedBox(height: 48),
 
-            
-            Column(
-              children: [
-                Text(
-                  "Made with  for Better Healthcare",
-                  style: GoogleFonts.poppins(
-                    color: isDark
-                        ? Colors.grey.shade400
-                        : AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "© 2024 HealthSync Inc.",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-              ],
+            // Menu Items
+            _MinimalMenuTile(
+              icon: PhosphorIconsDuotone.info,
+              title: "About & How to Use the App",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AboutDetailsPage()),
+                );
+              },
+              isDark: isDark,
+              isFirst: true,
+            ),
+            Divider(
+              height: 1,
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
+            ),
+            _MinimalMenuTile(
+              icon: PhosphorIconsDuotone.code,
+              title: "Developers",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DevelopersPage()),
+                );
+              },
+              isDark: isDark,
+              isLast: true,
+            ),
+
+            const Spacer(),
+            Text(
+              "© 2024 HealthSync Inc.",
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -156,123 +119,84 @@ class AboutAppPage extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildSectionHeader(String title, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16, left: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-          ),
-        ),
-      ),
-    );
-  }
+class _MinimalMenuTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool isDark;
+  final bool isFirst;
+  final bool isLast;
 
-  Widget _buildStepRow(String number, String text, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkPrimary.withValues(alpha: 0.2)
-                  : AppColors.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              number,
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.darkPrimary : AppColors.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  const _MinimalMenuTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    required this.isDark,
+    this.isFirst = false,
+    this.isLast = false,
+  });
 
-  Widget _buildTechCard(
-    IconData icon,
-    String title,
-    String subtitle,
-    Color color,
-    bool isDark,
-  ) {
+  @override
+  Widget build(BuildContext context) {
+    // Minimalist Aesthetics
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+        color: cardColor,
+        borderRadius: BorderRadius.vertical(
+          top: isFirst ? const Radius.circular(16) : Radius.zero,
+          bottom: isLast ? const Radius.circular(16) : Radius.zero,
         ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
+          if (!isDark &&
+              isFirst) // Add shadow only once/carefully to avoid stacking weirdness
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: isDark ? 0.2 : 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 20, color: color),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.vertical(
+            top: isFirst ? const Radius.circular(16) : Radius.zero,
+            bottom: isLast ? const Radius.circular(16) : Radius.zero,
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            child: Row(
               children: [
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: isDark ? AppColors.darkTextPrimary : Colors.black87,
+                Icon(
+                  icon,
+                  size: 22,
+                  color: isDark ? Colors.grey[400] : Colors.blueGrey,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.manrope(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
                   ),
                 ),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.poppins(
-                    fontSize: 10,
-                    color: isDark ? Colors.grey.shade400 : Colors.grey,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+                Icon(
+                  PhosphorIconsBold.caretRight,
+                  size: 16,
+                  color: isDark ? Colors.grey[600] : Colors.grey[400],
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
