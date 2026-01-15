@@ -21,6 +21,11 @@ class _DoctorPatientProfilePageState
   final List<String> _selectedTests = [];
   List<String> _allAvailableTests = [];
 
+  // Medicine Prescription State
+  final List<Map<String, String>> _medicines = [
+    {'name': '', 'dosage': '', 'duration': '', 'instruction': ''},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -130,10 +135,8 @@ class _DoctorPatientProfilePageState
     );
   }
 
-  void _showAssignTestDialog(bool isDark) {
-    final notesCtrl = TextEditingController();
+  void _showTestOrderDialog(bool isDark) {
     setState(() => _selectedTests.clear());
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -143,7 +146,7 @@ class _DoctorPatientProfilePageState
       ),
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
+          builder: (context, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(ctx).viewInsets.bottom,
@@ -155,25 +158,21 @@ class _DoctorPatientProfilePageState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Assign Tests & Advice",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.biotech, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Order Diagnostic Tests",
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
-
-                  Text(
-                    "Selected Tests:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.grey.shade300 : Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
                   Wrap(
                     spacing: 8.0,
                     runSpacing: 4.0,
@@ -181,128 +180,35 @@ class _DoctorPatientProfilePageState
                       ..._selectedTests.map(
                         (test) => Chip(
                           label: Text(test),
-                          backgroundColor: isDark
-                              ? AppColors.darkPrimary.withValues(alpha: 0.2)
-                              : AppColors.primary.withValues(alpha: 0.1),
-                          labelStyle: TextStyle(
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                          deleteIcon: Icon(
-                            Icons.close,
-                            size: 18,
-                            color: isDark ? Colors.grey.shade400 : Colors.grey,
-                          ),
-                          onDeleted: () {
-                            setModalState(() {
-                              _selectedTests.remove(test);
-                            });
-                          },
+                          onDeleted: () =>
+                              setModalState(() => _selectedTests.remove(test)),
                         ),
                       ),
                       ActionChip(
-                        avatar: Icon(
-                          Icons.add,
-                          size: 18,
-                          color: isDark ? Colors.black : Colors.white,
-                        ),
-                        label: Text(
-                          "Add Test",
-                          style: TextStyle(
-                            color: isDark ? Colors.black : Colors.white,
-                          ),
-                        ),
-                        backgroundColor: isDark
-                            ? AppColors.darkPrimary
-                            : AppColors.primary,
-                        onPressed: () {
-                          _showTestSelectionDialog(setModalState);
-                        },
+                        avatar: const Icon(Icons.add, size: 18),
+                        label: const Text("Add Test"),
+                        onPressed: () =>
+                            _showTestSelectionDialog(setModalState),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: notesCtrl,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: "Clinical Notes / Additional Advice",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.note_alt_outlined),
-                    ),
-                  ),
                   const SizedBox(height: 20),
-
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        if (_selectedTests.isEmpty && notesCtrl.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Please select a test or add a note.",
-                              ),
-                            ),
-                          );
-                          return;
-                        }
-
-                        Navigator.pop(ctx);
-
-                        try {
-                          final doctorId =
-                              Supabase.instance.client.auth.currentUser!.id;
-                          final testsString = _selectedTests.join(", ");
-
-                          await Supabase.instance.client.from('medical_events').insert({
-                            'patient_id': widget.patient['id'],
-                            'uploader_id': doctorId,
-                            'title': _selectedTests.isNotEmpty
-                                ? 'Test Assigned: ${_selectedTests.length}'
-                                : 'Doctor Advice',
-                            'event_type': 'PRESCRIPTION',
-                            'event_date': DateTime.now().toIso8601String(),
-                            'severity': 'MEDIUM',
-                            'summary':
-                                'Assigned Tests: $testsString. \nAdvice: ${notesCtrl.text}',
-                            'key_findings': _selectedTests,
-                            'extracted_text':
-                                "Tests Assigned:\n$testsString\n\nNotes:\n${notesCtrl.text}",
-                          });
-
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Prescription Sent Successfully!",
-                                ),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-
-                            ref.invalidate(
-                              timelineProvider(widget.patient['id']),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Error: $e")),
-                            );
-                          }
-                        }
-                      },
-                      icon: const Icon(Icons.send),
-                      label: const Text("CONFIRM & ASSIGN"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark
-                            ? AppColors.darkPrimary
-                            : AppColors.primary,
-                        foregroundColor: isDark ? Colors.black : Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+                    child: ElevatedButton(
+                      onPressed: _selectedTests.isEmpty
+                          ? null
+                          : () async {
+                              Navigator.pop(ctx);
+                              await _saveMedicalEvent(
+                                title: 'Diagnostic Test Order',
+                                type: 'TEST_ORDER',
+                                findings: _selectedTests,
+                                summary:
+                                    'Doctor advised diagnostic tests: ${_selectedTests.join(", ")}',
+                              );
+                            },
+                      child: const Text("SEND TEST ORDER"),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -313,6 +219,221 @@ class _DoctorPatientProfilePageState
         );
       },
     );
+  }
+
+  void _showPrescriptionDialog(bool isDark) {
+    setState(() {
+      _medicines.clear();
+      _medicines.add({
+        'name': '',
+        'dosage': '',
+        'duration': '',
+        'instruction': '',
+      });
+    });
+    final adviceCtrl = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.medication, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Write Prescription",
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.white
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ..._medicines.asMap().entries.map((entry) {
+                      int idx = entry.key;
+                      var med = entry.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: TextField(
+                                    decoration: const InputDecoration(
+                                      hintText: "Medicine Name",
+                                    ),
+                                    onChanged: (v) => med['name'] = v,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  flex: 2,
+                                  child: TextField(
+                                    decoration: const InputDecoration(
+                                      hintText: "Dosage (1+0+1)",
+                                    ),
+                                    onChanged: (v) => med['dosage'] = v,
+                                  ),
+                                ),
+                                if (_medicines.length > 1)
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () => setModalState(
+                                      () => _medicines.removeAt(idx),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    decoration: const InputDecoration(
+                                      hintText: "Duration (7 days)",
+                                    ),
+                                    onChanged: (v) => med['duration'] = v,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    decoration: const InputDecoration(
+                                      hintText: "Instruction (After meal)",
+                                    ),
+                                    onChanged: (v) => med['instruction'] = v,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(),
+                          ],
+                        ),
+                      );
+                    }),
+                    TextButton.icon(
+                      onPressed: () => setModalState(
+                        () => _medicines.add({
+                          'name': '',
+                          'dosage': '',
+                          'duration': '',
+                          'instruction': '',
+                        }),
+                      ),
+                      icon: const Icon(Icons.add),
+                      label: const Text("Add Another Medicine"),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: adviceCtrl,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: "Medical Advice / Notes",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (_medicines.any((m) => m['name']!.isEmpty)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please enter medicine names"),
+                              ),
+                            );
+                            return;
+                          }
+                          Navigator.pop(ctx);
+                          await _saveMedicalEvent(
+                            title: 'Prescription',
+                            type: 'PRESCRIPTION',
+                            summary: adviceCtrl.text,
+                            params: {'medicines': _medicines},
+                          );
+                        },
+                        child: const Text("SEND PRESCRIPTION"),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _saveMedicalEvent({
+    required String title,
+    required String type,
+    String? summary,
+    List<String>? findings,
+    Map<String, dynamic>? params,
+  }) async {
+    try {
+      final doctorId = Supabase.instance.client.auth.currentUser!.id;
+      final event = {
+        'patient_id': widget.patient['id'],
+        'uploader_id': doctorId,
+        'title': title,
+        'event_type': type,
+        'event_date': DateTime.now().toIso8601String(),
+        'severity': type == 'TEST_ORDER' ? 'MEDIUM' : 'LOW',
+        'summary': summary ?? '',
+        'key_findings': findings ?? [],
+        ...?params,
+      };
+
+      await Supabase.instance.client.from('medical_events').insert(event);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Sent Successfully!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        ref.invalidate(timelineProvider(widget.patient['id']));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+    }
   }
 
   @override
@@ -326,12 +447,27 @@ class _DoctorPatientProfilePageState
         title: Text(widget.patient['full_name'] ?? 'Patient Profile'),
       ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAssignTestDialog(isDark),
-        icon: const Icon(Icons.add_task),
-        label: const Text("Assign Test"),
-        backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
-        foregroundColor: isDark ? Colors.black : Colors.white,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'test_order',
+            onPressed: () => _showTestOrderDialog(isDark),
+            icon: const Icon(Icons.biotech),
+            label: const Text("Order Test"),
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'prescription',
+            onPressed: () => _showPrescriptionDialog(isDark),
+            icon: const Icon(Icons.medication),
+            label: const Text("Prescription"),
+            backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+            foregroundColor: isDark ? Colors.black : Colors.white,
+          ),
+        ],
       ),
 
       body: Column(

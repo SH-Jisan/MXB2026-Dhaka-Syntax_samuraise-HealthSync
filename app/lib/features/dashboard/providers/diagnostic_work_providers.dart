@@ -21,3 +21,15 @@ final pendingReportsProvider = FutureProvider.autoDispose
           .order('created_at', ascending: false);
       return List<Map<String, dynamic>>.from(response);
     });
+
+final doctorOrdersProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, patientId) async {
+      final response = await Supabase.instance.client
+          .from('medical_events')
+          .select('*, uploader:uploader_id(full_name)')
+          .eq('patient_id', patientId)
+          .eq('event_type', 'TEST_ORDER')
+          .order('created_at', ascending: false)
+          .limit(5);
+      return List<Map<String, dynamic>>.from(response);
+    });

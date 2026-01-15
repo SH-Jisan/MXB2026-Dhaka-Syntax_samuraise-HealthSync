@@ -28,7 +28,8 @@ class _MedicalEventDetailsPageState extends State<MedicalEventDetailsPage>
     super.initState();
     final event = widget.event;
     int tabCount = 4; // Overview, Medicines, Analysis, File
-    if (event.eventType == 'PRESCRIPTION') tabCount++; // + Prescription
+    if (event.eventType == 'PRESCRIPTION' || event.eventType == 'TEST_ORDER')
+      tabCount++; // + Prescription
 
     _tabController = TabController(length: tabCount, vsync: this);
   }
@@ -70,7 +71,8 @@ class _MedicalEventDetailsPageState extends State<MedicalEventDetailsPage>
             fontWeight: FontWeight.w400,
           ),
           tabs: [
-            if (event.eventType == 'PRESCRIPTION')
+            if (event.eventType == 'PRESCRIPTION' ||
+                event.eventType == 'TEST_ORDER')
               const Tab(text: 'Prescription'),
             Tab(text: isBangla ? 'ওভারভিউ' : 'Overview'),
             Tab(text: isBangla ? 'ঔষধ' : 'Medicines'),
@@ -82,7 +84,8 @@ class _MedicalEventDetailsPageState extends State<MedicalEventDetailsPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          if (event.eventType == 'PRESCRIPTION')
+          if (event.eventType == 'PRESCRIPTION' ||
+              event.eventType == 'TEST_ORDER')
             PrescriptionTab(event: event, isDark: isDark),
           OverviewTab(event: event, isDark: isDark, isBangla: isBangla),
           MedicinesTab(event: event, isDark: isDark),

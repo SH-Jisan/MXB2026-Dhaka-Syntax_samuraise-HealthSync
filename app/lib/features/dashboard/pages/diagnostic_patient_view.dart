@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../upload/widgets/upload_bottom_sheet.dart';
+import '../providers/diagnostic_work_providers.dart';
 
-class DiagnosticPatientView extends StatefulWidget {
+class DiagnosticPatientView extends ConsumerStatefulWidget {
   final Map<String, dynamic> patient;
 
   const DiagnosticPatientView({super.key, required this.patient});
 
   @override
-  State<DiagnosticPatientView> createState() => _DiagnosticPatientViewState();
+  ConsumerState<DiagnosticPatientView> createState() =>
+      _DiagnosticPatientViewState();
 }
 
-class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
-  
+class _DiagnosticPatientViewState extends ConsumerState<DiagnosticPatientView> {
   List<Map<String, dynamic>> _availableTests = [];
   bool _isTestsLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchTests(); 
+    _fetchTests();
   }
 
-  
   Future<void> _fetchTests() async {
     setState(() => _isTestsLoading = true);
     try {
@@ -46,24 +46,37 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
     }
   }
 
-  
-  Future<void> _createNewOrder() async {
-    
-    final List<String> selectedTestNames = [];
+  Future<void> _createNewOrder({List<String>? initialTests}) async {
+    final List<String> selectedTestNames = initialTests != null
+        ? List.from(initialTests)
+        : [];
     double currentTotal = 0;
 
     final amountController = TextEditingController();
 
-    
+    // Fetch tests to calculate price if initialTests is provided
     if (_availableTests.isEmpty) {
       await _fetchTests();
     }
+
+    if (initialTests != null) {
+      for (var testName in initialTests) {
+        final match = _availableTests.firstWhere(
+          (t) => t['name'].toString().toLowerCase() == testName.toLowerCase(),
+          orElse: () => {},
+        );
+        if (match.isNotEmpty) {
+          currentTotal += (match['base_price'] as num).toDouble();
+        }
+      }
+      amountController.text = currentTotal.toStringAsFixed(0);
+    }
+
     if (!mounted) return;
 
     await showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        
         builder: (sbContext, setStateDialog) {
           return AlertDialog(
             title: const Text("New Test Order"),
@@ -73,7 +86,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  
                   _isTestsLoading
                       ? const LinearProgressIndicator()
                       : DropdownButtonFormField<Map<String, dynamic>>(
@@ -111,13 +123,11 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                           onChanged: (selectedTest) {
                             if (selectedTest != null) {
                               setStateDialog(() {
-                                
                                 if (!selectedTestNames.contains(
                                   selectedTest['name'],
                                 )) {
                                   selectedTestNames.add(selectedTest['name']);
 
-                                  
                                   currentTotal +=
                                       (selectedTest['base_price'] as num)
                                           .toDouble();
@@ -131,7 +141,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
 
                   const SizedBox(height: 12),
 
-                  
                   if (selectedTestNames.isNotEmpty)
                     Wrap(
                       spacing: 8,
@@ -146,9 +155,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                               onDeleted: () {
                                 setStateDialog(() {
                                   selectedTestNames.remove(name);
-                                  
-                                  
-                                  
                                 });
                               },
                             ),
@@ -158,7 +164,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
 
                   const SizedBox(height: 12),
 
-                  
                   TextField(
                     controller: amountController,
                     keyboardType: TextInputType.number,
@@ -193,8 +198,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                   }
                   Navigator.pop(dialogContext);
 
-                  
-
                   try {
                     final providerId =
                         Supabase.instance.client.auth.currentUser!.id;
@@ -204,7 +207,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                         .insert({
                           'patient_id': widget.patient['id'],
                           'provider_id': providerId,
-                          'test_names': selectedTestNames, 
+                          'test_names': selectedTestNames,
                           'total_amount':
                               double.tryParse(amountController.text) ?? 0,
                           'paid_amount': 0,
@@ -212,7 +215,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                           'report_status': 'PENDING',
                         });
 
-                    setState(() {}); 
+                    setState(() {});
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -242,7 +245,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
     );
   }
 
-  
   Future<void> _updatePaymentStatus(String id, String currentStatus) async {
     final newStatus = currentStatus == 'PAID' ? 'DUE' : 'PAID';
     await Supabase.instance.client
@@ -302,7 +304,7 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: Text(widget.patient['full_name'])),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _createNewOrder, 
+        onPressed: () => _createNewOrder(),
         icon: const Icon(Icons.add_task),
         label: const Text("New Test"),
         backgroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
@@ -310,7 +312,8 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
       ),
       body: Column(
         children: [
-          
+          _buildDoctorOrders(isDark),
+
           Container(
             padding: const EdgeInsets.all(16),
             color: isDark ? AppColors.darkSurface : Colors.white,
@@ -356,7 +359,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
           ),
           Divider(height: 1, color: isDark ? Colors.grey.shade800 : null),
 
-          
           Expanded(
             child: FutureBuilder(
               future: Supabase.instance.client
@@ -460,7 +462,6 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
                             ),
                             const SizedBox(height: 8),
 
-                            
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -556,6 +557,127 @@ class _DiagnosticPatientViewState extends State<DiagnosticPatientView> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDoctorOrders(bool isDark) {
+    final doctorOrdersAsync = ref.watch(
+      doctorOrdersProvider(widget.patient['id']),
+    );
+
+    return doctorOrdersAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
+      data: (orders) {
+        if (orders.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.medication_liquid,
+                    size: 20,
+                    color: Colors.blue,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Doctor's Pending Orders",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? Colors.blue.shade300
+                          : Colors.blue.shade800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: orders.length,
+                itemBuilder: (context, index) {
+                  final order = orders[index];
+                  final tests = List<String>.from(order['key_findings'] ?? []);
+
+                  return Container(
+                    width: 280,
+                    margin: const EdgeInsets.only(right: 12, bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkSurface
+                          : Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.blue.shade900
+                            : Colors.blue.shade200,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Dr. ${order['uploader']?['full_name'] ?? 'Unknown'}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              DateFormat(
+                                'dd MMM',
+                              ).format(DateTime.parse(order['created_at'])),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: Text(
+                            tests.join(", "),
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: () =>
+                                _createNewOrder(initialTests: tests),
+                            icon: const Icon(Icons.add_shopping_cart, size: 16),
+                            label: const Text(
+                              "Create Bill",
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            const Divider(),
+          ],
+        );
+      },
     );
   }
 }
