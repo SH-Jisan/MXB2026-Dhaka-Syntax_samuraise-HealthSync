@@ -1,0 +1,248 @@
+/* layout/Sidebar.module.css - Premium Dashboard Sidebar */
+
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.95);
+    /* High opacity glass */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+}
+
+/* Mobile: Hide Sidebar by default */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        max-width: 85vw;
+        /* Slightly wider on mobile for comfort */
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: var(--shadow-xl);
+    }
+}
+
+.header {
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.welcomeLabel {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    text-align: center;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.6;
+    margin-bottom: 4px;
+}
+
+.userCard {
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 121, 107, 0.15);
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.userCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 121, 107, 0.25);
+}
+
+.userCard h3 {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.userCard p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.avatar {
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+
+.userInfo h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.userInfo p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+
+.nav {
+    padding: 1.5rem 1rem;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 0;
+    /* Crucial for scrolling in flex container */
+    scrollbar-width: thin;
+    /* Firefox */
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Custom scrollbar for Webkit */
+.nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.nav::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.navItem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: color 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    overflow: hidden;
+    z-index: 1;
+    flex-shrink: 0;
+    /* Prevent shrinking */
+}
+
+.navContent {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    /* Enable truncation in flex child */
+}
+
+.navItem span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.navItem:hover {
+    color: var(--primary);
+}
+
+.activeItem {
+    color: var(--primary) !important;
+    font-weight: 600;
+    background: transparent !important;
+    /* Let motion div handle bg */
+    border: none;
+    box-shadow: none;
+}
+
+.activeItem svg {
+    color: var(--primary) !important;
+}
+
+/* The Framer Motion Pill */
+.activePill {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 1);
+    z-index: 0;
+    /* Behind text */
+}
+
+.activePill::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    border-radius: 4px 0 0 4px;
+}
+
+.divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.06);
+    margin: 1rem 0.5rem;
+}
+
+.settingsGroup {
+    margin-top: auto;
+    padding: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.settingsGroup>* {
+    flex: 1;
+}
+
+.logout {
+    margin-top: auto;
+    color: var(--error);
+}
+
+.logout:hover {
+    background-color: rgba(239, 68, 68, 0.05);
+    color: var(--error);
+    border-color: rgba(239, 68, 68, 0.1);
+}

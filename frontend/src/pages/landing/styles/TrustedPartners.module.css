@@ -1,0 +1,88 @@
+.section {
+    padding: 60px 0;
+    background-color: white;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+}
+
+.title {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.marqueeContainer {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.marqueeTrack {
+    display: inline-flex;
+    gap: 80px;
+    animation: scroll 30s linear infinite;
+    padding-left: 80px;
+    /* Initial gap */
+}
+
+/* Pause on hover for accessibility/inspection */
+.marqueeContainer:hover .marqueeTrack {
+    animation-play-state: paused;
+}
+
+.partner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    opacity: 0.6;
+    transition: all 0.3s var(--ease-smooth);
+    user-select: none;
+}
+
+.partner:hover {
+    opacity: 1;
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+/* Gradient Masks to fade edges */
+.section::before,
+.section::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 150px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.section::before {
+    left: 0;
+    background: linear-gradient(to right, white, transparent);
+}
+
+.section::after {
+    right: 0;
+    background: linear-gradient(to left, white, transparent);
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+        /* Assumes we double the content */
+    }
+}

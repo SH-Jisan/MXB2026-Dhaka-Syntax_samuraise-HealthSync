@@ -1,0 +1,42 @@
+.grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive grid added */
+}
+
+.card {
+    background: var(--surface);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background: #E0F2F1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary); /* Icon color handled here if inherit works, else prop is fine */
+}
+
+.info h4 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.info small {
+    color: var(--text-secondary);
+}

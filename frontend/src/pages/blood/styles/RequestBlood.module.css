@@ -1,0 +1,445 @@
+:root {
+    --primary: #0F766E;
+    --primary-dark: #115E59;
+    --primary-light: #CCFBF1;
+    --surface: #FFFFFF;
+    --background: #F3F4F6;
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --border: #E5E7EB;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 20px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.mainCard {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.iconCircle {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+    color: #EF4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.025em;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* AI Section */
+.aiSection {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 1.75rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.aiSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+}
+
+.aiHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.aiBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.aiTitle {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.aiHelper {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.aiInputWrapper {
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.aiInputWrapper:focus-within {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.aiInput {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 1rem;
+    padding-bottom: 3.5rem;
+    /* Space for button */
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.aiInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.aiButton {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    background: white;
+    color: var(--primary);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.aiButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.aiButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.loadingSpinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--primary-light);
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 2rem 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+    margin: 0 1rem;
+}
+
+/* Manual Form */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.input,
+.select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--background);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.input:focus,
+.select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--surface);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+/* Urgency Toggle */
+.urgencyToggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    background: var(--background);
+    padding: 0.375rem;
+    border-radius: var(--radius-lg);
+}
+
+.urgencyBtn {
+    border: none;
+    background: transparent;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.urgencyBtn:hover:not(.active) {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.normalActive {
+    background: white;
+    color: var(--primary) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+.criticalActive {
+    background: #FEF2F2;
+    color: #EF4444 !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Submit Button */
+.submitBtn {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1.05rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(15, 118, 110, 0.3);
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px -1px rgba(15, 118, 110, 0.4);
+}
+
+.submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------
+   RESPONSIVE DESIGN (Mobile First considerations implemented via Desktop-First overrides)
+   ------------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+    .container {
+        padding: 0;
+        background: var(--background);
+    }
+
+    .mainCard {
+        border-radius: 0;
+        box-shadow: none;
+        padding: 1.5rem;
+        background: transparent;
+        border: none;
+    }
+
+    .header {
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    /* Keep AI section styled nicely but remove extra margins if needed */
+    .aiSection {
+        padding: 0.75rem 1rem;
+        /* Decreased vertical padding (Height reduced) */
+        margin-bottom: 2rem;
+        background: linear-gradient(135deg, var(--primary) 0%, #0F766E 100%);
+        border-radius: 16px;
+        /* Round edges */
+        margin-left: -0.5rem;
+        /* Increase width */
+        margin-right: -0.5rem;
+        /* Increase width */
+    }
+
+    .aiHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .aiInputWrapper {
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem;
+    }
+
+    .aiInput {
+        font-size: 1rem;
+        padding: 1rem;
+        padding-bottom: 1rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        color: white;
+        min-height: 80px;
+    }
+
+    .aiButton {
+        position: static;
+        width: 100%;
+        margin-top: 0.5rem;
+        justify-content: center;
+        padding: 12px;
+        background: white;
+        color: var(--primary);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+    }
+
+    /* Manual form card effect for mobile */
+    .formContent {
+        background: var(--surface);
+        margin: 0 -1.5rem;
+        /* Bleed to edges */
+        padding: 2rem 1.5rem 3rem 1.5rem;
+        border-radius: 32px;
+        /* Round all corners */
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .submitBtn {
+        height: 60px;
+        font-size: 1.15rem;
+        border-radius: 16px;
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 8px 20px -6px var(--primary);
+        margin-top: 2rem;
+        letter-spacing: 0.5px;
+    }
+}

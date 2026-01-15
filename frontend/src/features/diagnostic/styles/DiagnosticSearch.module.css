@@ -1,0 +1,156 @@
+.container {
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Search Bar */
+.searchBar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+}
+
+.searchInput {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    outline: none;
+}
+
+.searchInput:focus {
+    border-color: var(--primary);
+}
+
+.searchBtn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.searchBtn:disabled {
+    opacity: 0.7;
+}
+
+/* Result Card */
+.resultCard {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.resultAvatar {
+    width: 60px;
+    height: 60px;
+    background: #E0F2F1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--primary);
+}
+
+.resultName {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.resultEmail {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.assignBtn {
+    margin-top: 1.5rem;
+    padding: 12px 24px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.assignBtn:hover {
+    background: var(--primary-dark);
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modalContent {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+}
+
+.modalTitle {
+    margin-top: 0;
+    color: var(--primary);
+}
+
+.modalInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+}
+
+.modalInput:focus {
+    border-color: var(--primary);
+}
+
+.modalInput:last-of-type {
+    margin-bottom: 20px;
+}
+
+.modalActions {
+    display: flex;
+    gap: 10px;
+}
+
+.cancelBtn {
+    flex: 1;
+    padding: 10px;
+    background: #eee;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.registerBtn {
+    flex: 1;
+    padding: 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}

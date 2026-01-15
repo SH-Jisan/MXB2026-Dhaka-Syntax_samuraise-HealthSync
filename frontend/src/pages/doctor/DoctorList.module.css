@@ -1,0 +1,326 @@
+/* DoctorList.module.css - Premium UI */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1rem 3rem;
+    width: 100%;
+    position: relative;
+}
+
+.header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.title {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.filterBadge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 16px;
+    background: #E0F2F1;
+    color: var(--primary);
+    border-radius: 20px;
+    font-size: 0.95rem;
+}
+
+/* --- Glassmorphic Tabs --- */
+.tabsContainer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.tabs {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 6px;
+    border-radius: 60px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+    gap: 5px;
+}
+
+.tabBtn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 32px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 50px;
+    transition: color 0.2s;
+    z-index: 2;
+    outline: none;
+    white-space: nowrap;
+}
+
+.tabBtn:hover {
+    color: var(--primary);
+}
+
+.tabBtn.active {
+    color: white;
+    font-weight: 700;
+}
+
+.tabContent {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* The sliding background pill */
+.activePill {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    background: var(--primary);
+    border-radius: 50px;
+    z-index: 1;
+    box-shadow: 0 2px 10px rgba(0, 121, 107, 0.3);
+}
+
+/* --- Content Areas --- */
+.filters {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.filterChip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-transform: capitalize;
+}
+
+.filterChip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filterChipActive {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* App Doctors Grid */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    perspective: 1000px;
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 121, 107, 0.2);
+}
+
+.avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E0F2F1 0%, #B2DFDB 100%);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.docName {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.specialty {
+    background: #F8FAFC;
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid #F1F5F9;
+}
+
+.bookBtn {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 12px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+
+.bookBtn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.02);
+}
+
+/* Google Doctors List */
+.googleList {
+    display: grid;
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.googleCard {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.googleCard:hover {
+    transform: translateX(4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.googleInfo {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+}
+
+.googleIcon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #EFF6FF;
+    color: #3B82F6;
+}
+
+.googleMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.mapBtn {
+    padding: 10px 24px;
+    background: transparent;
+    border: 2px solid #22C55E;
+    color: #22C55E;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.mapBtn:hover {
+    background: #22C55E;
+    color: white;
+}
+
+.emptyState {
+    text-align: center;
+    margin-top: 4rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tabs {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .tabBtn {
+        flex: 1;
+        padding: 10px 4px;
+    }
+
+    .googleCard {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .mapBtn {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -1,0 +1,349 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    padding: 8px 0;
+    transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+    color: var(--primary);
+    transform: translateX(-4px);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Tabs */
+.tabContainer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: var(--surface);
+    padding: 0.5rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tabBtn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-full);
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.activeTab {
+    background: var(--primary);
+    color: white;
+}
+
+.activeTab:hover {
+    background: var(--primary-dark);
+    color: white;
+}
+
+/* Content Sections */
+.infoSection {
+    margin-bottom: 2rem;
+}
+
+.infoDesc {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.featureList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.featureItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-primary);
+    background: var(--surface);
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.devBox {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.devTitle {
+    font-size: 1.5rem;
+    color: var(--primary);
+    font-weight: 700;
+    margin: 0;
+}
+
+.logoBox {
+    width: 100px;
+    height: 100px;
+    background: var(--primary);
+    border-radius: 20px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.title {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.version {
+    color: var(--text-secondary);
+}
+
+.sectionTitle {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.stepsBox {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+
+.stepRow {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stepNum {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.stepText {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.spacer {
+    height: 2rem;
+}
+
+.techGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.techCard {
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.techIconBox {
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+}
+
+.techTitle {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.techSubtitle {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.footer {
+    text-align: center;
+    margin-top: 4rem;
+    color: var(--text-secondary);
+}
+
+.footerMadeWith {
+    font-weight: 500;
+}
+
+.footerCopyright {
+    font-size: 0.9rem;
+}
+
+/* Developers Section */
+.teamSection {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.teamImgWrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 4px solid var(--surface);
+}
+
+.teamImg {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.teamImg:hover {
+    transform: scale(1.02);
+}
+
+.devGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.devCard {
+    background: var(--surface);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    text-align: center;
+    padding: 2rem 1.5rem;
+}
+
+.devCard:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.devAvatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    object-fit: cover;
+    border: 4px solid var(--primary-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.devName {
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+}
+
+.devRole {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+.devDept {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.devContact {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+/* User Guide */
+.guideContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.guideSection {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+}
+
+.guideTitle {
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
