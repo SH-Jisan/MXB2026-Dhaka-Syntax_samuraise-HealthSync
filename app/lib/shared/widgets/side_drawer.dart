@@ -21,6 +21,7 @@ import '../../features/dashboard/pages/notifications_page.dart'; // Import Notif
 import '../../features/dashboard/pages/prescriptions_page.dart'; // Import PrescriptionsPage
 import '../../features/dashboard/pages/doctor_list_page.dart'; // Import DoctorListPage
 import '../../features/profile/pages/patient_history_page.dart'; // Import PatientHistoryPage
+import '../../features/dashboard/pages/doctor_citizen_dashboard_page.dart'; // New Import
 import '../providers/theme_provider.dart';
 import 'language_selector_widget.dart';
 
@@ -133,6 +134,22 @@ class SideDrawer extends ConsumerWidget {
           );
         },
       },
+      if (role == 'DOCTOR')
+        {
+          'key': 'citizen_mode',
+          'icon': PhosphorIconsRegular.userCircle,
+          'iconColor': Colors.teal,
+          'label': "Citizen",
+          'onTap': () {
+            context.pop();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const DoctorCitizenDashboardPage(),
+              ),
+            );
+          },
+        },
     ];
 
     return Drawer(

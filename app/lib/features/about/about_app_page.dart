@@ -6,7 +6,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../core/constants/app_colors.dart';
 import 'pages/about_details_page.dart';
 import 'pages/developers_page.dart';
 

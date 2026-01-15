@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../providers/doctor_provider.dart';
 
 class DoctorListPage extends ConsumerStatefulWidget {
   final String specialty;
-  final List<dynamic> internetDoctors; 
+  final List<dynamic> internetDoctors;
 
   const DoctorListPage({
     super.key,
@@ -30,7 +32,6 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
 
   @override
   Widget build(BuildContext context) {
-    
     final appDoctorsAsync = ref.watch(
       doctorsBySpecialtyProvider(widget.specialty),
     );
@@ -53,7 +54,6 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          
           appDoctorsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) => Center(child: Text("Error: $err")),
@@ -85,7 +85,11 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
                       ),
                       subtitle: Text(doc['specialty'] ?? widget.specialty),
                       trailing: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () => _showBookingDialog(
+                          context,
+                          doc['id'],
+                          doc['full_name'],
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
                               ? AppColors.darkPrimary
@@ -101,7 +105,6 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
             },
           ),
 
-          
           widget.internetDoctors.isEmpty
               ? _buildEmptyState("No results found on Google.")
               : ListView.builder(
@@ -166,7 +169,6 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
                         ),
                         trailing: const Icon(Icons.map, color: Colors.green),
                         onTap: () async {
-                          
                           final query = Uri.encodeComponent(
                             "${doc['title']} ${doc['address'] ?? ""}",
                           );
@@ -194,6 +196,153 @@ class _DoctorListPageState extends ConsumerState<DoctorListPage>
           Text(message, style: const TextStyle(color: Colors.grey)),
         ],
       ),
+    );
+  }
+
+  Future<void> _showBookingDialog(
+    BuildContext context,
+    String doctorId,
+    String doctorName,
+  ) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please login to book appointments.")),
+      );
+      return;
+    }
+
+    DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
+    TimeOfDay selectedTime = const TimeOfDay(hour: 10, minute: 0);
+    final reasonController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+
+            return AlertDialog(
+              title: Text("Book Appointment with $doctorName"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      title: const Text("Date"),
+                      subtitle: Text(
+                        DateFormat('EEE, MMM d, yyyy').format(selectedDate),
+                      ),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 90),
+                          ),
+                        );
+                        if (date != null) {
+                          setState(() => selectedDate = date);
+                        }
+                      },
+                    ),
+                    ListTile(
+                      title: const Text("Time"),
+                      subtitle: Text(selectedTime.format(context)),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () async {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: selectedTime,
+                        );
+                        if (time != null) {
+                          setState(() => selectedTime = time);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: reasonController,
+                      decoration: const InputDecoration(
+                        labelText: "Reason for visit",
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final combinedDateTime = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      selectedTime.hour,
+                      selectedTime.minute,
+                    );
+
+                    try {
+                      Navigator.pop(context); // Close dialog first
+
+                      // Ideally show loading indicator here
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Processing request...")),
+                      );
+
+                      await Supabase.instance.client
+                          .from('appointments')
+                          .insert({
+                            'doctor_id': doctorId,
+                            'patient_id': user.id,
+                            'appointment_date': combinedDateTime
+                                .toIso8601String(),
+                            'reason': reasonController.text.trim(),
+                            'status': 'PENDING',
+                          });
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Appointment requested successfully!",
+                            ),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Failed to book: $e"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark
+                        ? AppColors.darkPrimary
+                        : AppColors.primary,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
+                  ),
+                  child: const Text("Confirm"),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
