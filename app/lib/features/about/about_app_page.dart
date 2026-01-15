@@ -1,11 +1,10 @@
-/// File: lib/features/about/about_app_page.dart
-/// Purpose: Main About App menu screen.
-/// Author: HealthSync Team
-library;
-
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/constants/app_colors.dart';
 import 'pages/about_details_page.dart';
 import 'pages/developers_page.dart';
 
@@ -16,187 +15,257 @@ class AboutAppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = isDark
-        ? const Color(0xFF121212)
-        : const Color(0xFFF5F7FA);
+
+    // Gradient Background for a premium feel
+    final backgroundGradient = isDark
+        ? const LinearGradient(
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : const LinearGradient(
+            colors: [Color(0xFFF0F4F8), Color(0xFFE1E8ED)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          );
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           "About HealthSync",
-          style: GoogleFonts.manrope(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
+          style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: backgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black87),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        child: Column(
-          children: [
-            // App Branding
-            const SizedBox(height: 20),
-            Container(
-              width: 100,
-              height: 100,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+      body: Container(
+        decoration: BoxDecoration(gradient: backgroundGradient),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+
+              // --- Pulsing Logo Section ---
+              Center(
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Image.asset('assets/logo/logo.png', fit: BoxFit.contain),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "HealthSync Pro",
-              style: GoogleFonts.manrope(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-            ),
-            Text(
-              "Version 1.0.0",
-              style: GoogleFonts.manrope(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 48),
+                  child:
+                      Image.asset('assets/logo/logo.png', fit: BoxFit.contain)
+                          .animate(
+                            onPlay: (controller) =>
+                                controller.repeat(reverse: true),
+                          )
+                          .scale(
+                            begin: const Offset(1, 1),
+                            end: const Offset(1.05, 1.05),
+                            duration: 2.seconds,
+                          ),
+                ),
+              ).animate().fadeIn().slideY(begin: -0.2),
 
-            // Menu Items
-            _MinimalMenuTile(
-              icon: PhosphorIconsDuotone.info,
-              title: "About & How to Use the App",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AboutDetailsPage()),
-                );
-              },
-              isDark: isDark,
-              isFirst: true,
-            ),
-            Divider(
-              height: 1,
-              color: isDark ? Colors.grey[800] : Colors.grey[200],
-            ),
-            _MinimalMenuTile(
-              icon: PhosphorIconsDuotone.code,
-              title: "Developers",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DevelopersPage()),
-                );
-              },
-              isDark: isDark,
-              isLast: true,
-            ),
+              const SizedBox(height: 20),
 
-            const Spacer(),
-            Text(
-              "© 2024 HealthSync Inc.",
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                color: Colors.grey.shade500,
+              Text(
+                "HealthSync Pro",
+                style: GoogleFonts.manrope(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ).animate().fadeIn(delay: 200.ms),
+
+              Text(
+                "v1.0.0 • Production Build",
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white54 : Colors.grey[600],
+                ),
+              ).animate().fadeIn(delay: 300.ms),
+
+              const SizedBox(height: 60),
+
+              // --- Premium Menu Cards ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    _PremiumMenuCard(
+                      title: "About & Guide",
+                      subtitle: "Learn about features & usage",
+                      icon: PhosphorIconsDuotone.bookOpenText,
+                      color: Colors.blueAccent,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AboutDetailsPage(),
+                        ),
+                      ),
+                      delay: 400.ms,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 16),
+                    _PremiumMenuCard(
+                      title: "Meet the Developers",
+                      subtitle: "Team Syntax_Samuraies",
+                      icon: PhosphorIconsDuotone.code,
+                      color: Colors.purpleAccent,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DevelopersPage(),
+                        ),
+                      ),
+                      delay: 500.ms,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 16),
+                    _PremiumMenuCard(
+                      title: "Privacy Policy",
+                      subtitle: "Data protection & safety",
+                      icon: PhosphorIconsDuotone.shieldCheck,
+                      color: Colors.teal,
+                      onTap: () async {
+                        final uri = Uri.parse(
+                          "https://google.com",
+                        ); // Placeholder
+                        if (await canLaunchUrl(uri)) launchUrl(uri);
+                      },
+                      delay: 600.ms,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+
+              const Spacer(),
+
+              // --- Footer ---
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      PhosphorIconsFill.heart,
+                      color: Colors.redAccent,
+                      size: 16,
+                    ).animate().scale(
+                      duration: 1.seconds,
+                      curve: Curves.elasticOut,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Made with love using Flutter",
+                      style: GoogleFonts.manrope(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _MinimalMenuTile extends StatelessWidget {
-  final IconData icon;
+class _PremiumMenuCard extends StatelessWidget {
   final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
   final VoidCallback onTap;
+  final Duration delay;
   final bool isDark;
-  final bool isFirst;
-  final bool isLast;
 
-  const _MinimalMenuTile({
-    required this.icon,
+  const _PremiumMenuCard({
     required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
     required this.onTap,
+    required this.delay,
     required this.isDark,
-    this.isFirst = false,
-    this.isLast = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Minimalist Aesthetics
-    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-
     return Container(
       decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.vertical(
-          top: isFirst ? const Radius.circular(16) : Radius.zero,
-          bottom: isLast ? const Radius.circular(16) : Radius.zero,
-        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          if (!isDark &&
-              isFirst) // Add shadow only once/carefully to avoid stacking weirdness
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+          BoxShadow(
+            color: color.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Material(
-        color: Colors.transparent,
+        color: isDark ? const Color(0xFF252A34) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.vertical(
-            top: isFirst ? const Radius.circular(16) : Radius.zero,
-            bottom: isLast ? const Radius.circular(16) : Radius.zero,
-          ),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  size: 22,
-                  color: isDark ? Colors.grey[400] : Colors.blueGrey,
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: color, size: 28),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: GoogleFonts.manrope(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.manrope(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Icon(
                   PhosphorIconsBold.caretRight,
-                  size: 16,
-                  color: isDark ? Colors.grey[600] : Colors.grey[400],
+                  color: isDark ? Colors.grey[600] : Colors.grey[300],
                 ),
               ],
             ),
           ),
         ),
       ),
-    );
+    ).animate().fadeIn(delay: delay).slideX(begin: 0.1);
   }
 }
