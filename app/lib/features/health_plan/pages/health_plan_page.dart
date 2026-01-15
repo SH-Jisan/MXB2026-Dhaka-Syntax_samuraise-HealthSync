@@ -12,13 +12,102 @@ class HealthPlanPage extends StatefulWidget {
 
 class _HealthPlanPageState extends State<HealthPlanPage> {
   bool _isLoading = false;
+  bool _isSaving = false;
   bool _isBangla = false;
   Map<String, dynamic>? _healthPlan;
+  bool _isSaved = false; // Tracks if the current plan is saved in DB
 
-  
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedPlan();
+  }
+
+  Future<void> _loadSavedPlan() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return;
+
+      final data = await Supabase.instance.client
+          .from('ai_health_plans')
+          .select()
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      if (data != null) {
+        if (mounted) {
+          setState(() {
+            _healthPlan = {
+              'summary': data['summary'] ?? '',
+              'diet': data['diet_plan'] ?? '',
+              'exercise': data['exercise_plan'] ?? '',
+              'precautions':
+                  data['precautions'] ?? data['lifestyle_tips'] ?? '',
+            };
+            _isSaved = true;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        debugPrint("Error loading saved plan: $e");
+        // Silent fail or optional snackbar
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _savePlan() async {
+    if (_healthPlan == null) return;
+    setState(() => _isSaving = true);
+
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) throw "User not logged in";
+
+      final planData = {
+        'user_id': user.id,
+        'summary': _healthPlan!['summary'],
+        'diet_plan': _healthPlan!['diet'],
+        'exercise_plan': _healthPlan!['exercise'],
+        'precautions': _healthPlan!['precautions'],
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      await Supabase.instance.client
+          .from('ai_health_plans')
+          .upsert(planData, onConflict: 'user_id');
+
+      if (mounted) {
+        setState(() => _isSaved = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Health Plan saved successfully!")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to save: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   Future<void> _generateHealthPlan() async {
     setState(() => _isLoading = true);
+    // Don't clear _healthPlan immediately if we want to show the old one while loading,
+    // but typically users expect a clear indicator.
+    // Let's keep the old one until the new one arrives?
+    // For now, let's clear it to show we are doing fresh work.
     _healthPlan = null;
+    _isSaved = false;
 
     try {
       final user = Supabase.instance.client.auth.currentUser;
@@ -47,6 +136,7 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
                 ? "কোনো সমস্যা হলে ডাক্তারের পরামর্শ নিন।"
                 : "Consult a doctor if you feel unwell.",
           };
+          // Don't mark as saved/unsaved really, this is just a mockup response.
         });
         return;
       }
@@ -60,9 +150,14 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
       );
 
       if (response.status == 200) {
-        setState(() {
-          _healthPlan = response.data;
-        });
+        final data = response.data;
+        if (mounted) {
+          setState(() {
+            _healthPlan = data;
+            // New Plan, so it's NOT saved yet.
+            _isSaved = false;
+          });
+        }
       } else {
         throw "Server Error: ${response.status}";
       }
@@ -123,6 +218,23 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
           ),
         ],
       ),
+      floatingActionButton: (_healthPlan != null && !_isSaved && !_isLoading)
+          ? FloatingActionButton.extended(
+              onPressed: _isSaving ? null : _savePlan,
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.save),
+              label: Text(_isSaving ? "Saving..." : "Save Plan"),
+              backgroundColor: Colors.green,
+            )
+          : null,
       body: _healthPlan == null && !_isLoading
           ? _buildWelcomeState(isDark)
           : _isLoading
@@ -211,7 +323,6 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -319,7 +430,7 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 80), // Space for FAB
         ],
       ),
     );
@@ -370,7 +481,6 @@ class _HealthPlanPageState extends State<HealthPlanPage> {
               : accentColor.withValues(alpha: 0.3))
         : (isDark ? Colors.grey.shade800 : Colors.grey.shade100);
 
-    
     final textColor = isWarning
         ? (isDark ? accentColor.withValues(alpha: 0.9) : Colors.orange.shade900)
         : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary);
