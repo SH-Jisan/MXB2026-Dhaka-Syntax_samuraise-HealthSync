@@ -46,7 +46,10 @@ class _DiagnosticPatientViewState extends ConsumerState<DiagnosticPatientView> {
     }
   }
 
-  Future<void> _createNewOrder({List<String>? initialTests}) async {
+  Future<void> _createNewOrder({
+    List<String>? initialTests,
+    String? sourceOrderId,
+  }) async {
     final List<String> selectedTestNames = initialTests != null
         ? List.from(initialTests)
         : [];
@@ -214,6 +217,18 @@ class _DiagnosticPatientViewState extends ConsumerState<DiagnosticPatientView> {
                           'status': 'DUE',
                           'report_status': 'PENDING',
                         });
+
+                    if (sourceOrderId != null) {
+                      await Supabase.instance.client
+                          .from('medical_events')
+                          .update({'event_type': 'TEST_ORDER_BILLED'})
+                          .eq('id', sourceOrderId);
+
+                      await Future.delayed(const Duration(milliseconds: 500));
+                      ref.invalidate(
+                        doctorOrdersProvider(widget.patient['id']),
+                      );
+                    }
 
                     setState(() {});
                     if (mounted) {
@@ -656,8 +671,10 @@ class _DiagnosticPatientViewState extends ConsumerState<DiagnosticPatientView> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton.icon(
-                            onPressed: () =>
-                                _createNewOrder(initialTests: tests),
+                            onPressed: () => _createNewOrder(
+                              initialTests: tests,
+                              sourceOrderId: order['id'],
+                            ),
                             icon: const Icon(Icons.add_shopping_cart, size: 16),
                             label: const Text(
                               "Create Bill",
