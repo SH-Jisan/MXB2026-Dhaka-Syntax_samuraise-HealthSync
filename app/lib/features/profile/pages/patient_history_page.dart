@@ -112,7 +112,7 @@ class _PatientHistoryPageState extends State<PatientHistoryPage>
             final formattedTime = DateFormat('hh:mm a').format(date);
             final status = apt['status'] ?? 'PENDING';
 
-            Color statusColor = status == 'CONFIRMED'
+            Color statusColor = (status == 'CONFIRMED' || status == 'ACCEPTED')
                 ? (isDark ? Colors.green.shade300 : Colors.green.shade700)
                 : (isDark ? Colors.orange.shade300 : Colors.orange.shade800);
 

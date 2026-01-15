@@ -196,7 +196,7 @@ class DoctorAppointmentsPage extends ConsumerWidget {
                                   context,
                                   ref,
                                   app['id'],
-                                  'CONFIRMED',
+                                  'ACCEPTED',
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
@@ -222,7 +222,10 @@ class DoctorAppointmentsPage extends ConsumerWidget {
   Widget _buildStatusChip(String status, bool isDark) {
     Color color;
     switch (status) {
-      case 'CONFIRMED':
+      case 'ACCEPTED':
+        color = Colors.green;
+        break;
+      case 'CONFIRMED': // Backward compatibility
         color = Colors.green;
         break;
       case 'CANCELLED':

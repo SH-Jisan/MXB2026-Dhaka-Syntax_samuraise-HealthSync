@@ -251,7 +251,7 @@ class _HospitalOverviewTabState extends State<HospitalOverviewTab>
                       'doctor_id': selectedDoctorId,
                       'hospital_id': hospitalId,
                       'appointment_date': finalDateTime.toIso8601String(),
-                      'status': 'CONFIRMED',
+                      'status': 'ACCEPTED',
                     });
 
                     if (context.mounted) {
